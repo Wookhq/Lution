@@ -14,7 +14,7 @@
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
 > [!IMPORTANT]  
-> Chip is finally rewriting Lution in GTK/Adwaita.
+> Chip is finally rewriting Lution in customtkinter.
 
 # What is Lution?
 
