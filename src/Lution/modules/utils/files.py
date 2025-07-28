@@ -140,8 +140,8 @@ def ApplyMarketplaceMods(dir):
 
 def ResetMods():
     with st.spinner("Resetting mods..."):
-        dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/")
-        src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/")
+        dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
+        src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/")
         if not os.path.isdir(src_dir):
             st.warning(f"Source directory does not exist: {src_dir}")
             return
