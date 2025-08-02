@@ -13,12 +13,8 @@ def CheckClientSettings(config_fl):
         content = r.read()
         with open(dump_file_path, "w") as f:
             try:
-                f.write(content)  # dump raw text into file
-
-                # parse to dict (from the stringified JSON inside content)
+                f.write(content)  
                 parsed = json.loads(content)
-
-                # store as dict not a string
                 UpdateSoberConfig("fflags", parsed)
 
             except Exception as e:
