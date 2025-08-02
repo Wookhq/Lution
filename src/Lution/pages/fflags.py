@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+from modules.mod.clientsettings import SplitClientSettingsContent
 from modules.utils.lang import LANG
 from modules.utils.logging import log
 from modules.utils.files import OverlaySetup
@@ -44,10 +45,13 @@ st.session_state.texturequality = st.selectbox(
 
 # advanded
 st.write(LANG["lution.fflags.text.advanded"])
-st.button(
-    LANG["lution.fflags.button.reseteditor"],
-    on_click=lambda: st.session_state.update({"fflagseditor": ReadSoberConfig("fflags")})
-)
+
+
+def reload_fflags():
+    st.session_state.fflagseditor = json.loads(SplitClientSettingsContent() or "{}")
+    st.session_state.fflags_text = json.dumps(st.session_state.fflagseditor, indent=4)
+
+st.button("Reload Flags", on_click=reload_fflags)
 
 # fflags editor
 if "fflags_text" not in st.session_state:
@@ -56,7 +60,7 @@ if "fflags_text" not in st.session_state:
 fflags_text = st.text_area(
     LANG["lution.fflags.texterea.fflagseditor"],
     value=st.session_state.fflags_text,
-    height=300
+    height=400
 )
 
 try:
