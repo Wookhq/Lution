@@ -14,7 +14,8 @@ LANG_NAMES = {
     "ger": "Deutsch",
     "lolcat" : "Lolcat 😹 ",
     "premiumenglish": "𝓟𝓻𝓮𝓶𝓲𝓾𝓶  𝓔𝓷𝓰𝓵𝓲𝓼𝓱",
-    "tram" : "🚡🚡🚡🚡🚡"
+    "tram" : "🚡🚡🚡🚡🚡",
+    "sybau" : "sybau.json"
 
 }
 def readlang():
