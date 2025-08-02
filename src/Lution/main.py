@@ -2,6 +2,7 @@
 import streamlit as st 
 import os 
 import json
+from modules.mod.clientsettings import SplitClientSettingsContent
 from modules.utils.logging import log
 from modules.json.json import *
 from modules.utils.messages import *
@@ -58,7 +59,7 @@ if "language" not in st.session_state:
     st.session_state.language = "en"
 if "fflagseditor" not in st.session_state:
     log.info("Reading FFlags editor")
-    Currfflags = ReadSoberConfig("fflags")
+    Currfflags = json.loads(SplitClientSettingsContent() or "{}")
     st.session_state.fflagseditor = Currfflags
 if "fontsize" not in st.session_state:
     log.info("Reading FFlag Fon size")
