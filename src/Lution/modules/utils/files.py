@@ -7,6 +7,7 @@ import streamlit as st
 from .messages import success , warning as warn
 from modules.utils.lang import LANG
 from modules.configcheck.fontreplacer import Replace
+from modules.mod.clientsettings import CheckClientSettings
 
 
 def OverwriteFiles(dest_dir, src_files):
@@ -126,6 +127,7 @@ def ApplyMods():
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/content/")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
+        CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
         warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 def ApplyMarketplaceMods(dir):
@@ -135,6 +137,7 @@ def ApplyMarketplaceMods(dir):
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/content/")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
+        CheckClientSettings(f"{dir}/ClientSettings")
         warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 
