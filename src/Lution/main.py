@@ -78,10 +78,10 @@ if "useoldrobloxsounds" not in st.session_state:
         a = False  
     st.session_state.useoldrobloxsounds = a
 
-@st.dialog("What's new?")
+@st.dialog("Dialog")
 def whatsnew():
-    st.markdown("/markdown/whatsnew.md")
-
+    with open("./markdown/whatsnew.md", "r") as f:
+        st.markdown(f.read())
 
 st.header("Wellcome to Lution!")
 st.image("files/cooked.png")
