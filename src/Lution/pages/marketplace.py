@@ -64,6 +64,7 @@ def ChangeProvider():
         cfmk("marketplaceprd", new_provider)
         log.warn(f"Changed marketplace provider to: {new_provider}")
 
+
 marketplace, installed, settings = st.tabs([
     LANG["lution.marketplace.tab.marketplace"],
     LANG["lution.marketplace.tab.installed"],
@@ -109,6 +110,7 @@ with marketplace:
     st.markdown("[DOCS](https://wookhq.github.io/lution/pages/docs.html)")
 
     #st.write(f"### {LANG['lution.marketplace.tab.themes']}")
+    st.button("Reload Marketplace", on_click=lambda: loadbar(), icon="🔄")
     if avdthemes and st.session_state.get("theme"):
         with st.spinner(LANG["lution.marketplace.marketplace.spinner.download"]):
             log.info("Creating Themes col")
