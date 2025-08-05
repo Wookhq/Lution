@@ -9,7 +9,7 @@ import json
 genconfig = Config()
 ff = FilesFunctions()
 
-class ApplyFuntions:
+class ApplyFunctions:
     def __init__(self):
         pass
 
@@ -60,7 +60,7 @@ class ApplyFuntions:
                 case "x4":
                     genconfig.UpdateFflags("FIntMSAASampleCount", 4)
                 case "Auto":
-                    genconfig.DeleteFflag("DFIntTextureQualityOverride")
+                    pass
 
         msaaapply(msaa)
         # FPS limit

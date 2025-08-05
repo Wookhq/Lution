@@ -47,7 +47,6 @@ class FilesFunctions:
                 shutil.rmtree(dest_path)
             shutil.copytree(src_path, dest_path)
         if not no_success:
-            print("u suck at code")
             success()
 
 
