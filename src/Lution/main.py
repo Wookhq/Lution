@@ -5,7 +5,7 @@ import json
 from modules.config.genconfig import Config
 from modules.utils.sidebar import InitSidebar
 from modules.utils.logging import log
-from modules.config.applyfun import ApplyFuntions
+from modules.config.applyfun import ApplyFunctions
 from modules.mod.clientsettings import SplitClientSettingsContent
 
 InitSidebar()
@@ -15,7 +15,7 @@ file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/conf
 log.info("Page : Home")
 
 cg = Config()
-af = ApplyFuntions()
+af = ApplyFunctions()
 
 # Set default values so they're always defined
 if "fpslimit" not in st.session_state:
