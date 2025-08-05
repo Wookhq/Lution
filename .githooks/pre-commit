@@ -36,7 +36,7 @@ def update_cache(sha):
 cached_commit = get_cached_commit()
 if cached_commit is None:
     g = Github()
-    repo = g.get_repo("lutionhq/lution")
+    repo = g.get_repo("wookhq/lution")
     latest_commit = repo.get_commits()[0].sha
     update_cache(latest_commit)
 else:
