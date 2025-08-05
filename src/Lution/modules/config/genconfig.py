@@ -2,6 +2,7 @@
 import json
 import os
 import streamlit as st
+import toml
 
 
 class Config:
@@ -30,6 +31,7 @@ class Config:
         except Exception as e:
             st.error(f"Failed to read fflag '{flag_name}': {e}")
             return None
+
     def DeleteFflag(self, flag_name):
         """Delete a key from the fflags section of the Sober config."""
         file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
@@ -90,7 +92,7 @@ class Config:
                 st.warning(f"Skipped non-dict object in CombineJson: {type(obj)}")
         return result
 
-    def ReadLutionConfig(self, key, filename="LutionConfig.json", default=None):
+    def ReadLutionConfig(self, key, filename="LutionConfig.toml", default=None):
         from modules.utils.files import FilesFunctions
         ff = FilesFunctions()
 
@@ -99,10 +101,10 @@ class Config:
         if not os.path.exists(file_path):
             return default
         with open(file_path, "r") as f:
-            data = json.load(f)
+            data = toml.load(f)
         return data.get(key, default)
 
-    def UpdateLutionConfig(self, key, value, filename="LutionConfig.json"):
+    def UpdateLutionConfig(self, key, value, filename="LutionConfig.toml"):
         from modules.utils.files import FilesFunctions
         ff = FilesFunctions()
         
@@ -110,14 +112,14 @@ class Config:
         file_path = os.path.join(os.path.expanduser("~/Documents/Lution"), filename)
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
-                data = json.load(f)
+                data = toml.load(f)
         else:
             data = {}
         data[key] = value
         with open(file_path, "w") as f:
-            json.dump(data, f, indent=4)
+            toml.dump(data, f)
 
-    def ReadLutionMarketplaceConfig(self, key, filename="Marketplace.json", default=None):
+    def ReadLutionMarketplaceConfig(self, key, filename="Marketplace.toml", default=None):
         from modules.utils.files import FilesFunctions
         ff = FilesFunctions()
 
@@ -126,10 +128,10 @@ class Config:
         if not os.path.exists(file_path):
             return default
         with open(file_path, "r") as f:
-            data = json.load(f)
+            data = toml.load(f)
         return data.get(key, default)
 
-    def UpdateLutionMarketplaceConfig(self, key, value, filename="Marketplace.json"):
+    def UpdateLutionMarketplaceConfig(self, key, value, filename="Marketplace.toml"):
         from modules.utils.files import FilesFunctions
         ff = FilesFunctions()
 
@@ -137,14 +139,14 @@ class Config:
         file_path = os.path.join(os.path.expanduser("~/Documents/Lution/Lution Marketplace/"), filename)
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
-                data = json.load(f)
+                data = toml.load(f)
         else:
             data = {}
         data[key] = value
         with open(file_path, "w") as f:
-            json.dump(data, f, indent=4)
-        
-    def RemoveLutionMarketplaceConfig(self, key, value_to_remove, filename="Marketplace.json"):
+            toml.dump(data, f)
+
+    def RemoveLutionMarketplaceConfig(self, key, value_to_remove, filename="Marketplace.toml"):
         from modules.utils.files import FilesFunctions
         ff = FilesFunctions()
 
@@ -152,7 +154,7 @@ class Config:
         file_path = os.path.join(os.path.expanduser("~/Documents/Lution/Lution Marketplace/"), filename)
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
-                data = json.load(f)
+                data = toml.load(f)
         else:
             data = {}
         if key in data:
@@ -162,8 +164,21 @@ class Config:
                 values.remove(value_to_remove)
                 data[key] = ','.join(values)
                 with open(file_path, "w") as f:
-                    json.dump(data, f, indent=4)
+                    toml.dump(data, f)
             else:
                 print(f"Value '{value_to_remove}' not found in key '{key}'.") # debug
         else:
             print(f"Key '{key}' not found in the dictionary.")
+
+    def Json2Toml(self, json_path, toml_path=None):
+        if not os.path.isfile(json_path):
+            raise FileNotFoundError(f"ermmm where tf is the json file: {json_path}")
+
+        with open(json_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+
+        if toml_path is None:
+            toml_path = os.path.splitext(json_path)[0] + ".toml"
+
+        with open(toml_path, "w", encoding="utf-8") as f:
+            toml.dump(json_data, f)
