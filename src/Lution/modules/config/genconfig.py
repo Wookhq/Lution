@@ -91,8 +91,10 @@ class Config:
         return result
 
     def ReadLutionConfig(self, key, filename="LutionConfig.json", default=None):
-        from modules.utils.files import JsonSetup, JsonSetup2 # temp
-        JsonSetup()
+        from modules.utils.files import FilesFunctions
+        ff = FilesFunctions()
+
+        ff.JsonSetup()
         file_path = os.path.join(os.path.expanduser("~/Documents/Lution"), filename)
         if not os.path.exists(file_path):
             return default
@@ -101,8 +103,10 @@ class Config:
         return data.get(key, default)
 
     def UpdateLutionConfig(self, key, value, filename="LutionConfig.json"):
-        from modules.utils.files import JsonSetup, JsonSetup2 # temp
-        JsonSetup()
+        from modules.utils.files import FilesFunctions
+        ff = FilesFunctions()
+        
+        ff.JsonSetup()
         file_path = os.path.join(os.path.expanduser("~/Documents/Lution"), filename)
         if os.path.exists(file_path):
             with open(file_path, "r") as f:

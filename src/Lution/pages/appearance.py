@@ -1,16 +1,19 @@
 import streamlit as st
-from modules.utils.files import ApplyFont
+from modules.utils.files import FilesFunctions
 from modules.utils.lang import LANG
-from Lution.modules.config.config import UpdateCursor, ReadLutionConfig, JsonSetup
+from modules.config.genconfig import Config
 from modules.utils.logging import log
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()
 
+ff = FilesFunctions()
+cf = Config()
+
 log.info('Page : Apperance')
 
-JsonSetup()
-curcf = ReadLutionConfig("CursorType")
+ff.JsonSetup()
+curcf = cf.ReadLutionConfig("CursorType")
 
 if "cursor" not in st.session_state:
     st.session_state.cursor = "Default"
@@ -30,7 +33,7 @@ st.session_state.customfont = st.file_uploader(
 )
 st.button(
     LANG["lution.appearance.button.applyfont"],
-    on_click=lambda : ApplyFont()
+    on_click=lambda : ff.ApplyFont()
     )
 st.session_state.cursor = st.selectbox(
         LANG["lution.appearance.mutichoices.cursor"],
@@ -39,7 +42,7 @@ st.session_state.cursor = st.selectbox(
     )
 st.button(
         LANG["lution.appearance.button.applycursor"],
-        on_click=lambda: UpdateCursor(st.session_state.cursor),
+        on_click=lambda: cf.UpdateCursor(st.session_state.cursor),
         key="apply_cursor_button"
     )
 
@@ -48,7 +51,5 @@ st.button(
 
 st.markdown(LANG["lution.appearance.text.laucher"])
 st.markdown("""
-Maybe not possible,Sober itself is not very customizable, but you can wait to Vinegarhq-
-
-(Aka Sober team) to add a api to change the appearance of the launcher.
+no im not gonna do that 
 """)
