@@ -1,7 +1,9 @@
 import os
 import json
-from modules.json.json import UpdateSoberConfig, ReadSoberConfig
+from modules.config.genconfig import Config
 from pathlib import Path
+
+cg = Config()
 
 def CheckClientSettings(config_fl):
     client_app_settings_path = os.path.join(os.path.expanduser(config_fl), "ClientAppSettings.json")
@@ -15,7 +17,7 @@ def CheckClientSettings(config_fl):
             try:
                 f.write(content)  
                 parsed = json.loads(content)
-                UpdateSoberConfig("fflags", parsed)
+                cg.UpdateSoberConfig("fflags", parsed)
 
             except Exception as e:
                 print(f"Error writing to {dump}: {e}")
@@ -33,7 +35,7 @@ def ClientSettingsContent():
 
 def SplitClientSettingsContent():
     dumped = ClientSettingsContent()
-    currfflag = ReadSoberConfig("fflags")
+    currfflag = cg.ReadSoberConfig("fflags")
 
     if not isinstance(currfflag, dict):
         currfflag = {}

@@ -1,7 +1,7 @@
 import streamlit as st
 from modules.utils.lang import LANG
 from modules.utils.logging import log
-from modules.configcheck.VERSION import GIT_COMMIT, COMMIT_DATE
+from modules.utils.VERSION import GIT_COMMIT, COMMIT_DATE
 import os
 
 
