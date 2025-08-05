@@ -4,8 +4,8 @@ from modules.mod.clientsettings import SplitClientSettingsContent
 from modules.utils.lang import LANG
 from modules.utils.logging import log
 from modules.utils.files import OverlaySetup
-from modules.configcheck.config import ReadSoberConfig
-from modules.configcheck.config import Applyfflags
+from Lution.modules.config.config import ReadSoberConfig
+from Lution.modules.config.config import Applyfflags
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()

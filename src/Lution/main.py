@@ -7,7 +7,7 @@ from modules.utils.logging import log
 from modules.json.json import *
 from modules.utils.messages import *
 from modules.utils.files import *
-from modules.configcheck.config import *
+from Lution.modules.config.config import *
 from modules.utils.lang import LANG , LANG_CODES, LANG_NAMES
 from modules.utils.sidebar import InitSidebar
 

@@ -5,7 +5,7 @@ from github import Github as g
 from github.GithubException import UnknownObjectException
 from modules.utils.lang import LANG
 from modules.utils.logging import log
-from modules.configcheck.config import UpdateLutionMarketplaceConfig as cfmk, ReadLutionMarketplaceConfig as rmk
+from Lution.modules.config.config import UpdateLutionMarketplaceConfig as cfmk, ReadLutionMarketplaceConfig as rmk
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()

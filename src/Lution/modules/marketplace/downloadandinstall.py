@@ -1,6 +1,6 @@
 from github import Github as g
 from modules.utils.files import ApplyMarketplaceMods, ResetMods2
-from modules.configcheck.config import UpdateLutionMarketplaceConfig as cfmk, ReadLutionMarketplaceConfig as rmk, RemoveLutionMarketplaceConfig as remcf
+from Lution.modules.config.config import UpdateLutionMarketplaceConfig as cfmk, ReadLutionMarketplaceConfig as rmk, RemoveLutionMarketplaceConfig as remcf
 import os
 import zipfile
 import requests

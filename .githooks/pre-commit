@@ -6,7 +6,7 @@ ROOT=$(git rev-parse --show-toplevel)
 commit_hash=$(git rev-parse HEAD)
 commit_date=$(git show -s --format=%ci HEAD)
 
-OUT="$ROOT/src/Lution/modules/configcheck/VERSION.py"
+OUT="$ROOT/src/Lution/modules/utils/VERSION.py"
 
 cat > "$OUT" <<EOF
 # AUTO GENERATED, DO NOT MODIFY

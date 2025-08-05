@@ -1,6 +1,6 @@
 import streamlit as st
 from modules.utils.logging import log
-from modules.configcheck.config import ApplyChanges, ReadSoberConfig
+from Lution.modules.config.config import ApplyChanges, ReadSoberConfig
 from modules.utils.lang import LANG
 from modules.utils.sidebar import InitSidebar
 
