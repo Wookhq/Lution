@@ -1,16 +1,26 @@
 import streamlit as st
 import json
-from modules.marketplace.downloadandinstall import DownloadMarketplace, ApplyMarketplace, RemoveMarketplace
+from modules.marketplace.downloadandinstall import MarketplaceManager
 from github import Github as g
 from github.GithubException import UnknownObjectException
 from modules.utils.lang import LANG
 from modules.utils.logging import log
-from Lution.modules.config.config import UpdateLutionMarketplaceConfig as cfmk, ReadLutionMarketplaceConfig as rmk
+from modules.config.genconfig import Config
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()
 log.info("Page : Marketplace")
 
+# work smarter, not harder
+cf = Config()
+rmk = cf.ReadLutionMarketplaceConfig
+cfmk = cf.UpdateLutionMarketplaceConfig
+remcf = cf.RemoveLutionMarketplaceConfig
+
+mm = MarketplaceManager()
+DownloadMarketplace = mm.DownloadMarketplace
+RemoveMarketplace = mm.RemoveMarketplace
+ApplyMarketplace = mm.ApplyMarketplace
 
 @st.cache_data(ttl=3600)
 def GetItemCached(repo_name, item):
