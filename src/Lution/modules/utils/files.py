@@ -1,11 +1,12 @@
 import os
 import shutil
-import json
+import toml
 import subprocess
 import platform
 import streamlit as st
 from .messages import success , warning as warn
 from modules.utils.lang import LANG
+from modules.config.genconfig import Config
 from modules.mod.fontreplacer import Replace
 from modules.mod.clientsettings import CheckClientSettings
 
@@ -50,24 +51,43 @@ class FilesFunctions:
             success()
 
 
-
     def JsonSetup(self, filename="LutionConfig.json", default_data=None):
+        cf = Config()
+
         documents_dir = os.path.expanduser("~/Documents/Lution/")
         os.makedirs(documents_dir, exist_ok=True)
-        file_path = os.path.join(documents_dir, filename)
-        if not os.path.exists(file_path):
-            with open(file_path, "w") as f:
-                json.dump(default_data if default_data is not None else {}, f, indent=4)
-        return file_path
+
+        json_path = os.path.join(documents_dir, filename)
+        toml_path = json_path.replace(".json", ".toml")
+
+        if os.path.exists(json_path):
+            cf.Json2Toml(json_path, toml_path)
+            os.remove(json_path)
+
+        if not os.path.exists(toml_path):
+            with open(toml_path, "w") as f:
+                toml.dump(default_data if default_data is not None else {}, f)
+
+        return toml_path
 
     def JsonSetup2(self, filename="Marketplace.json", default_data=None):
+        cf = Config()
+
         documents_dir = os.path.expanduser("~/Documents/Lution/Lution Marketplace/")
         os.makedirs(documents_dir, exist_ok=True)
-        file_path = os.path.join(documents_dir, filename)
-        if not os.path.exists(file_path):
-            with open(file_path, "w") as f:
-                json.dump(default_data if default_data is not None else {}, f, indent=4)
-        return file_path
+
+        json_path = os.path.join(documents_dir, filename)
+        toml_path = json_path.replace(".json", ".toml")
+
+        if os.path.exists(json_path):
+            cf.Json2Toml(json_path, toml_path)
+            os.remove(json_path)
+
+        if not os.path.exists(toml_path):
+            with open(toml_path, "w") as f:
+                toml.dump(default_data if default_data is not None else {}, f)
+
+        return toml_path
 
     def ModsFolder(self):
         mods_dir = os.path.expanduser("~/Documents/Lution/Mods")
