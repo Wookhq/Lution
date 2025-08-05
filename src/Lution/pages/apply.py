@@ -1,13 +1,17 @@
 import streamlit as st
 from modules.utils.logging import log
-from Lution.modules.config.config import ApplyChanges, ReadSoberConfig
+from modules.config.applyfun import ApplyFunctions
+from modules.config.genconfig import Config
 from modules.utils.lang import LANG
 from modules.utils.sidebar import InitSidebar
+
+cg = ApplyFunctions()
+cf = Config()
 
 InitSidebar()
 
 def AppyAndUpdate():
-    ApplyChanges(
+    cg.ApplyChanges(
         st.session_state.fpslimit,
         st.session_state.lightingtech,
         st.session_state.oof,
@@ -20,11 +24,11 @@ def AppyAndUpdate():
         st.session_state.texturequality,
         st.session_state.msaa
     )
-    Currfflags = ReadSoberConfig("fflags")
+    Currfflags = cf.ReadSoberConfig("fflags")
     log.info("Applying changes...")
     st.session_state.fflagseditor = Currfflags
 
-Currfflags = ReadSoberConfig("fflags")
+Currfflags = cf.ReadSoberConfig("fflags")
 st.session_state.fflagseditor = Currfflags
 
 left,mid,right = st.columns(3)
