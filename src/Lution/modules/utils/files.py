@@ -127,7 +127,11 @@ def ApplyMods():
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/content/")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
-        CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
+        try :
+            CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
+        except Exception as e:
+            st.warn(f"Error checking client settings: {e}, skipping...")
+            pass
         warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 def ApplyMarketplaceMods(dir):
@@ -137,6 +141,11 @@ def ApplyMarketplaceMods(dir):
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/content/")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
         OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
+        try:
+            CheckClientSettings(f"{dir}/ClientSettings")
+        except Exception as e:
+            st.warn(f"Error checking client settings: {e}, skipping...")
+            pass
         CheckClientSettings(f"{dir}/ClientSettings")
         warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
