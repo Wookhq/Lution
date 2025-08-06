@@ -9,18 +9,20 @@ def CheckClientSettings(config_fl):
     dump_file_path = os.path.join(dump, "ClientAppSettings.json")
     
     Path(dump).mkdir(parents=True, exist_ok=True)
-    with open(client_app_settings_path, "r") as r:
-        content = r.read()
-        with open(dump_file_path, "w") as f:
-            try:
-                f.write(content)  
-                parsed = json.loads(content)
-                UpdateSoberConfig("fflags", parsed)
+    if os.path.exists(client_app_settings_path):
+        with open(client_app_settings_path, "r") as r:
+            content = r.read()
+            with open(dump_file_path, "w") as f:
+                try:
+                    f.write(content)  
+                    parsed = json.loads(content)
+                    UpdateSoberConfig("fflags", parsed)
 
-            except Exception as e:
-                print(f"Error writing to {dump}: {e}")
-                return
-
+                except Exception as e:
+                    print(f"Error writing to {dump}: {e}")
+                    return
+    else:
+        return
 def ClientSettingsContent():
     dump = os.path.expanduser("~/Documents/Lution/fflag dump/ClientAppSettings.json")
     try:
