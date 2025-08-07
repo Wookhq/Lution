@@ -1,19 +1,23 @@
 import streamlit as st
 import json
-from modules.mod.clientsettings import SplitClientSettingsContent
+from modules.mod.clientsettings import ClientSettings
 from modules.utils.lang import LANG
 from modules.utils.logging import log
-from modules.utils.files import OverlaySetup
-from modules.configcheck.config import ReadSoberConfig
-from modules.configcheck.config import Applyfflags
+from modules.utils.files import FilesFunctions
+from modules.config.genconfig import Config
+from modules.config.applyfun import ApplyFunctions
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()
 
+cf = Config()
+ff = FilesFunctions()
+af = ApplyFunctions()
+cs = ClientSettings()
+
 log.info("Page : Fflags")
 
 st.header(LANG["lution.tab.fflags"])
-st.session_state.oof = st.toggle(LANG["lution.fflags.toggle.bringbackoof"], value=st.session_state.oof)
 st.session_state.rpc = st.toggle(LANG["lution.fflags.toggle.rpc"], value=st.session_state.rpc)
 st.session_state.fpslimit = st.text_input(LANG["lution.fflags.textbox.fpslimit"], st.session_state.fpslimit, max_chars=3)
 st.session_state.render = st.selectbox(
@@ -48,7 +52,7 @@ st.write(LANG["lution.fflags.text.advanded"])
 
 
 def reload_fflags():
-    st.session_state.fflagseditor = json.loads(SplitClientSettingsContent() or "{}")
+    st.session_state.fflagseditor = json.loads(cs.SplitClientSettingsContent() or "{}")
     st.session_state.fflags_text = json.dumps(st.session_state.fflagseditor, indent=4)
 
 st.button("Reload Flags", on_click=reload_fflags)
@@ -76,12 +80,12 @@ st.caption("The fflags editor slow to update with the config, recommend restart 
 with mid:
     st.button(
         "Apply FFlags",
-        on_click=lambda : Applyfflags(st.session_state.fflagseditor),
+        on_click=lambda : af.Applyfflags(st.session_state.fflagseditor),
         use_container_width=True
     )
 
 st.write(LANG["lution.fflags.text.mics"])
 st.button(
     LANG["lution.fflags.button.setupoverlay"],
-    on_click=OverlaySetup
+    on_click=ff.OverlaySetup
 )

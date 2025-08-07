@@ -1,7 +1,7 @@
 import streamlit as st
 from modules.utils.lang import LANG
 from modules.utils.logging import log
-from modules.configcheck.VERSION import GIT_COMMIT, COMMIT_DATE
+from modules.utils.VERSION import GIT_COMMIT, COMMIT_DATE
 import os
 
 
@@ -15,7 +15,7 @@ def InitSidebar():
     st.logo(image="files/lution1.svg",icon_image="files/lution1.svg")
     st.sidebar.markdown("<h2>Lution</h2>", unsafe_allow_html=True)
     st.sidebar.badge("Stable", icon=":material/check:", color="green")
-    st.sidebar.caption("Version 0.2.7")
+    st.sidebar.caption("Version 0.2.8r")
 
     st.sidebar.page_link("main.py", label="Home", icon="🏠")
     st.sidebar.page_link("pages/marketplace.py", label=LANG["lution.tab.marketplace"], icon="🛒")
