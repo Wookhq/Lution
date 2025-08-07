@@ -4,7 +4,7 @@ import toml
 import subprocess
 import platform
 from modules.utils.messages import STMessages
-from .messages import success , warning as warn
+from .messages import STMessages
 from modules.utils.lang import LANG
 from modules.config.genconfig import Config
 from modules.mod.fontreplacer import Replace
@@ -30,7 +30,7 @@ class FilesFunctions:
             dest_path = os.path.join(dest_dir, filename)
 
             shutil.copy2(src_path, dest_path)
-        success()
+        st.success()
 
     def OverwriteFolders(self, dest_dir, src_dirs, no_success=False):
 
@@ -50,7 +50,7 @@ class FilesFunctions:
                 shutil.rmtree(dest_path)
             shutil.copytree(src_path, dest_path)
         if not no_success:
-            success()
+            st.success()
 
 
     def JsonSetup(self, filename="LutionConfig.json", default_data=None):
@@ -152,7 +152,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
             self.client_settings.CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
-            warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
+            st.warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
     def ApplyMarketplaceMods(self, dir):
         with st.spinner("Applying mods..."):
@@ -162,7 +162,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
             self.client_settings.CheckClientSettings(f"{dir}/ClientSettings")
-            warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
+            st.warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 
     def ResetMods(self):
@@ -182,7 +182,7 @@ class FilesFunctions:
                     shutil.copytree(s, d)
                 else:
                     shutil.copy2(s, d)
-            success()
+            st.success()
 
 
 
