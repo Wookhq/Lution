@@ -2,12 +2,12 @@
 from modules.config.genconfig import Config
 from modules.mod.fontreplacer import *
 from modules.utils.files import FilesFunctions
+from modules.utils.messages import STMessages
 import os
-import streamlit as st
-import json
-
 genconfig = Config()
 ff = FilesFunctions()
+
+st = STMessages()
 
 class ApplyFunctions:
     def __init__(self):

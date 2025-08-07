@@ -1,9 +1,10 @@
 #src/Lution/modules/json/json.py
 import json
 import os
-import streamlit as st
 import toml
+from modules.utils.messages import STMessages\
 
+st = STMessages()
 
 class Config:
     def __init__(self):

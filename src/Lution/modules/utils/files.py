@@ -3,13 +3,14 @@ import shutil
 import toml
 import subprocess
 import platform
-import streamlit as st
+from modules.utils.messages import STMessages
 from .messages import success , warning as warn
 from modules.utils.lang import LANG
 from modules.config.genconfig import Config
 from modules.mod.fontreplacer import Replace
 from modules.mod.clientsettings import ClientSettings
 
+st = STMessages()
 class FilesFunctions:
     def __init__(self):
         self.client_settings = ClientSettings()
