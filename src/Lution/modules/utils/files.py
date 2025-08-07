@@ -54,9 +54,8 @@ class FilesFunctions:
             stt.success()
 
 
-    def JsonSetup(self, filename="LutionConfig.json", default_data=None):
-        cf = Config()
 
+    def JsonSetup(self, filename="LutionConfig.json", default_data=None):
         documents_dir = os.path.expanduser("~/Documents/Lution/")
         os.makedirs(documents_dir, exist_ok=True)
 
@@ -64,7 +63,7 @@ class FilesFunctions:
         toml_path = json_path.replace(".json", ".toml")
 
         if os.path.exists(json_path):
-            cf.Json2Toml(json_path, toml_path)
+            Config.Json2Toml(json_path, toml_path)
             os.remove(json_path)
 
         if not os.path.exists(toml_path):
@@ -73,17 +72,16 @@ class FilesFunctions:
 
         return toml_path
 
-    def JsonSetup2(self, filename="Marketplace.json", default_data=None):
-        cf = Config()
 
-        documents_dir = os.path.expanduser("~/Documents/Lution/Lution Marketplace/")
+    def JsonSetup(self, filename="LutionConfig.json", default_data=None):
+        documents_dir = os.path.expanduser("~/Documents/Lution/")
         os.makedirs(documents_dir, exist_ok=True)
 
         json_path = os.path.join(documents_dir, filename)
         toml_path = json_path.replace(".json", ".toml")
 
         if os.path.exists(json_path):
-            cf.Json2Toml(json_path, toml_path)
+            Config.Json2Toml(json_path, toml_path)
             os.remove(json_path)
 
         if not os.path.exists(toml_path):

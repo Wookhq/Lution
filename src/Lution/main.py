@@ -15,6 +15,7 @@ file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/conf
 log.info("Page : Home")
 
 cg = Config()
+cg.ConvertOldConfigs()
 af = ApplyFunctions()
 client_settings = ClientSettings()
 
@@ -62,14 +63,14 @@ if "fontsize" not in st.session_state:
     st.session_state.fontsize = cg.ReadFflagsConfig("FIntFontSizePadding")
 if "disableplayersh" not in st.session_state:
     log.info("Reading Disnable player shadows")
-    dis = cg.ReadLutionConfig("disableplayersh")
+    dis = cg.Read("lution", "disableplayersh")
     if dis == None :
         st.session_state.disableplayersh = False
     else:
         st.session_state.disableplayersh = dis
 if "useoldrobloxsounds" not in st.session_state:
     log.info("Reading Old roblox sounds")
-    a = cg.ReadLutionConfig("OldRlbxSd")
+    a = cg.Read("lution", "OldRlbxSd")
     if a is None:
         a = False  
     st.session_state.useoldrobloxsounds = a

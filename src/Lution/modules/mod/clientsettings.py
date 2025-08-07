@@ -3,7 +3,14 @@ import json
 from modules.config.genconfig import Config
 from pathlib import Path
 
-cg = Config()
+_config_instance = None
+
+def get_config():
+    global _config_instance
+    if _config_instance is None:
+        from modules.config.genconfig import Config
+        _config_instance = Config()
+    return _config_instance
 
 class ClientSettings:
     def __init__(self):
@@ -22,7 +29,7 @@ class ClientSettings:
                     try:
                         f.write(content)  
                         parsed = json.loads(content)
-                        cg.UpdateSoberConfig("fflags", parsed)
+                        get_config().UpdateSoberConfig("fflags", parsed)
 
                     except Exception as e:
                         print(f"Error writing to {dump}: {e}")
@@ -42,7 +49,7 @@ class ClientSettings:
 
     def SplitClientSettingsContent(self):
         dumped = self.ClientSettingsContent()
-        currfflag = cg.ReadSoberConfig("fflags")
+        currfflag = get_config().ReadSoberConfig("fflags")
 
         if not isinstance(currfflag, dict):
             currfflag = {}

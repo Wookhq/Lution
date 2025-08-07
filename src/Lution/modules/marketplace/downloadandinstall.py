@@ -12,9 +12,7 @@ import shutil
 
 
 cf = Config()
-rmk = cf.ReadLutionMarketplaceConfig
-cfmk = cf.UpdateLutionMarketplaceConfig
-remcf = cf.RemoveLutionMarketplaceConfig
+
 ff = FilesFunctions()
 class MarketplaceManager:
     def __init__(self):
@@ -76,17 +74,17 @@ class MarketplaceManager:
                 raise
 
     def DownloadMarketplace(self, Name, type):
-        repo_name = rmk("marketplaceprd")
+        repo_name = cf.Read("marketplace", "marketplaceprd")
         repo = g().get_repo(repo_name)
         download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
         os.makedirs(download_dir, exist_ok=True)
 
         if type == "theme":
-            curf = rmk("InstalledThemes")
+            curf = cf.Read("marketplace", "InstalledThemes")
             if not curf:
                 curf = ""
             if Name not in curf:
-                cfmk("InstalledThemes", Name + "," + curf if curf else Name)
+                cf.Update("marketplace", "InstalledThemes", Name + "," + curf if curf else Name)
 
             info_file_path = "Assets/Themes/info.json"
             content = repo.get_contents(info_file_path)
@@ -108,11 +106,11 @@ class MarketplaceManager:
                 print(f"No theme found with name '{Name}'")
 
         elif type == "mod":
-            curf = rmk("InstalledMods")
+            curf = cf.Read("marketplace", "InstalledMods")
             if not curf:
                 curf = ""
             if Name not in curf:
-                cfmk("InstalledMods", Name + "," + curf if curf else Name)
+                cf.Update("marketplace", "InstalledMods", Name + "," + curf if curf else Name)
 
             info_file_path = "Assets/Mods/info.json"
             content = repo.get_contents(info_file_path)
@@ -140,12 +138,12 @@ class MarketplaceManager:
         path = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{Type}s/{Name}")
         if Type == "mod":
             print(f"type: {Name}")
-            remcf("InstalledMods", Name)
+            cf.RemoveValueFromList("marketplace", "InstalledMods", Name)
             if os.path.isdir(path):
                 shutil.rmtree(path)
         if Type == "theme":
             print(f"type: {Name}")
-            remcf("InstalledThemes", Name)
+            cf.RemoveValueFromList("marketplace", "InstalledThemes", Name)
             if os.path.isdir(path):
                 shutil.rmtree(path)
 

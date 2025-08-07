@@ -1,5 +1,6 @@
 import streamlit as st
 from modules.utils.files import FilesFunctions
+from modules.config.applyfun import ApplyFunctions
 from modules.utils.lang import LANG
 from modules.config.genconfig import Config
 from modules.utils.logging import log
@@ -9,11 +10,12 @@ InitSidebar()
 
 ff = FilesFunctions()
 cf = Config()
+af = ApplyFunctions()
 
 log.info('Page : Apperance')
 
 ff.JsonSetup()
-curcf = cf.ReadLutionConfig("CursorType")
+curcf = cf.Read("lution", "CursorType")
 
 if "cursor" not in st.session_state:
     st.session_state.cursor = "Default"
@@ -42,7 +44,7 @@ st.session_state.cursor = st.selectbox(
     )
 st.button(
         LANG["lution.appearance.button.applycursor"],
-        on_click=lambda: cf.UpdateCursor(st.session_state.cursor),
+        on_click=lambda: af.UpdateCursor(st.session_state.cursor),
         key="apply_cursor_button"
     )
 

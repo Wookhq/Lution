@@ -72,10 +72,10 @@ class ApplyFunctions:
         # Disable Player shadows
         if disableprsh == True :
             genconfig.UpdateFflags("FIntRenderShadowIntensity", "0")
-            genconfig.UpdateLutionConfig("disableplayersh", True)
+            genconfig.Update("lution", "disableplayersh", True)
         else:
             genconfig.UpdateFflags("FIntRenderShadowIntensity", "75")
-            genconfig.UpdateLutionConfig("disableplayersh", False)
+            genconfig.Update("lution","disableplayersh", False)
         # Render Technology
         if rendertech == "OpenGL":
             genconfig.UpdateSoberConfig("use_opengl", True)
@@ -98,7 +98,7 @@ class ApplyFunctions:
             ]
         )
         # use old roblox sounds
-        genconfig.UpdateLutionConfig("OldRlbxSd",useoldrobloxsounds)
+        genconfig.Update("lution","OldRlbxSd",useoldrobloxsounds)
         if useoldrobloxsounds:
             ff.OverwriteFiles(
                 os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/sounds/"),
@@ -187,7 +187,7 @@ class ApplyFunctions:
                     cursor_file("customcursor", "new", "IBeamCursor.png"),
                 ]
             )
-            genconfig.UpdateLutionConfig("CursorType", "Default")
+            genconfig.Update("lution","CursorType", "Default")
         elif cursortype == "Old 2007 Cursor":
             ff.OverwriteFiles(
                 CursorFolder,
@@ -197,7 +197,7 @@ class ApplyFunctions:
                     cursor_file("customcursor", "old2006", "IBeamCursor.png"),
                 ]
             )
-            genconfig.UpdateLutionConfig("CursorType", "Old 2007 Cursor")
+            genconfig.Update("lution","CursorType", "Old 2007 Cursor")
         elif cursortype == "Old 2013 Cursor":
             ff.OverwriteFiles(
                 CursorFolder,
@@ -207,6 +207,6 @@ class ApplyFunctions:
                     cursor_file("customcursor", "old2013", "IBeamCursor.png"),
                 ]
             )
-            genconfig.UpdateLutionConfig("CursorType", "Old 2013 Cursor")
+            genconfig.Update("lution","CursorType", "Old 2013 Cursor")
         else:
             st.error("Invalid cursor type selected.")

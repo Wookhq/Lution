@@ -13,9 +13,6 @@ log.info("Page : Marketplace")
 
 # work smarter, not harder
 cf = Config()
-rmk = cf.ReadLutionMarketplaceConfig
-cfmk = cf.UpdateLutionMarketplaceConfig
-remcf = cf.RemoveLutionMarketplaceConfig
 
 mm = MarketplaceManager()
 DownloadMarketplace = mm.DownloadMarketplace
@@ -30,13 +27,12 @@ def GetItemCached(repo_name, item):
     except UnknownObjectException:
         return "Not found"
 
-if "provider" not in st.session_state:
-    cf = rmk("marketplaceprd")
-    if cf is None:
-        cfmk("marketplaceprd", "Wookhq/Lution-Marketplace")
-        st.session_state.prd = rmk("marketplaceprd")
-    else:
-        st.session_state.prd = cf
+provider = cf.Read("marketplace", "marketplaceprd")
+if provider is None:
+    cf.Update("marketplace", "marketplaceprd", "Wookhq/Lution-Marketplace")
+    st.session_state.prd = cf.Read("marketplace", "marketplaceprd")
+else:
+    st.session_state.prd = provider
 
 def loadbar():
     progress = st.progress(0)
@@ -71,7 +67,7 @@ avdmods, avdthemes = loadbar()
 def ChangeProvider():
     new_provider = st.session_state.get("pr")
     if new_provider:
-        cfmk("marketplaceprd", new_provider)
+        cf.Update("marketplace", "marketplaceprd", new_provider)
         log.warn(f"Changed marketplace provider to: {new_provider}")
 
 
@@ -143,8 +139,8 @@ with marketplace:
 with installed:
     st.header(LANG["lution.marketplace.installed.title"])
     st.write(LANG["lution.marketplace.title.decs"])
-    theme = rmk("InstalledThemes")
-    mod = rmk("InstalledMods")
+    theme = cf.Read("marketplace", "InstalledThemes")
+    mod = cf.Read("marketplace", "InstalledMods")
     st.write(f"### {LANG['lution.marketplace.title.decs']}")
     if theme:
         themesexpander = st.expander("Themes", expanded=True)

@@ -27,3 +27,7 @@ class log():
     def debug(mes, logger="LUTION"):
         logging.basicConfig(format=f"{logger} %(asctime)s %(levelname)s: %(message)s")
         logging.debug(mes)
+    @staticmethod
+    def critical(mes, logger="LUTION"):
+        logging.basicConfig(format=f"{logger} %(asctime)s %(levelname)s: %(message)s")
+        logging.critical(mes)
