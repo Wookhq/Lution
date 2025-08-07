@@ -8,11 +8,12 @@ from .messages import success , warning as warn
 from modules.utils.lang import LANG
 from modules.config.genconfig import Config
 from modules.mod.fontreplacer import Replace
-from modules.mod.clientsettings import CheckClientSettings
+from modules.mod.clientsettings import ClientSettings
 
 class FilesFunctions:
     def __init__(self):
-        pass
+        self.client_settings = ClientSettings()
+
     
     def OverwriteFiles(self, dest_dir, src_files):
         os.makedirs(dest_dir, exist_ok=True)
@@ -149,7 +150,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/content/")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
-            CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
+            self.client_settings.CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
             warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
     def ApplyMarketplaceMods(self, dir):
@@ -159,7 +160,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/content/")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
-            CheckClientSettings(f"{dir}/ClientSettings")
+            self.client_settings.CheckClientSettings(f"{dir}/ClientSettings")
             warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 
