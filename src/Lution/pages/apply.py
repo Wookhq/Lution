@@ -14,7 +14,6 @@ def AppyAndUpdate():
     cg.ApplyChanges(
         st.session_state.fpslimit,
         st.session_state.lightingtech,
-        st.session_state.oof,
         st.session_state.rpc,
         st.session_state.render,
         st.session_state.disablechat,

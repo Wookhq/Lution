@@ -18,7 +18,6 @@ cs = ClientSettings()
 log.info("Page : Fflags")
 
 st.header(LANG["lution.tab.fflags"])
-st.session_state.oof = st.toggle(LANG["lution.fflags.toggle.bringbackoof"], value=st.session_state.oof)
 st.session_state.rpc = st.toggle(LANG["lution.fflags.toggle.rpc"], value=st.session_state.rpc)
 st.session_state.fpslimit = st.text_input(LANG["lution.fflags.textbox.fpslimit"], st.session_state.fpslimit, max_chars=3)
 st.session_state.render = st.selectbox(

@@ -67,8 +67,6 @@ class ApplyFunctions:
         genconfig.UpdateFflags("DFIntTaskSchedulerTargetFps",fpslimit)
         genconfig.UpdateFflags("FFlagGameBasicSettingsFramerateCap5",True)
         genconfig.UpdateFflags("FFlagTaskSchedulerLimitTargetFpsTo2402",False)
-        #Bringbackoof - ts is a hashtag lol 🥀
-        genconfig.UpdateSoberConfig("bring_back_oof",oof1)
         # Disnabel Discord RPC
         genconfig.UpdateSoberConfig("discord_rpc_enabled",rpc1)
         # Disable Player shadows

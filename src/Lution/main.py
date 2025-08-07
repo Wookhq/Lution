@@ -35,10 +35,6 @@ if "mssa" not in st.session_state:
     log.info("Reading msaa")
     msaa = af.LoadMSAA()
     st.session_state.msaa = msaa
-if "oof" not in st.session_state:
-    log.info("Reading Oof")
-    oof = cg.ReadSoberConfig("bring_back_oof")
-    st.session_state.oof = oof
 if "rpc" not in st.session_state:
     log.info("Reading Discord RPC")
     drpc = cg.ReadSoberConfig("discord_rpc_enabled")
