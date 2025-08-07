@@ -5,8 +5,8 @@ import json
 from modules.config.genconfig import Config
 from modules.utils.sidebar import InitSidebar
 from modules.utils.logging import log
-from modules.config.applyfun import ApplyFunctions
-from modules.mod.clientsettings import SplitClientSettingsContent
+from modules.config.applyfun import ApplyFunctions  
+from modules.mod.clientsettings import ClientSettings
 
 InitSidebar()
 
@@ -16,6 +16,7 @@ log.info("Page : Home")
 
 cg = Config()
 af = ApplyFunctions()
+client_settings = ClientSettings()
 
 # Set default values so they're always defined
 if "fpslimit" not in st.session_state:
@@ -57,7 +58,8 @@ if "language" not in st.session_state:
     st.session_state.language = "en"
 if "fflagseditor" not in st.session_state:
     log.info("Reading FFlags editor")
-    Currfflags = json.loads(SplitClientSettingsContent() or "{}")
+    spilted = client_settings.SplitClientSettingsContent()
+    Currfflags = json.loads(spilted or "{}")
     st.session_state.fflagseditor = Currfflags
 if "fontsize" not in st.session_state:
     log.info("Reading FFlag Fon size")
