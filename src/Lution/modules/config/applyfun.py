@@ -13,7 +13,7 @@ class ApplyFunctions:
     def __init__(self):
         pass
 
-    def ApplyChanges(self,fpslimit, lightingtech, oof1, rpc1, rendertech, bbchat, fontsize, useoldrobloxsounds, disableprsh, texturequa, msaa):
+    def ApplyChanges(self,fpslimit, lightingtech, rpc1, rendertech, bbchat, fontsize, useoldrobloxsounds, disableprsh, texturequa, msaa):
         """Apply changes based on user input."""
         # Lighting Tech
         if lightingtech == "Voxel Lighting (Phase 1)" : 
