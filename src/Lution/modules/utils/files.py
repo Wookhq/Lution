@@ -3,6 +3,7 @@ import shutil
 import toml
 import subprocess
 import platform
+import streamlit as st
 from modules.utils.messages import STMessages
 from .messages import STMessages
 from modules.utils.lang import LANG
@@ -10,7 +11,7 @@ from modules.config.genconfig import Config
 from modules.mod.fontreplacer import Replace
 from modules.mod.clientsettings import ClientSettings
 
-st = STMessages()
+stt = STMessages()
 class FilesFunctions:
     def __init__(self):
         self.client_settings = ClientSettings()
@@ -30,7 +31,7 @@ class FilesFunctions:
             dest_path = os.path.join(dest_dir, filename)
 
             shutil.copy2(src_path, dest_path)
-        st.success()
+        stt.success()
 
     def OverwriteFolders(self, dest_dir, src_dirs, no_success=False):
 
@@ -50,7 +51,7 @@ class FilesFunctions:
                 shutil.rmtree(dest_path)
             shutil.copytree(src_path, dest_path)
         if not no_success:
-            st.success()
+            stt.success()
 
 
     def JsonSetup(self, filename="LutionConfig.json", default_data=None):
@@ -152,7 +153,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
             self.client_settings.CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
-            st.warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
+            stt.warning("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
     def ApplyMarketplaceMods(self, dir):
         with st.spinner("Applying mods..."):
@@ -162,7 +163,7 @@ class FilesFunctions:
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
             self.client_settings.CheckClientSettings(f"{dir}/ClientSettings")
-            st.warn("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
+            stt.warning("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
 
     def ResetMods(self):
@@ -182,7 +183,7 @@ class FilesFunctions:
                     shutil.copytree(s, d)
                 else:
                     shutil.copy2(s, d)
-            st.success()
+            stt.success()
 
 
 
@@ -228,8 +229,8 @@ class FilesFunctions:
                 try:
                     os.remove(font_path)
                 except Exception as e:
-                    st.warning(f"Could not delete temp font: {e}")
+                    stt.warning(f"Could not delete temp font: {e}")
                 self.OverwriteEmoji(os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"))
-                st.success(LANG["lution.message.success.fontapplied"])
+                stt.success(LANG["lution.message.success.fontapplied"])
             else:
-                st.warning(LANG["lution.appearance.warning.customfontnotuploaded"])
+                stt.warning(LANG["lution.appearance.warning.customfontnotuploaded"])
