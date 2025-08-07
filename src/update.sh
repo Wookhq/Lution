@@ -16,7 +16,29 @@ exit_code=$?
 if [ $exit_code -ne 0 ]; then
     echo ""
     echo "Error: 'git pull' failed. This could be due to local changes or merge conflicts."
-    echo "Please resolve the issues manually and run this script again."
+    echo "Attempting to resolve by re-cloning the repository."
+
+    # Create a temporary script to delete and re-clone
+    cat > /tmp/lution_update_resolver.sh << 'EOL'
+#!/bin/bash
+echo "--- Force-updating Lution ---"
+# Go to the parent directory
+cd /home/chip/Documents/gh/
+# Remove the old directory
+echo "Removing old Lution directory..."
+rm -rf Lution
+# Clone the repository again
+echo "Cloning fresh copy of Lution..."
+git clone https://github.com/Wookhq/Lution.git
+echo "--- Lution has been updated. Please re-run the application. ---"
+EOL
+
+    # Make the temporary script executable
+    chmod +x /tmp/lution_update_resolver.sh
+
+    # Execute the temporary script and exit
+    echo "Running update resolver script..."
+    /tmp/lution_update_resolver.sh
     exit 1
 fi
 
