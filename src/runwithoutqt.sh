@@ -14,22 +14,32 @@ EOF
 
 banner
 
-if grep -qi 'ubuntu' /etc/os-release; then
+if grep -qi 'ubuntu\|debian' /etc/os-release; then
     if ! dpkg -s python3-venv >/dev/null 2>&1; then
         echo "Installing python3-venv..."
         sudo apt update && sudo apt install -y python3-venv
     else
         echo "python3-venv is already installed."
     fi
-fi
 
-if grep -qi 'arch' /etc/os-release; then
+elif grep -qi 'arch\|manjaro' /etc/os-release; then
     if ! pacman -Qi python-virtualenv >/dev/null 2>&1; then
         echo "Installing python-virtualenv..."
         sudo pacman -Sy --noconfirm python-virtualenv
     else
         echo "python-virtualenv is already installed."
     fi
+
+elif grep -qi 'fedora' /etc/os-release; then
+    if ! rpm -q python3-virtualenv >/dev/null 2>&1; then
+        echo "Installing python3-virtualenv..."
+        sudo dnf install -y python3-virtualenv
+    else
+        echo "python3-virtualenv is already installed."
+    fi
+
+else
+    exit 1
 fi
 
 cd ..
