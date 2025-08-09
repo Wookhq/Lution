@@ -1,13 +1,37 @@
 #!/bin/bash
+./update.sh
 clear
 echo "RUN LUTION"
 
+
 banner() {
-cat << "EOF"
+    # start color: 0,170,255  (#00AAFF)
+    local r1=0
+    local g1=170
+    local b1=255
+
+    # end color: 0,73,230  (#0049E6)
+    local r2=0
+    local g2=73
+    local b2=230
+
+    # total steps = number of lines in banner
+    local lines_count=5
+    local i=0
+
+    while IFS= read -r line; do
+        # interpolate colors
+        local r=$(( r1 + (r2 - r1) * i / (lines_count - 1) ))
+        local g=$(( g1 + (g2 - g1) * i / (lines_count - 1) ))
+        local b=$(( b1 + (b2 - b1) * i / (lines_count - 1) ))
+
+        printf "\033[38;2;%s;%s;%sm%s\033[0m\n" "$r" "$g" "$b" "$line"
+        ((i++))
+    done << 'EOF'
  __         __  __     ______   __     ______     __   __
-/\ \       /\ \/\ \   /\__  _\ /\ \   /\  __ \   /\ "-.\ \
+/\ \       /\ \/\ \   /\__  _\ /\ \   /\  __ \   /\ ".-. \
 \ \ \____  \ \ \_\ \  \/_/\ \/ \ \ \  \ \ \/\ \  \ \ \-.  \
- \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_____\  \ \_\\"\_\
+ \ \_____\  \ \_____\    \ \_\  \ \_\  \ \_____\  \ \_\"_\_\
   \/_____/   \/_____/     \/_/   \/_/   \/_____/   \/_/ \/_/
 EOF
 }
