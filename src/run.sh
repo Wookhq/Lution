@@ -76,10 +76,10 @@ pip install -r requirements.txt
 clear
 banner
 
-echo "It should open a window right now, if not click on the link"
-echo "If you get a error or something like that, try pressing R to fix it"
+echo "GTK IS HERE YAYYY! 🎉"
+echo "Took a while, but now lution is a GTK app! 🐧"
 echo "Also do you love my ASCII text? :3"
 
-python3 launch.py
+python3 gurt.py
 
 echo "i got destroyed 😭"
