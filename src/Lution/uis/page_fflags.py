@@ -54,7 +54,8 @@ class PageFFlags(Adw.Bin):
         self.disableplayersh = self.cf.Read("lution", "disableplayersh") or False
         self.useoldrobloxsounds = self.cf.Read("lution", "OldRlbxSd") or False
 
-        self.fontsize = self.cf.ReadFflagsConfig("FIntFontSizePadding") or "12"
+        self.fontsize = self.cf.ReadFflagsConfig("FIntFontSizePadding")
+        if not self.fontsize: self.fontsize = "1"
         self.msaa = self.af.LoadMSAA() or "Auto"
         self.texturequality = self.af.LoadTextureQuality() or "Level 2 (Medium)"
         self.fflagseditor = json.loads(self.cs.SplitClientSettingsContent() or "{}")
@@ -67,39 +68,45 @@ class PageFFlags(Adw.Bin):
         self.disablechat_toggle.set_active(self.disablechat)
         self.disableplayersh_toggle.set_active(self.disableplayersh)
         self.fontsize_entry.set_text(self.fontsize)
+        print(self.fontsize)
         self.msaa_dropdown.set_selected(["Off","Auto","x1","x2","x4"].index(self.msaa))
         self.texturequality_dropdown.set_selected(["Off","Level 0 (potato)", "Level 1 (Low)","Level 2 (Medium)","Level 3 (High)","Level 4 (Ultra)"].index(self.texturequality))
         self.fflags_textarea.get_buffer().set_text(json.dumps(self.fflagseditor, indent=4))
-
+        
     def on_apply_clicked(self, button):
         # Get the values from the UI
         rpc_val = self.rpc_toggle.get_active()
-        fpslimit_val = self.fpslimit_entry.get_text()
+        fpslimit_val = self.fpslimit_entry.get_text().strip()
+        fontsize_val = self.fontsize_entry.get_text().strip()
+
         render_val = self.render_dropdown.get_selected_item().get_string()
         lightingtech_val = self.lightingtech_dropdown.get_selected_item().get_string()
         disablechat_val = self.disablechat_toggle.get_active()
         disableplayersh_val = self.disableplayersh_toggle.get_active()
-        fontsize_val = self.fontsize_entry.get_text()
         msaa_val = self.msaa_dropdown.get_selected_item().get_string()
         texturequality_val = self.texturequality_dropdown.get_selected_item().get_string()
-        fflags_text = self.fflags_textarea.get_buffer().get_text(self.fflags_textarea.get_buffer().get_start_iter(), self.fflags_textarea.get_buffer().get_end_iter(), False)
+
+        fflags_text = self.fflags_textarea.get_buffer().get_text(
+            self.fflags_textarea.get_buffer().get_start_iter(),
+            self.fflags_textarea.get_buffer().get_end_iter(),
+            False
+        )
 
         # Parse the FFlags editor
         try:
             self.fflagseditor = json.loads(fflags_text)
         except Exception as e:
             log.warn(f"Invalid fflags config: {e}")
-            # Show a warning to the user
             dialog = Adw.MessageDialog.new(self.get_root(), "Invalid FFlags", "The FFlags editor contains invalid JSON.")
             dialog.add_response("ok", "OK")
             dialog.connect("response", lambda d, r: d.close())
             dialog.present()
             return
 
-        # Read useoldrobloxsounds from config (assuming it's stored there)
-        useoldrobloxsounds_val = self.cf.Read("fflags", "useoldrobloxsounds") or False # Default to False if not found
+        # Read useoldrobloxsounds from config
+        useoldrobloxsounds_val = self.cf.Read("lution", "OldRlbxSd") or False
 
-        # Apply changes using ApplyChanges
+        # Apply changes
         self.af.ApplyChanges(
             fpslimit_val,
             lightingtech_val,
@@ -107,7 +114,7 @@ class PageFFlags(Adw.Bin):
             render_val,
             disablechat_val,
             fontsize_val,
-            useoldrobloxsounds_val, # This needs to be read from config or UI
+            useoldrobloxsounds_val,
             disableplayersh_val,
             texturequality_val,
             msaa_val
@@ -115,10 +122,16 @@ class PageFFlags(Adw.Bin):
 
         # Apply the FFlags from the editor
         self.af.Applyfflags(self.fflagseditor)
+        
+        self.load_config()
+
 
     def on_reset_clicked(self, button):
-        self.load_fflags()
+        self.load_config()
 
     def on_setup_overlay_clicked(self, button):
         self.ff.OverlaySetup()
-        
+        dialog = Adw.MessageDialog.new(self.get_root(), LANG["lution.dialog.overlay.title"], LANG["lution.dialog.overlay.body"])
+        dialog.add_response("ok", "OK")
+        dialog.connect("response", lambda d, r: d.close())
+        dialog.present()

@@ -36,18 +36,15 @@ class PageAppearance(Adw.PreferencesPage):
         """
         dialog = Gtk.FileDialog(title="Choose a Font File")
 
-        # Create a filter for font files
         font_filter = Gtk.FileFilter(name="Font Files")
         font_filter.add_mime_type("font/ttf")
         font_filter.add_mime_type("font/otf")
 
-        # The set_filters method expects a Gio.ListModel, not a list.
-        # We must create a Gio.ListStore and add our filter to it.
+
         filters = Gio.ListStore.new(Gtk.FileFilter)
         filters.append(font_filter)
         dialog.set_filters(filters)
 
-        # Present the dialog and handle the response
         dialog.open(self.get_root(), None, self.on_font_file_selected)
 
 
@@ -59,8 +56,6 @@ class PageAppearance(Adw.PreferencesPage):
             file_path = dialog.open_finish(result)
             if file_path:
                 print(f"Selected font file: {file_path.get_path()}")
-                # You can now process the selected file path
-                # self.ff.copy_file(file_path.get_path(), "destination/path")
+                self.ff.ApplyFont(file_path.get_path())
         except GObject.GError as err:
-            # Handle the case where the user canceled the dialog
             print(f"Error opening file dialog: {err.message}")
