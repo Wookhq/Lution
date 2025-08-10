@@ -36,17 +36,18 @@ banner
 if grep -qi 'ubuntu\|debian' /etc/os-release; then
     if ! dpkg -s python3-venv >/dev/null 2>&1; then
         echo "Installing python3-venv..."
-        sudo apt update && sudo apt install -y python3-venv
+        sudo apt update && sudo apt install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 python3-dev libcairo2-dev libgirepository1.0-dev
+        sudo apt update
     fi
 elif grep -qi 'arch\|manjaro' /etc/os-release; then
     if ! pacman -Qi python-virtualenv >/dev/null 2>&1; then
         echo "Installing python-virtualenv..."
-        sudo pacman -Sy --noconfirm python-virtualenv
+        sudo pacman -Sy --noconfirm python-virtualenv python-gobject gtk3
     fi
 elif grep -qi 'fedora' /etc/os-release; then
     if ! rpm -q python3-virtualenv >/dev/null 2>&1; then
         echo "Installing python3-virtualenv..."
-        sudo dnf install -y python3-virtualenv
+        sudo dnf install -y python3-virtualenv python3-gobject gtk3
     fi
 else
     exit 1
