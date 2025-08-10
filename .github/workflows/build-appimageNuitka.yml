@@ -2,7 +2,7 @@ name: Build Lution AppImage with Nuitka
 
 on:
   push:
-    branches: [latest]
+    branches: [latest, GTK-fr]
   workflow_dispatch:
 
 jobs:
