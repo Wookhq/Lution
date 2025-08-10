@@ -72,6 +72,7 @@ source .venv/bin/activate
 
 cd "src/Lution" || exit 1
 pip install -r requirements.txt
+pip install pygobject
 
 clear
 banner
