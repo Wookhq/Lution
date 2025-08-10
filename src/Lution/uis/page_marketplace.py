@@ -27,7 +27,7 @@ def run_in_thread(func):
         thread.start()
     return wrapper
 
-@Gtk.Template(filename="uis/page_marketplace_layout.ui")
+@Gtk.Template(filename="files/uis/page_marketplace_layout.ui")
 class PageMarketplace(Adw.PreferencesPage):
     __gtype_name__ = "PageMarketplace"
 
@@ -146,7 +146,7 @@ class PageMarketplace(Adw.PreferencesPage):
         Creates a custom card widget for a single marketplace item.
         The card's structure is defined in the .ui file's template.
         """
-        builder = Gtk.Builder.new_from_file("uis/marketplace_card.ui")
+        builder = Gtk.Builder.new_from_file("files/uis/marketplace_card.ui")
         card = builder.get_object("MarketplaceCard")
 
         title_label = builder.get_object("title_label")

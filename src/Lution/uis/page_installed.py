@@ -7,7 +7,7 @@ from modules.config.genconfig import Config
 from modules.marketplace.downloadandinstall import MarketplaceManager
 from modules.utils.logging import log
 
-@Gtk.Template(filename="uis/page_installed.ui")
+@Gtk.Template(filename="files/uis/page_installed.ui")
 class PageInstalled(Adw.PreferencesPage):
     __gtype_name__ = "PageInstalled"
 

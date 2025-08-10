@@ -9,7 +9,7 @@ from modules.utils.logging import log
 from modules.config.applyfun import ApplyFunctions
 from modules.config.genconfig import Config
 
-@Gtk.Template(filename="uis/page_mods.ui")
+@Gtk.Template(filename="files/uis/page_mods.ui")
 class PageMods(Adw.PreferencesPage):
     __gtype_name__ = "PageMods"
 

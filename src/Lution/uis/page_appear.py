@@ -7,7 +7,7 @@ from modules.utils.files import FilesFunctions
 from modules.utils.lang import LANG
 from modules.utils.logging import log
 
-@Gtk.Template(filename="uis/page_appear.ui")
+@Gtk.Template(filename="files/uis/page_appear.ui")
 class PageAppearance(Adw.PreferencesPage):
     __gtype_name__ = "PageAppearance"
 

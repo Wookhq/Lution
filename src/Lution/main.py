@@ -60,10 +60,12 @@ class MainWindow(Gtk.ApplicationWindow):
             application_icon=icon_path,
             developer_name="Wookhq",
             version="1.7.8",
-            comments="just vibes ✨",
+            comments="just a few cats and coffee",
+            license="MIT",
             website="https://wookhq.github.io/lution",
             issue_url="https://github.com/Wookhq/Lution/issues",
-            license_type=Gtk.License.MIT_X11
+            license_type=Gtk.License.MIT_X11,
+            developers=["Chip", "gio-exe"],
         )
 
       
