@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="PageMarketplace" parent="AdwPreferencesPage">
+    <property name="title">Marketplace</property>
+    <child>
+      <object class="AdwPreferencesGroup" id="marketplace_group">
+        <property name="title">Marketplace</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkButton" id="reload_button">
+                <property name="label">Reload Marketplace</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinner" id="loading_spinner"/>
+            </child>
+            <child>
+              <object class="AdwExpanderRow" id="themes_expander">
+                <property name="title">Themes</property>
+                <child>
+                  <object class="GtkFlowBox" id="themes_flowbox">
+                    <property name="valign">start</property>
+                    <property name="max-children-per-line">3</property>
+                    <property name="selection-mode">none</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwExpanderRow" id="mods_expander">
+                <property name="title">Mods</property>
+                <child>
+                  <object class="GtkFlowBox" id="mods_flowbox">
+                    <property name="valign">start</property>
+                    <property name="max-children-per-line">3</property>
+                    <property name="selection-mode">none</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

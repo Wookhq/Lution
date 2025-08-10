@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="PageInstalled" parent="AdwPreferencesPage">
+    <property name="title">Installed</property>
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title">Installed Items</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="AdwExpanderRow" id="themes_expander">
+                <property name="title">Themes</property>
+                <child>
+                  <object class="GtkBox" id="themes_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwExpanderRow" id="mods_expander">
+                <property name="title">Mods</property>
+                <child>
+                  <object class="GtkBox" id="mods_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

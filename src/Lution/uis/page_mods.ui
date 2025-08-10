@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.0"/>
+
+  <template class="PageMods" parent="AdwPreferencesPage">
+    <property name="title" translatable="yes">Mods</property>
+
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title" translatable="yes">Mod Settings</property>
+        <property name="description" translatable="yes">Bloxstrap Mods is supported.</property>
+
+        <child>
+          <object class="AdwSwitchRow" id="switch_use_old_sounds">
+            <property name="title" translatable="yes">Use Old Roblox Sounds</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Open Mods Folder</property>
+            <child type="end">
+              <object class="GtkButton" id="btn_open_mods">
+                <property name="label" translatable="yes">Open</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Apply Mods</property>
+            <child type="end">
+              <object class="GtkButton" id="btn_apply_mods">
+                <property name="label" translatable="yes">Apply</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Reset Mods</property>
+            <child type="end">
+              <object class="GtkButton" id="btn_reset_mods">
+                <property name="label" translatable="yes">Reset</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

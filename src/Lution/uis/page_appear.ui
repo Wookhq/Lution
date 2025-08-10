@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="adw" version="1.0"/>
+
+  <template class="PageAppearance" parent="AdwPreferencesPage">
+    <property name="title" translatable="yes">Appearance</property>
+
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title" translatable="yes">Custom Font</property>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Upload Custom Font</property>
+            <child type="end">
+              <!-- Replaced GtkFileChooserButton with GtkButton -->
+              <object class="GtkButton" id="btn_upload_font">
+                <property name="label" translatable="yes">Choose Font</property>
+                <property name="tooltip-text" translatable="yes">Click to select a font file</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Apply Font</property>
+            <child type="end">
+              <object class="GtkButton" id="btn_apply_font">
+                <property name="label" translatable="yes">Apply</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="AdwPreferencesGroup">
+        <property name="title" translatable="yes">Cursor</property>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Cursor Style</property>
+            <child type="end">
+              <object class="GtkComboBoxText" id="combo_cursor_style">
+                <items>
+                  <item>Default</item>
+                  <item>Old 2007 Cursor</item>
+                  <item>Old 2013 Cursor</item>
+                </items>
+                <property name="hexpand">true</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Apply Cursor</property>
+            <child type="end">
+              <object class="GtkButton" id="btn_apply_cursor">
+                <property name="label" translatable="yes">Apply</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="AdwPreferencesGroup">
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">no im not gonna do that</property>
+            <property name="wrap">true</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+
+  </template>
+</interface>
