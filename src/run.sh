@@ -55,11 +55,6 @@ fi
 
 cd ..
 
-# always clean venv to avoid perm issues
-if [ -d ".venv" ]; then
-    echo "cleaning old venv..."
-    rm -rf .venv
-fi
 
 python3 -m venv ".venv"
 source .venv/bin/activate
