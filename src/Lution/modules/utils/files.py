@@ -3,7 +3,6 @@ import shutil
 import toml
 import subprocess
 import platform
-import streamlit as st
 from modules.utils.messages import STMessages
 from .messages import STMessages
 from modules.utils.lang import LANG
@@ -144,7 +143,6 @@ class FilesFunctions:
                     shutil.copy2(s, d)
 
     def ApplyMods(self):
-        with st.spinner("Applying mods..."):
             dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ExtraContent/")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/content/")],no_success=True)
@@ -154,7 +152,6 @@ class FilesFunctions:
             stt.warning("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
 
     def ApplyMarketplaceMods(self, dir):
-        with st.spinner("Applying mods..."):
             dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ExtraContent/")],no_success=True)
             self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/content/")],no_success=True)
@@ -165,22 +162,21 @@ class FilesFunctions:
 
 
     def ResetMods(self):
-        with st.spinner("Resetting mods..."):
-            dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
-            src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/")
-            if not os.path.isdir(src_dir):
-                st.warning(f"Source directory does not exist: {src_dir}")
-                return
-            if os.path.isdir(dest_dirr):
-                shutil.rmtree(dest_dirr)
-            os.makedirs(dest_dirr, exist_ok=True)
-            for item in os.listdir(src_dir):
-                s = os.path.join(src_dir, item)
-                d = os.path.join(dest_dirr, item)
-                if os.path.isdir(s):
-                    shutil.copytree(s, d)
-                else:
-                    shutil.copy2(s, d)
+        dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
+        src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/")
+        if not os.path.isdir(src_dir):
+            stt.warning(f"Source directory does not exist: {src_dir}")
+            return
+        if os.path.isdir(dest_dirr):
+            shutil.rmtree(dest_dirr)
+        os.makedirs(dest_dirr, exist_ok=True)
+        for item in os.listdir(src_dir):
+            s = os.path.join(src_dir, item)
+            d = os.path.join(dest_dirr, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d)
+            else:
+                shutil.copy2(s, d)
             stt.success()
 
 
@@ -210,16 +206,13 @@ class FilesFunctions:
         shutil.copy2(src_file, dest_file)
 
 
-    def ApplyFont(self):
-        with st.spinner(LANG["lution.spinner.applyfont"]):
-            if st.session_state.customfont:
+    def ApplyFont(self, font_path):
+            if not os.path.isfile(font_path):
                 # setup the overlay
                 self.Fontsetup()
                 font_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts")
                 os.makedirs(font_dir, exist_ok=True)
-                font_path = os.path.join(font_dir, st.session_state.customfont.name)
-                with open(font_path, "wb") as f:
-                    f.write(st.session_state.customfont.getbuffer())
+                
                 Replace(
                     font_path,
                     os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts")

@@ -1,9 +1,6 @@
 #src/Luiton/modules/utils/lang.py
 import os
 import json
-import streamlit as st
-if "language" not in st.session_state:
-    st.session_state.language = "en"
     
 LANG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "files/languages")
 lang_files = [f for f in os.listdir(LANG_DIR) if f.endswith(".json")]
@@ -19,14 +16,9 @@ LANG_NAMES = {
 
 }
 def readlang():
-    lang_path = os.path.join(LANG_DIR, f"{st.session_state.language}.json")
+    lang_path = os.path.join(LANG_DIR, f"en.json") # temp
     with open(lang_path, "r") as f:
         return json.load(f)
 
 LANG = readlang()
 
-def ApplyLanguage(lang):
-    st.session_state.language = lang
-    print(st.session_state.language)
-    global LANG
-    LANG = readlang()
