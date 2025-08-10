@@ -36,26 +36,5 @@ if echo "$update_output" | grep -q "update.sh"; then
     exec "$0" "$@"
 fi
 
-# --- Step 3: Python Environment ---
-echo ""
-echo "--- Ensuring Python venv exists... ---"
-cd Lution || exit 1
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
-source .venv/bin/activate
-
-echo ""
-echo "--- Updating Python packages inside venv... ---"
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install -r requirements.txt
-
-if [ $? -ne 0 ]; then
-    echo ""
-    echo "Error: Pip install failed inside venv."
-    exit 1
-fi
-
-echo "Python packages updated successfully."
 echo ""
 echo "--- Project Update Finished ---"
