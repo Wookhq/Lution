@@ -1,89 +1,87 @@
-# src/Lution/app.py
-import streamlit as st 
-import os 
-import json
-from modules.config.genconfig import Config
-from modules.utils.sidebar import InitSidebar
-from modules.utils.logging import log
-from modules.config.applyfun import ApplyFunctions  
-from modules.mod.clientsettings import ClientSettings
+import gi
+import sys
+import os
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
+from gi.repository import Gtk, Adw, Gio
 
-InitSidebar()
+from uis.page_fflags import PageFFlags
+from uis.page_mods import PageMods
+from uis.page_appear import PageAppearance
+from uis.page_marketplace import PageMarketplace
+from uis.page_installed import PageInstalled
 
-file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+class MainWindow(Gtk.ApplicationWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-log.info("Page : Home")
+        hb = Adw.HeaderBar()
+        self.set_titlebar(hb)
 
-cg = Config()
-cg.ConvertOldConfigs()
-af = ApplyFunctions()
-client_settings = ClientSettings()
+        # lazy add about btn
+        about_btn = Gtk.Button.new_from_icon_name("help-about-symbolic")
+        about_btn.set_tooltip_text("About")
+        about_btn.connect("clicked", self.show_about)
+        hb.pack_end(about_btn)
 
-# Set default values so they're always defined
-if "fpslimit" not in st.session_state:
-    log.info("Reading fpslimit")
-    fpslimit = cg.ReadFflagsConfig("DFIntTaskSchedulerTargetFps")
-    st.session_state.fpslimit = fpslimit
-if "lightingtech" not in st.session_state: 
-    log.info("Reading Lighting technology")
-    tech = af.LoadLightTechConfig()
-    st.session_state.lightingtech = tech
-if "texturequality" not in st.session_state: 
-    log.info("Reading Texture Quality")
-    qua = af.LoadTextureQuality()
-    st.session_state.texturequality = qua
-if "mssa" not in st.session_state: 
-    log.info("Reading msaa")
-    msaa = af.LoadMSAA()
-    st.session_state.msaa = msaa
-if "rpc" not in st.session_state:
-    log.info("Reading Discord RPC")
-    drpc = cg.ReadSoberConfig("discord_rpc_enabled")
-    st.session_state.rpc = drpc
-if "render" not in st.session_state:
-    log.info("Reading Render technology")
-    st.session_state.render = af.UsingOpenGl()
-if "disablechat" not in st.session_state:
-    log.info("Reading FFlag Disnable chat service")
-    disablechat = cg.ReadFflagsConfig("FFlagEnableBubbleChatFromChatService")
-    st.session_state.disablechat = disablechat
-if "customfont" not in st.session_state:
-    log.info("Reading custom font")
-    st.session_state.customfont = None
-if "language" not in st.session_state:
-    log.info("Reading language")
-    st.session_state.language = "en"
-if "fflagseditor" not in st.session_state:
-    log.info("Reading FFlags editor")
-    spilted = client_settings.SplitClientSettingsContent()
-    Currfflags = json.loads(spilted or "{}")
-    st.session_state.fflagseditor = Currfflags
-if "fontsize" not in st.session_state:
-    log.info("Reading FFlag Fon size")
-    st.session_state.fontsize = cg.ReadFflagsConfig("FIntFontSizePadding")
-if "disableplayersh" not in st.session_state:
-    log.info("Reading Disnable player shadows")
-    dis = cg.Read("lution", "disableplayersh")
-    if dis == None :
-        st.session_state.disableplayersh = False
-    else:
-        st.session_state.disableplayersh = dis
-if "useoldrobloxsounds" not in st.session_state:
-    log.info("Reading Old roblox sounds")
-    a = cg.Read("lution", "OldRlbxSd")
-    if a is None:
-        a = False  
-    st.session_state.useoldrobloxsounds = a
+        container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-@st.dialog("Dialog")
-def whatsnew():
-    with open("./markdown/whatsnew.md", "r") as f:
-        st.markdown(f.read())
+        stack = Adw.ViewStack(vexpand=True)
+        container.append(stack)
+        self.set_default_size(600, 900)
 
-st.header("Wellcome to Lution!")
-st.image("files/cooked.png")
-if st.button("What's new?"): 
-    whatsnew()
-st.write("Lution is a boostrapper for sober, try out one of the feature!")
-st.write("Thank you for using Lution!")
-st.write("-- Lution dev team")
+        try: stack.add_titled(PageFFlags(), "fflags", "Feature Flags")
+        except Exception as e: print(f"Error loading PageFFlags: {e}")
+
+        try: stack.add_titled(PageMods(), "mods", "Mods")
+        except Exception as e: print(f"Error loading PageMods: {e}")
+
+        try: stack.add_titled(PageAppearance(), "appearance", "Appearance")
+        except Exception as e: print(f"Error loading PageAppearance: {e}")
+
+        try: stack.add_titled(PageMarketplace(), "marketplace", "Marketplace")
+        except Exception as e: print(f"Error loading PageMarketplace: {e}")
+
+        try: stack.add_titled(PageInstalled(), "installed", "Installed")
+        except Exception as e: print(f"Error loading PageInstalled: {e}")
+
+        c = Adw.ViewSwitcherBar()
+        c.set_stack(stack)
+        c.set_reveal(True)
+        container.append(c)
+
+        self.set_child(container)
+
+    def show_about(self, button):
+        icon_path = os.path.join(os.path.dirname(__file__), "files", "lution1.png")
+        
+        about = Adw.AboutWindow(
+            application_name="LUTION BETA",
+            application_icon=icon_path,
+            developer_name="Wookhq",
+            version="1.7.8",
+            comments="just vibes ✨",
+            website="https://wookhq.github.io/lution",
+            issue_url="https://github.com/Wookhq/Lution/issues",
+            license_type=Gtk.License.MIT_X11
+        )
+
+      
+
+        about.present()
+
+class MyApp(Adw.Application):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.connect('activate', self.on_activate)
+
+    def on_activate(self, app):
+        win = MainWindow(application=app)
+        win.present()
+
+def main():
+    app = MyApp()
+    return app.run(sys.argv)
+
+if __name__ == '__main__':
+    main()
