@@ -70,5 +70,5 @@ echo "GTK IS HERE YAYYY! 🎉"
 echo "Took a while, but now lution is a GTK app! 🐧"
 echo "Also do you love my ASCII text? :3"
 
-python3 gurt.py
+python3 main.py
 echo "i got destroyed 😭"
