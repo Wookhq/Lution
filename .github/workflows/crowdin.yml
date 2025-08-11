@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   pull-translations:
@@ -17,7 +18,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v3
 
-      - name: download and commit translations
+      - name: download, commit, and create PR
         uses: crowdin/github-action@v1.18.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,6 +27,7 @@ jobs:
           skip_untranslated_strings: false
           skip_untranslated_files: false
           export_only_approved: false
+          create_pull_request: true
           
           project_id: ${{ secrets.CROWDIN_PROJECT_ID }}
           token: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
