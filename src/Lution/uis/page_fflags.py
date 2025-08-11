@@ -75,68 +75,100 @@ class PageFFlags(Adw.Bin):
         self.fflags_textarea.get_buffer().set_text(json.dumps(self.fflagseditor, indent=4))
         
     def on_apply_clicked(self, button):
-        # 1. Get values from UI and validate them
-        rpc_val = self.rpc_toggle.get_active()
-        fpslimit_val = self.fpslimit_entry.get_text().strip()
-        fontsize_val = self.fontsize_entry.get_text().strip()
+            # 1. Get values from UI and validate them
+            rpc_val = self.rpc_toggle.get_active()
+            fpslimit_val = self.fpslimit_entry.get_text().strip()
+            fontsize_val = self.fontsize_entry.get_text().strip()
 
-        try:
-            fpslimit_val_int = int(fpslimit_val)
-            fontsize_val_int = int(fontsize_val)
-        except ValueError:
-            log.warn("Invalid FPS or font size value entered. Must be a number.")
-            dialog = Adw.MessageDialog.new(self.get_child().get_root(), "Invalid Input", "FPS Limit and Font Size must be whole numbers.")
-            dialog.add_response("ok", "OK")
-            dialog.connect("response", lambda d, r: d.close())
-            dialog.present()
-            return
+            try:
+                fpslimit_val_int = int(fpslimit_val)
+                fontsize_val_int = int(fontsize_val)
+            except ValueError:
+                log.warn("Invalid FPS or font size value entered. Must be a number.")
+                dialog = Adw.MessageDialog.new(self.get_child().get_root(), "Invalid Input", "FPS Limit and Font Size must be whole numbers.")
+                dialog.add_response("ok", "OK")
+                dialog.connect("response", lambda d, r: d.close())
+                dialog.present()
+                return
 
-        render_val = self.render_dropdown.get_selected_item().get_string()
-        lightingtech_val = self.lightingtech_dropdown.get_selected_item().get_string()
-        disablechat_val = self.disablechat_toggle.get_active()
-        disableplayersh_val = self.disableplayersh_toggle.get_active()
-        msaa_val = self.msaa_dropdown.get_selected_item().get_string()
-        texturequality_val = self.texturequality_dropdown.get_selected_item().get_string()
-        useoldrobloxsounds_val = self.cf.Read("lution", "OldRlbxSd") or False
+            render_val = self.render_dropdown.get_selected_item().get_string()
+            lightingtech_val = self.lightingtech_dropdown.get_selected_item().get_string()
+            disablechat_val = self.disablechat_toggle.get_active()
+            disableplayersh_val = self.disableplayersh_toggle.get_active()
+            msaa_val = self.msaa_dropdown.get_selected_item().get_string()
+            texturequality_val = self.texturequality_dropdown.get_selected_item().get_string()
+            # useoldrobloxsounds_val is likely not an fflag, so we can ignore it for the dictionary.
 
-        # 2. Update the FFlags editor content
-        fflags_text = self.fflags_textarea.get_buffer().get_text(
-            self.fflags_textarea.get_buffer().get_start_iter(),
-            self.fflags_textarea.get_buffer().get_end_iter(),
-            False
-        )
+            # 2. Update the FFlags editor content
+            fflags_text = self.fflags_textarea.get_buffer().get_text(
+                self.fflags_textarea.get_buffer().get_start_iter(),
+                self.fflags_textarea.get_buffer().get_end_iter(),
+                False
+            )
 
-        try:
-            self.fflagseditor = json.loads(fflags_text)
-        except json.JSONDecodeError as e:
-            log.warn(f"Invalid fflags config: {e}")
-            dialog = Adw.MessageDialog.new(self.get_child().get_root(), "Invalid FFlags", "The FFlags editor contains invalid JSON.")
-            dialog.add_response("ok", "OK")
-            dialog.connect("response", lambda d, r: d.close())
-            dialog.present()
-            return
-        
-        # Add FPS and Font Size to the FFlags editor dictionary directly
-        self.fflagseditor["DFIntTaskSchedulerTargetFps"] = fpslimit_val_int
-        self.fflagseditor["FIntFontSizePadding"] = fontsize_val_int
-        
-        # 3. Apply the changes to the configuration files
-        self.af.ApplyChanges(
-            fpslimit_val,
-            lightingtech_val,
-            rpc_val,
-            render_val,
-            disablechat_val,
-            fontsize_val,
-            useoldrobloxsounds_val,
-            disableplayersh_val,
-            texturequality_val,
-            msaa_val
-        )
-        self.af.Applyfflags(self.fflagseditor)
-        
-        # 4. Reload the configuration to update the GUI
-        self.load_config()
+            try:
+                # First, load the user's manual edits
+                self.fflagseditor = json.loads(fflags_text)
+            except json.JSONDecodeError as e:
+                log.warn(f"Invalid fflags config: {e}")
+                dialog = Adw.MessageDialog.new(self.get_child().get_root(), "Invalid FFlags", "The FFlags editor contains invalid JSON.")
+                dialog.add_response("ok", "OK")
+                dialog.connect("response", lambda d, r: d.close())
+                dialog.present()
+                return
+            
+            # Now, explicitly add/override values from the other UI controls
+            self.fflagseditor["DFIntTaskSchedulerTargetFps"] = fpslimit_val_int
+            self.fflagseditor["FIntFontSizePadding"] = fontsize_val_int
+            # This is the key part that was missing: adding the other FFlags
+            # These FFlag names are examples and might need to be verified.
+            self.fflagseditor["FFlagEnableBubbleChatFromChatService"] = disablechat_val
+            self.fflagseditor["DFFlagEnableExperimentalRenderDevice"] = True if render_val == "Vulkan" else False
+            
+            # Mapping the dropdown values to their respective FFlag names/values
+            lightingtech_map = {
+                "Voxel Lighting (Phase 1)": "Voxel", 
+                "Shadowmap Lighting (Phase 2)": "ShadowMap", 
+                "Future Lighting (Phase 3)": "Future"
+            }
+            self.fflagseditor["FFlagLightingTechnology"] = lightingtech_map.get(lightingtech_val)
+            
+            msaa_map = {
+                "Off": 0, "Auto": 0, "x1": 1, "x2": 2, "x4": 4
+            }
+            self.fflagseditor["FFlagD3D11DisableMSAA"] = True if msaa_val == "Off" else False
+            self.fflagseditor["FFlagD3D11MSAASamples"] = msaa_map.get(msaa_val)
+
+            texturequality_map = {
+                "Off": "Disabled", 
+                "Level 0 (potato)": "Low", 
+                "Level 1 (Low)": "Low",
+                "Level 2 (Medium)": "Medium",
+                "Level 3 (High)": "High",
+                "Level 4 (Ultra)": "Ultra"
+            }
+            self.fflagseditor["FFlagTextureQuality"] = texturequality_map.get(texturequality_val)
+
+            # 3. Apply the changes to the configuration files
+            # The Applyfflags method should write the entire self.fflagseditor dictionary to the ClientSettings.json
+            self.af.Applyfflags(self.fflagseditor)
+            
+            # You may want to keep this to handle non-fflag settings like discord RPC
+            self.af.ApplyChanges(
+                fpslimit_val,
+                lightingtech_val,
+                rpc_val,
+                render_val,
+                disablechat_val,
+                fontsize_val,
+                False, # This is a placeholder since we're now handling it differently.
+                disableplayersh_val,
+                texturequality_val,
+                msaa_val
+            )
+            
+            # 4. Reload the configuration to update the GUI
+            self.load_config()
 
     def on_reset_clicked(self, button):
         self.load_config()
