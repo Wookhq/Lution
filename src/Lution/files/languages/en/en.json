@@ -41,7 +41,7 @@
     "lution.fflags.mutichoices.lighting": "Preferred Lighting Technology",
     "lution.fflags.text.advanded": "Advanced",
     "lution.fflags.text.mics": "Miscellaneous",
-    "lution.fflags.button.reseteditor": "",
+    "lution.fflags.button.reseteditor": "Reset fflags editor",
     "lution.fflags.button.setupoverlay": "Setup Overlay",
     "lution.fflags.texterea.fflagseditor": "FFlags editor",
     "lution.appearance.uploader.customfont": "Upload Custom Font",
