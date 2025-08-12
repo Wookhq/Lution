@@ -1,5 +1,5 @@
 {
-    "TRANSLATION NOTES": "Try not to modify text in {}",
+    "TRANSLATION NOTES": "Try not to modify stuff that in {}",
     "lution.message.warning.fflags.invalid": "Invalid JSON! Please fix errors in the editor.",
     "lution.spinner.applyfont": "Applying Custom Font...",
     "lution.message.success.fontapplied": "Successfully applied custom font!",
@@ -31,7 +31,7 @@
     "lution.mods.button.applymods": "Apply Mods",
     "lution.mods.button.openmods": "Open mods folder",
     "lution.mods.button.resetmods": "Reset roblox to default",
-    "lution.mods.caption.bloxstrapsupport": "We support most Bloxstrap mods! If your mods don't work, please check the GitHub issues page.",
+    "lution.mods.caption.bloxstrapsupport": "By the way, we support bloxstrap mods :) (most of it, if your mod does not work, go to the issues page on github)",
     "lution.mods.toggle.useoldsound": "Use old roblox sounds",
     "lution.fflags.toggle.bringbackoof": "Bring back oof",
     "lution.fflags.toggle.rpc": "Enable Discord Rich Presence",
@@ -40,7 +40,7 @@
     "lution.fflags.mutichoices.render": "Preferred Render Technology",
     "lution.fflags.mutichoices.lighting": "Preferred Lighting Technology",
     "lution.fflags.text.advanded": "Advanced",
-    "lution.fflags.text.mics": "Miscellaneous",
+    "lution.fflags.text.mics": "Micsellaneous",
     "lution.fflags.button.reseteditor": "Reset fflags editor",
     "lution.fflags.button.setupoverlay": "Setup Overlay",
     "lution.fflags.texterea.fflagseditor": "FFlags editor",
@@ -52,7 +52,7 @@
     "lution.appearance.mutichoices.cursor": "Custom Cursor",
     "lution.appearance.button.applycursor": "Apply Custom Cursor",
     "lution.appearance.button.cursor": "Apply custom Cursor",
-    "lution.appearance.text.laucher": "Launcher Appearance Customization",
-    "lution.save.button.downloadcf": "Download Config",
+    "lution.appearance.text.laucher": "**Laucher Appearance Customization**",
+    "lution.save.button.downloadcf": "Descarcă configurația",
     "lution.save.button.apply": "Apply Changes"
 }
