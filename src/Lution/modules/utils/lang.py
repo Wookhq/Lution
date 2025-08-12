@@ -3,7 +3,7 @@ import json
 import streamlit as st
 
 if "language" not in st.session_state:
-    st.session_state.language = "en"
+    st.session_state.language = "English"
 
 LANG_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),

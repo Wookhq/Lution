@@ -150,12 +150,12 @@ with installed:
                 with colleft1:
                     st.markdown(f"- {t}")
                 with colmid1:
-                    if st.button(f"Apply {t}", use_container_width=True):
+                    if st.button(f"{LANG["lution.marketplace.installed.apply"]} {t}", use_container_width=True):
                         with st.spinner("Applying theme..."):
                             log.info(f"Applying {t}")
                             ApplyMarketplace(t, "theme")
                 with colright1:
-                    if st.button(f"Delete", key=f"deletebutton_{t}",use_container_width=True):
+                    if st.button(f"{LANG["lution.marketplace.installed.delete"]}", key=f"deletebutton_{t}",use_container_width=True):
                         log.info(f"Deleted {t}")
                         RemoveMarketplace(t, "theme")
                         del st.session_state["theme"]
@@ -169,19 +169,19 @@ with installed:
                 with colleft2:
                     st.markdown(f"- {m}")
                 with colmid2:
-                    if st.button(f"Apply {m}", use_container_width=True):
+                    if st.button(f"{LANG["lution.marketplace.installed.apply"]} {m}", use_container_width=True):
                         with st.spinner("Applying mod..."):
                             log.info(f"Applying {m}")
                             ApplyMarketplace(m, "mod")
                 with colright2:
-                    if st.button(f"Delete", key=f"deletebutton_{m}", use_container_width=True):
+                    if st.button(f"{LANG["lution.marketplace.installed.delete"]}", key=f"deletebutton_{m}", use_container_width=True):
                         log.info(f"Deleted {m}")
                         RemoveMarketplace(m, "mod")
                         del st.session_state["mod"]
                         st.rerun()
 
 with settings:
-    st.header("Marketplace Settings")
-    st.write("Here you can change your marketplace provider")
-    st.text_input("Marketplace Provider", value=st.session_state.prd, key="pr", help="e.g Username/LutionMarketplace")
-    st.button("Change Marketplace Provider", on_click=lambda : ChangeProvider() )
+    st.header(LANG["lution.marketplace.tab.marketplacesettings"])
+    st.write(LANG["lution.marketplace.marketplacesettings.changeheader"])
+    st.text_input(LANG["lution.marketplace.marketplacesettings.provider"], value=st.session_state.prd, key="pr", help="e.g Username/LutionMarketplace")
+    st.button(LANG["lution.marketplace.marketplacesettings.changeprovider"], on_click=lambda : ChangeProvider() )
