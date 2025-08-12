@@ -3,4 +3,4 @@ api_token_env: CROWDIN_PERSONAL_TOKEN
 base_path: .
 files:
   - source: src/Lution/files/languages/en/*.json
-    translation: src/Lution/files/languages/%two_letters_code%/%original_file_name%
+    translation: src/Lution/files/languages/%language%/%original_file_name%
