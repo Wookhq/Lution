@@ -29,7 +29,7 @@
     "lution.marketplace.marketplacesettings.provider": "Penyedia Toko Lution",
     "lution.marketplace.marketplacesettings.changeprovider": "Mengubah Penyedia Toko Lution",
     "lution.marketplace.marketplace.nodescprovidered": "Tidak ada deskripsi yang diberikan.",
-    "lution.marketplace.marketplace.badges.stable": "<span style=\"background-color: #4CAF50; color: white; padding: 2px 8px; border-radius: 8px;\">✅ Stable</span>",
+    "lution.marketplace.marketplace.badges.stable": "<span style=\"background-color: #4CAF50; color: white; padding: 2px 8px; border-radius: 8px;\">✅  Stabil</span>",
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Belum Stabil</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Belum diketahui</span>",
     "lution.marketplace.marketplace.by": "**Oleh.**",
