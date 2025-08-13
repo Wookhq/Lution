@@ -1,5 +1,5 @@
 {
-    "TRANSLATION NOTES": "Jangan merubah tulisan yang ada di {}",
+    "TRANSLATION NOTES": "Jangan merubah tulisan yang ada pada {}",
     "lution.message.warning.fflags.invalid": "JSON Invalid! Tolong perbaiki error nya pada editor.",
     "lution.spinner.applyfont": "Menerapkan Font Kustom...",
     "lution.message.success.fontapplied": "Berhasil Menerapkan Font Kustom!",
