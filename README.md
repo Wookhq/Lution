@@ -65,7 +65,9 @@ Find it [here](https://github.com/triisdang/Lution-Marketplace)
 ## big numbers = chip happy
 [![starboard](https://starchart.cc/Wookhq/Lution.svg?variant=adaptive)](https://starchart.cc/Wookhq/Lution)
 
-can we reach 35?
+yoo 35 stars lets goooo
+
+can we go to 75 stars? that would be nice
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
                     
