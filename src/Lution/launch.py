@@ -1,16 +1,12 @@
 import sys
 import subprocess
-import threading
 import time
 from PySide6.QtWidgets import QApplication
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 
-def startweebserver():
-    subprocess.Popen(["streamlit", "run", "main.py"])
-
 def main():
-    threading.Thread(target=startweebserver, daemon=True).start()
+    weebserver = subprocess.Popen(["streamlit", "run", "main.py"])
     time.sleep(2)
 
     app = QApplication(sys.argv)
@@ -19,7 +15,13 @@ def main():
     browser.setWindowTitle("Lution - Windwon")
     browser.load(QUrl("http://localhost:8501"))
     browser.show()
-    sys.exit(app.exec())
+
+    exitCode=app.exec()
+
+    weebserver.terminate()
+    weebserver.wait()
+    
+    sys.exit(exitCode)
 
 if __name__ == '__main__':
     main()
