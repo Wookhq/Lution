@@ -10,3 +10,4 @@ toolbarMode = "minimal"
 headless = true
 [browser]
 gatherUsageStats = false
+serverAddress = "localhost"
