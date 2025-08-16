@@ -8,6 +8,7 @@ showSidebarNavigation = false
 toolbarMode = "minimal"
 [server]
 headless = true
+address = "localhost"
 [browser]
 gatherUsageStats = false
 serverAddress = "localhost"
