@@ -1,13 +1,30 @@
 import sys
 import subprocess
 import time
+import requests
 from PySide6.QtWidgets import QApplication
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 
+def waitready(url, timeout=10):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                return True
+        except requests.exceptions.ConnectionError:
+            pass
+        time.sleep(0.3)
+    return False
+
 def main():
     weebserver = subprocess.Popen(["streamlit", "run", "main.py"])
-    time.sleep(2)
+
+    if not waitready("http://localhost:8501"):
+        print("streamlit failed :(")
+        weebserver.terminate()
+        sys.exit(1)
 
     app = QApplication(sys.argv)
     browser = QWebEngineView()
