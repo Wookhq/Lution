@@ -3,3 +3,4 @@ PyGithub
 rich
 PySide6
 toml
+py7zr
