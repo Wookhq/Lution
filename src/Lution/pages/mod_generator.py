@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from modules.mod_generator import ModGenerator
 from modules.mod_generator.dataclasses import GradientColor
 from modules.utils.sidebar import InitSidebar
@@ -30,21 +31,11 @@ def verycool():
         return
     if gardient:
         gardientcolor = [
-            GradientColor(
-                color=hex_to_rgb(st.session_state.Color1),
-                stop=st.session_state.Stop1
-            ),
-            GradientColor(
-                color=hex_to_rgb(st.session_state.Color2),
-                stop=st.session_state.Stop2
-            )
+            GradientColor(color=hex_to_rgb(st.session_state.Color1), stop=st.session_state.Stop1),
+            GradientColor(color=hex_to_rgb(st.session_state.Color2), stop=st.session_state.Stop2)
         ]
         if st.session_state.CustomLogo is not None:
-            res = MG.generate_preview_image(
-                mode="gradient",
-                data=gardientcolor,
-                custom_roblox_icon=st.session_state.CustomLogo
-            )
+            res = MG.generate_preview_image(mode="gradient", data=gardientcolor, custom_roblox_icon=st.session_state.CustomLogo)
         else:
             res = MG.generate_preview_image(mode="gradient", data=gardientcolor)
     else:
@@ -53,35 +44,32 @@ def verycool():
 
     st.image(res, caption="Mod preview")
 
+
 def verycooltoo():
     if st.session_state.Color1 is None:
         return
+
+    out_dir = os.path.expanduser("~/Documents/Lution/Generated_mod")
+    os.makedirs(out_dir, exist_ok=True)
+
     if gardient:
         gardientcolor = [
-            GradientColor(
-                color=hex_to_rgb(st.session_state.Color1),
-                stop=st.session_state.Stop1
-            ),
-            GradientColor(
-                color=hex_to_rgb(st.session_state.Color2),
-                stop=st.session_state.Stop2
-            )
+            GradientColor(color=hex_to_rgb(st.session_state.Color1), stop=st.session_state.Stop1),
+            GradientColor(color=hex_to_rgb(st.session_state.Color2), stop=st.session_state.Stop2)
         ]
         if st.session_state.CustomLogo is not None:
-            res = MG.generate_mod(
-                mode="gradient",
-                data=gardientcolor,
-                custom_roblox_icon=st.session_state.CustomLogo
-            )
+            res = MG.generate_mod(mode="gradient", data=gardientcolor, custom_roblox_icon=st.session_state.CustomLogo, output_dir=out_dir)
         else:
-            res = MG.generate_mod(mode="gradient", data=gardientcolor)
+            res = MG.generate_mod(mode="gradient", data=gardientcolor, output_dir=out_dir)
     else:
         color = hex_to_rgb(st.session_state.Color1)
-        res = MG.generate_mod(mode="color", data=color)
+        res = MG.generate_mod(mode="color", data=color, output_dir=out_dir)
+
+    st.success(f"Mod generated at {out_dir}")
 
 
 st.header("Mod Generator")
-st.caption("Please use this to genarate Mods only! Don't share genarated mod with anyone. Its corny.")
+st.caption("please use this to generate mods only! don’t share generated mods because its cringy")
 
 
 gardient = st.checkbox("Gradient ?")
@@ -98,4 +86,5 @@ if gardient:
 st.session_state.CustomLogo = st.file_uploader("Custom Logo", type=["png", "jpg", "jpeg"])
 
 st.button("Preview", on_click=verycool)
-st.button("Genarate", on_click=verycooltoo)
+st.button("Generate", on_click=verycooltoo)
+
