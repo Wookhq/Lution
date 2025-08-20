@@ -51,7 +51,7 @@
     "lution.fflags.texterea.fflagseditor": "FFlags editor",
     "lution.appearance.uploader.customfont": "Завантажити користувацький шрифт",
     "lution.appearance.button.applyfont": "Застосувати користувацький шрифт",
-    "lution.appearance.textbox.fontsize": "Font size",
+    "lution.appearance.textbox.fontsize": "Розмір шрифта",
     "lution.appearance.warning.customfontnotuploaded": "Не завантажено користувальницький шрифт.",
     "lution.appearance.success.customfontapplied": "Користувацький шрифт успішно застосовано!",
     "lution.appearance.mutichoices.cursor": "Custom Cursor",
