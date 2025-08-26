@@ -55,7 +55,7 @@ def reload_fflags():
     st.session_state.fflagseditor = json.loads(cs.SplitClientSettingsContent() or "{}")
     st.session_state.fflags_text = json.dumps(st.session_state.fflagseditor, indent=4)
 
-st.button("Reload Flags", on_click=reload_fflags)
+st.button(LANG["lution.fflags.button.reloadfflag"], on_click=reload_fflags)
 
 # fflags editor
 if "fflags_text" not in st.session_state:

@@ -11,7 +11,7 @@ if "language" not in st.session_state:
     st.session_state.language = LANG_CODES[0]
 
 lang_choice = st.selectbox(
-    "Language",
+    LANG["lution.dropdown.languages"],
     LANG_CODES,
     format_func=lambda code: LANG_NAMES.get(code, code),
     index=LANG_CODES.index(st.session_state.language)
@@ -22,7 +22,7 @@ def langcallback():
     log.info(f"Changed language to {lang_choice}")
 
 st.button(
-    "Apply Language",
+    LANG["lution.button.applylanguage"],
     on_click=langcallback,
     key="apply_language_button"
 )

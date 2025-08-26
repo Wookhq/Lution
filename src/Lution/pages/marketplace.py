@@ -116,7 +116,7 @@ with marketplace:
     st.markdown("[DOCS](https://wookhq.github.io/lution/pages/docs.html)")
 
     #st.write(f"### {LANG['lution.marketplace.tab.themes']}")
-    st.button("Reload Marketplace", on_click=lambda: loadbar(), icon="🔄")
+    st.button(LANG["lution.marketplace.marketplace.button.reload"], on_click=lambda: loadbar(), icon="🔄")
     if avdthemes and st.session_state.get("theme"):
         with st.spinner(LANG["lution.marketplace.marketplace.spinner.download"]):
             log.info("Creating Themes col")
@@ -124,7 +124,7 @@ with marketplace:
             with themeexpander:
                 create_columns(st.session_state.theme, "theme", cols_per_row=3)
     else:
-        st.write("Your provider does not have themes. Change your provider now.")
+        st.write(LANG["lution.marketplace.invaildprovider.theme"])
 
     #st.write(f"### {LANG['lution.marketplace.tab.mods']}")
     if avdmods and st.session_state.get("mod"):
@@ -134,7 +134,7 @@ with marketplace:
             with modsexpander:
                 create_columns(st.session_state.mod, "mod")
     else:
-        st.write("Your provider does not have mods. Change your provider now.")
+        st.write(LANG["lution.marketplace.invaildprovider.mods"])
 
 with installed:
     st.header(LANG["lution.marketplace.installed.title"])
