@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Terapkan",
     "lution.marketplace.installed.delete": "Hapus",
     "lution.marketplace.tab.marketplacesettings": "Pengaturan Toko",
+    "lution.marketplace.marketplace.button.reload": "Reload Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Disini kalian bisa merubah penyedia toko nya",
     "lution.marketplace.marketplacesettings.provider": "Penyedia Toko Lution",
     "lution.marketplace.marketplacesettings.changeprovider": "Mengubah Penyedia Toko Lution",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Belum Stabil</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Tidak diketahui</span>",
     "lution.marketplace.marketplace.by": "**Oleh/Dari.**",
+    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
+    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
     "lution.mods.button.applymods": "Terapkan Mod",
     "lution.mods.button.openmods": "Buka brankas mod",
     "lution.mods.button.resetmods": "Reset Roblox to default",
     "lution.mods.caption.bloxstrapsupport": "Kita dukung mods Bloxstrap! jika mods kalian tidak berfungsi, tolong melihat kirim issue kalian di halaman issue Github.",
     "lution.mods.toggle.useoldsound": "Gunakan suara Roblox yang lama",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Kembalikan suara oof",
     "lution.fflags.toggle.rpc": "Aktifkan Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Nonaktifkan Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Terapkan kursor kustom",
     "lution.appearance.text.laucher": "Kostumisasi Tampilan Peluncur",
     "lution.save.button.downloadcf": "Unduh Konfigurasi",
-    "lution.save.button.apply": "Terapkan Perubahan"
+    "lution.save.button.apply": "Terapkan Perubahan",
+    "lution.dropdown.languages": "Languages",
+    "lution.button.applylanguage": "Apply Language"
 }

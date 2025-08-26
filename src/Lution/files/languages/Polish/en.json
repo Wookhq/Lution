@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Zastosuj",
     "lution.marketplace.installed.delete": "Usuń",
     "lution.marketplace.tab.marketplacesettings": "Ustawienia Marketplace",
+    "lution.marketplace.marketplace.button.reload": "Odśwież Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Tutaj możesz zmienić swojego dostawcę marketplace",
     "lution.marketplace.marketplacesettings.provider": "Dostawca Marketplace",
     "lution.marketplace.marketplacesettings.changeprovider": "Zmień Dostawcę Marketplace",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Niestabilny</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Nieznany</span>",
     "lution.marketplace.marketplace.by": "**Do:**",
+    "lution.marketplace.invaildprovider.theme": "Twój dostawca nie ma motywów. Zmień dostawcę teraz.",
+    "lution.marketplace.invaildprovider.mods": "Twój dostawca nie ma modyfikacji. Zmień dostawcę teraz.",
     "lution.mods.button.applymods": "Zastosuj Modyfikacje",
     "lution.mods.button.openmods": "Otwórz folder modów",
     "lution.mods.button.resetmods": "Resetuj Roblox do wartości domyślnych",
     "lution.mods.caption.bloxstrapsupport": "Wspieramy większość modów Bloxstrap! Jeśli mody nie działają, sprawdź stronę problemów GitHub.",
     "lution.mods.toggle.useoldsound": "Użyj starych dźwięków Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Przywróć dno",
     "lution.fflags.toggle.rpc": "Włącz Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Wyłącz czat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Zastosuj niestandardowy kursor",
     "lution.appearance.text.laucher": "Dostosowanie wyglądu launchera",
     "lution.save.button.downloadcf": "Pobierz konfigurację",
-    "lution.save.button.apply": "Zastosuj zmiany"
+    "lution.save.button.apply": "Zastosuj zmiany",
+    "lution.dropdown.languages": "Języki",
+    "lution.button.applylanguage": "Zastosuj język"
 }

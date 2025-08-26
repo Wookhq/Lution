@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Applica",
     "lution.marketplace.installed.delete": "Elimina",
     "lution.marketplace.tab.marketplacesettings": "Impostazioni Marketplace",
+    "lution.marketplace.marketplace.button.reload": "Ricarica Il Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Qui puoi cambiare il tuo provider di marketplace",
     "lution.marketplace.marketplacesettings.provider": "Provider Marketplace",
     "lution.marketplace.marketplacesettings.changeprovider": "Cambia Provider Marketplace",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Unstable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Sconosciuto</span>",
     "lution.marketplace.marketplace.by": "**Da:**",
+    "lution.marketplace.invaildprovider.theme": "Il tuo provider non ha temi. Cambia il tuo provider ora.",
+    "lution.marketplace.invaildprovider.mods": "Il tuo provider non ha mods. Cambia il tuo provider ora.",
     "lution.mods.button.applymods": "Applica Mods",
     "lution.mods.button.openmods": "Apri cartella mod",
     "lution.mods.button.resetmods": "Reimposta la Roblox a quella predefinita",
     "lution.mods.caption.bloxstrapsupport": "Supportiamo la maggior parte delle mod Bloxstrap! Se le tue mod non funzionano, controlla la pagina dei problemi di GitHub.",
     "lution.mods.toggle.useoldsound": "Usa vecchi suoni Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Porta indietro l'oof",
     "lution.fflags.toggle.rpc": "Abilita Presenza Ricca Discord",
     "lution.fflags.toggle.bbchat": "Disabilita Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Applica cursore personalizzato",
     "lution.appearance.text.laucher": "Personalizzazione Aspetto Launcher",
     "lution.save.button.downloadcf": "Scarica Configurazione",
-    "lution.save.button.apply": "Applica Modifiche"
+    "lution.save.button.apply": "Applica Modifiche",
+    "lution.dropdown.languages": "Lingue",
+    "lution.button.applylanguage": "Applica Lingua"
 }

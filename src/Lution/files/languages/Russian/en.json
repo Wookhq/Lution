@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Применить",
     "lution.marketplace.installed.delete": "Удалить",
     "lution.marketplace.tab.marketplacesettings": "Настройки Магазина",
+    "lution.marketplace.marketplace.button.reload": "Обновить Магазин",
     "lution.marketplace.marketplacesettings.changeheader": "Здесь вы можете изменить вашего поставщика",
     "lution.marketplace.marketplacesettings.provider": "Поставщик торговой площадки",
     "lution.marketplace.marketplacesettings.changeprovider": "Изменить поставщика магазина",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Нестабильная</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Неизвестное</span>",
     "lution.marketplace.marketplace.by": "**Создатель:**",
+    "lution.marketplace.invaildprovider.theme": "У вашего провайдера нет тем. Измените провайдера сейчас.",
+    "lution.marketplace.invaildprovider.mods": "У вашего провайдера нет модов. Измените провайдера сейчас.",
     "lution.mods.button.applymods": "Применить моды",
     "lution.mods.button.openmods": "Открыть папку модов",
     "lution.mods.button.resetmods": "Сброс Roblox по умолчанию",
     "lution.mods.caption.bloxstrapsupport": "Мы поддерживаем большинство модов Bloxstrap! Если ваши моды не работают, пожалуйста, проверьте страницу с проблемами GitHub.",
     "lution.mods.toggle.useoldsound": "Использовать старые звуки Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Вернуть Oof",
     "lution.fflags.toggle.rpc": "Включить Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Отключить чат",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Применить пользовательский курсор",
     "lution.appearance.text.laucher": "Настройка внешнего вида лаунчера",
     "lution.save.button.downloadcf": "Скачать конфигурацию",
-    "lution.save.button.apply": "Применить изменения"
+    "lution.save.button.apply": "Применить изменения",
+    "lution.dropdown.languages": "Языки",
+    "lution.button.applylanguage": "Применить язык"
 }
