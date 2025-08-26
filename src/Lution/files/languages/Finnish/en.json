@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Käytä",
     "lution.marketplace.installed.delete": "Poista",
     "lution.marketplace.tab.marketplacesettings": "Kauppapaikan Asetukset",
+    "lution.marketplace.marketplace.button.reload": "Lataa Marketplace Uudelleen",
     "lution.marketplace.marketplacesettings.changeheader": "Täällä voit vaihtaa markkinapaikan tarjoajaa",
     "lution.marketplace.marketplacesettings.provider": "Markkinapaikan Tarjoaja",
     "lution.marketplace.marketplacesettings.changeprovider": "Vaihda Markkinapaikan Tarjoajaa",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Epävakaa</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">:red_question·: Tuntematon</span>",
     "lution.marketplace.marketplace.by": "**Mei:**",
+    "lution.marketplace.invaildprovider.theme": "Palveluntarjoajalla ei ole teemoja. Vaihda palveluntarjoajaasi nyt.",
+    "lution.marketplace.invaildprovider.mods": "Palveluntarjoajalla ei ole modeja. Vaihda palveluntarjoajaasi nyt.",
     "lution.mods.button.applymods": "Käytä Modeja",
     "lution.mods.button.openmods": "Avaa modit kansio",
     "lution.mods.button.resetmods": "Palauta Roblox oletukseksi",
     "lution.mods.caption.bloxstrapsupport": "Tuemme useimpia Bloxstrap-tiloja! Jos modit eivät toimi, ole hyvä ja tarkista GitHubin virhesivu.",
     "lution.mods.toggle.useoldsound": "Käytä vanhoja Roblox-ääniä",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Tuo kavio takaisin",
     "lution.fflags.toggle.rpc": "Ota Discordin Rich Presence Käyttöön",
     "lution.fflags.toggle.bbchat": "Poista Keskustelu Käytöstä",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Käytä omaa kohdistinta",
     "lution.appearance.text.laucher": "Käynnistimen Ulkoasun Mukauttaminen",
     "lution.save.button.downloadcf": "Lataa Asetukset",
-    "lution.save.button.apply": "Ota Muutokset Käyttöön"
+    "lution.save.button.apply": "Ota Muutokset Käyttöön",
+    "lution.dropdown.languages": "Kielet",
+    "lution.button.applylanguage": "Ota Kieli Käyttöön"
 }

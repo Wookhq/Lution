@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "تطبيق",
     "lution.marketplace.installed.delete": "حذف",
     "lution.marketplace.tab.marketplacesettings": "إعدادات السوق",
+    "lution.marketplace.marketplace.button.reload": "إعادة تحميل السوق",
     "lution.marketplace.marketplacesettings.changeheader": "هنا يمكنك تغيير موفر السوق الخاص بك",
     "lution.marketplace.marketplacesettings.provider": "موفر السوق",
     "lution.marketplace.marketplacesettings.changeprovider": "تغيير موفر السوق",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ غير مستقر</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ مجهول</span>",
     "lution.marketplace.marketplace.by": "**بواسطة:**",
+    "lution.marketplace.invaildprovider.theme": "المزود الخاص بك ليس لديه سمات. قم بتغيير المزود الخاص بك الآن.",
+    "lution.marketplace.invaildprovider.mods": "المزود الخاص بك ليس لديه المودع. قم بتغيير المزود الخاص بك الآن.",
     "lution.mods.button.applymods": "تطبيق المودات",
     "lution.mods.button.openmods": "فتح مجلد المودات",
     "lution.mods.button.resetmods": "إعادة تعيين Roblox إلى الافتراضي",
     "lution.mods.caption.bloxstrapsupport": "نحن ندعم معظم أوضاع Bloxstrap! إذا لم تعمل المودات الخاصة بك، يرجى التحقق من صفحة مشاكل GitHub .",
     "lution.mods.toggle.useoldsound": "استخدم أصوات Roblox القديمة",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "إرجاع إلى الوراء",
     "lution.fflags.toggle.rpc": "تمكين وجود ديسكورد الغني",
     "lution.fflags.toggle.bbchat": "تعطيل الدردشة",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "تطبيق مؤشر مخصص",
     "lution.appearance.text.laucher": "مظهر المشغل التخصيص",
     "lution.save.button.downloadcf": "إعدادات التحميل",
-    "lution.save.button.apply": "تطبيق التغييرات"
+    "lution.save.button.apply": "تطبيق التغييرات",
+    "lution.dropdown.languages": "اللغات",
+    "lution.button.applylanguage": "تطبيق اللغة"
 }

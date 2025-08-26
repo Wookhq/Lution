@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "適用",
     "lution.marketplace.installed.delete": "削除",
     "lution.marketplace.tab.marketplacesettings": "マーケットプレースの設定",
+    "lution.marketplace.marketplace.button.reload": "マーケットプレイスを再読み込み",
     "lution.marketplace.marketplacesettings.changeheader": "マーケットプレイスのプロバイダーを変更できます",
     "lution.marketplace.marketplacesettings.provider": "マーケットプレースプロバイダー",
     "lution.marketplace.marketplacesettings.changeprovider": "マーケットプレースプロバイダーの変更",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Unstable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ 不明な</span>",
     "lution.marketplace.marketplace.by": "**利用者:**",
+    "lution.marketplace.invaildprovider.theme": "プロバイダにテーマがありません。今すぐプロバイダを変更してください。",
+    "lution.marketplace.invaildprovider.mods": "プロバイダにModがありません。今すぐプロバイダを変更してください。",
     "lution.mods.button.applymods": "Modを適用",
     "lution.mods.button.openmods": "MODフォルダを開く",
     "lution.mods.button.resetmods": "Robloxをデフォルトにリセット",
     "lution.mods.caption.bloxstrapsupport": "私たちはほとんどのBloxstrapモッドをサポートしています! あなたのMODが動作しない場合は、GitHubのissuesページを確認してください。",
     "lution.mods.toggle.useoldsound": "古いRobloxサウンドを使用する",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "戻ってきてください",
     "lution.fflags.toggle.rpc": "Discord Rich Presenceを有効にする",
     "lution.fflags.toggle.bbchat": "チャットを無効にする",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "カスタムカーソルを適用する",
     "lution.appearance.text.laucher": "**Laucher Appearance Customization**",
     "lution.save.button.downloadcf": "設定をダウンロード",
-    "lution.save.button.apply": "変更を適用"
+    "lution.save.button.apply": "変更を適用",
+    "lution.dropdown.languages": "言語",
+    "lution.button.applylanguage": "言語を適用"
 }

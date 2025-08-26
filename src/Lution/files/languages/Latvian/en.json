@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Lietot",
     "lution.marketplace.installed.delete": "Dzēst",
     "lution.marketplace.tab.marketplacesettings": "Tirgus iestatījumi",
+    "lution.marketplace.marketplace.button.reload": "Reload Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Šeit jūs varat mainīt sava tirgus pakalpojumu sniedzēju",
     "lution.marketplace.marketplacesettings.provider": "Tirgus pakalpojumu sniedzējs",
     "lution.marketplace.marketplacesettings.changeprovider": "Mainīt tirgus pakalpojumu sniedzēju",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Nestabils</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Nezināms</span>",
     "lution.marketplace.marketplace.by": "**Autors:**",
+    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
+    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
     "lution.mods.button.applymods": "Lietot modus",
     "lution.mods.button.openmods": "Atvērt modu mapi",
     "lution.mods.button.resetmods": "Reset Roblox to default",
     "lution.mods.caption.bloxstrapsupport": "Mēs atbalstām lielāko daļu Bloxstrap modu! Ja jūsu modi nedarbojas, lūdzu, pārbaudiet GitHub problēmu (issues) lapu.",
     "lution.mods.toggle.useoldsound": "Izmantot vecās Roblox skaņas",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Atgriezt “oof” skaņu",
     "lution.fflags.toggle.rpc": "Ieslēgt Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Atspējot tērzēšanu",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Lietot pielāgotu rādītāju",
     "lution.appearance.text.laucher": "Palaidēja izskata pielāgošana",
     "lution.save.button.downloadcf": "Lejupielādēt konfigurāciju",
-    "lution.save.button.apply": "Lietot izmaiņas"
+    "lution.save.button.apply": "Lietot izmaiņas",
+    "lution.dropdown.languages": "Languages",
+    "lution.button.applylanguage": "Apply Language"
 }

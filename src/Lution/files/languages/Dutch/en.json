@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Toepassen",
     "lution.marketplace.installed.delete": "Verwijderen",
     "lution.marketplace.tab.marketplacesettings": "Marktplaats Instellingen",
+    "lution.marketplace.marketplace.button.reload": "Marktplaats opnieuw laden",
     "lution.marketplace.marketplacesettings.changeheader": "Hier kunt u uw marktplaats provider wijzigen",
     "lution.marketplace.marketplacesettings.provider": "Marktplaats Provider",
     "lution.marketplace.marketplacesettings.changeprovider": "Marketplace Provider wijzigen",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Onstabiel</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Onbekend</span>",
     "lution.marketplace.marketplace.by": "*Van:**",
+    "lution.marketplace.invaildprovider.theme": "Uw provider heeft geen thema's. Verander uw provider nu.",
+    "lution.marketplace.invaildprovider.mods": "Uw provider heeft geen mods. Wijzig uw provider nu.",
     "lution.mods.button.applymods": "Mods Toepassen",
     "lution.mods.button.openmods": "Mods-bestand openen",
     "lution.mods.button.resetmods": "Reset Roblox naar standaard instellingen",
     "lution.mods.caption.bloxstrapsupport": "Wij ondersteunen de meeste Bloxstrap mods! Als je mods niet werken, controleer dan de GitHub issue pagina.",
     "lution.mods.toggle.useoldsound": "Gebruik oude Roblox geluiden",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Breng oof terug",
     "lution.fflags.toggle.rpc": "Discord Rich Presence inschakelen",
     "lution.fflags.toggle.bbchat": "Blokeer Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Aangepaste cursor toepassen",
     "lution.appearance.text.laucher": "Launcher uiterlijk aanpassen",
     "lution.save.button.downloadcf": "Configuratie downloaden",
-    "lution.save.button.apply": "Wijzigingen toepassen"
+    "lution.save.button.apply": "Wijzigingen toepassen",
+    "lution.dropdown.languages": "Leren",
+    "lution.button.applylanguage": "Taal toepassen"
 }

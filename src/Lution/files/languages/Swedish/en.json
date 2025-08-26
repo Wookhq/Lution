@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Tillämpa",
     "lution.marketplace.installed.delete": "Radera",
     "lution.marketplace.tab.marketplacesettings": "Inställningar för marknadsplats",
+    "lution.marketplace.marketplace.button.reload": "Ladda om Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Här kan du ändra din marknadsplatsleverantör",
     "lution.marketplace.marketplacesettings.provider": "Marknadsplats leverantör",
     "lution.marketplace.marketplacesettings.changeprovider": "Ändra marknadsplats-leverantör",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Unstable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Okänt</span>",
     "lution.marketplace.marketplace.by": "**Av:**",
+    "lution.marketplace.invaildprovider.theme": "Din leverantör har inga teman. Ändra din leverantör nu.",
+    "lution.marketplace.invaildprovider.mods": "Din leverantör har inga mods. Ändra din leverantör nu.",
     "lution.mods.button.applymods": "Tillämpa mods",
     "lution.mods.button.openmods": "Öppna mods mapp",
     "lution.mods.button.resetmods": "Återställ Roblox till standard",
     "lution.mods.caption.bloxstrapsupport": "Vi stöder de flesta Bloxstrap mods! Om dina moddar inte fungerar, vänligen kontrollera GitHub ärendesidan.",
     "lution.mods.toggle.useoldsound": "Använd gamla Roblox ljud",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Ta tillbaka oof",
     "lution.fflags.toggle.rpc": "Aktivera Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Inaktivera chatt",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Tillämpa anpassad markör",
     "lution.appearance.text.laucher": "Anpassning av Launcher utseende",
     "lution.save.button.downloadcf": "Ladda ner konfiguration",
-    "lution.save.button.apply": "Tillämpa ändringar"
+    "lution.save.button.apply": "Tillämpa ändringar",
+    "lution.dropdown.languages": "Språk",
+    "lution.button.applylanguage": "Tillämpa språk"
 }

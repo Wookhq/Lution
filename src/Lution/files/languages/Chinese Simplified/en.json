@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "应用",
     "lution.marketplace.installed.delete": "删除",
     "lution.marketplace.tab.marketplacesettings": "市场设置",
+    "lution.marketplace.marketplace.button.reload": "重新加载市场",
     "lution.marketplace.marketplacesettings.changeheader": "您可以在这里更改您的市场提供商",
     "lution.marketplace.marketplacesettings.provider": "市场提供商",
     "lution.marketplace.marketplacesettings.changeprovider": "更改市场提供商",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">:警告: 不稳定的</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ 未知</span>",
     "lution.marketplace.marketplace.by": "**是:**",
+    "lution.marketplace.invaildprovider.theme": "您的提供商没有主题。现在就更改您的提供商。",
+    "lution.marketplace.invaildprovider.mods": "您的提供商没有版主。现在就更改您的提供商。",
     "lution.mods.button.applymods": "应用模组",
     "lution.mods.button.openmods": "打开模组文件夹",
     "lution.mods.button.resetmods": "重置Roblex为默认值",
     "lution.mods.caption.bloxstrapsupport": "我们支持大部分Bloxstrap mod！如果你的模组不能工作，请检查 GitHub 问题页面。",
     "lution.mods.toggle.useoldsound": "使用旧的 Roblox 声音",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "带回ooof",
     "lution.fflags.toggle.rpc": "启用 Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "禁用聊天",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "应用自定义光标",
     "lution.appearance.text.laucher": "启动器外观自定义",
     "lution.save.button.downloadcf": "下载配置",
-    "lution.save.button.apply": "应用更改"
+    "lution.save.button.apply": "应用更改",
+    "lution.dropdown.languages": "语文",
+    "lution.button.applylanguage": "应用语言"
 }

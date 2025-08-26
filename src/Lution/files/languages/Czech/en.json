@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Použít",
     "lution.marketplace.installed.delete": "Vymazat",
     "lution.marketplace.tab.marketplacesettings": "Nastavení tržiště",
+    "lution.marketplace.marketplace.button.reload": "Znovu načíst tržiště",
     "lution.marketplace.marketplacesettings.changeheader": "Zde můžete změnit poskytovatele tržiště",
     "lution.marketplace.marketplacesettings.provider": "Poskytovatel tržiště",
     "lution.marketplace.marketplacesettings.changeprovider": "Změnit poskytovatele tržiště",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Nestabilní</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Neznámý</span>",
     "lution.marketplace.marketplace.by": "**By:**",
+    "lution.marketplace.invaildprovider.theme": "Váš poskytovatel nemá motivy. Změňte svého poskytovatele.",
+    "lution.marketplace.invaildprovider.mods": "Váš poskytovatel nemá režimy. Změňte svého poskytovatele.",
     "lution.mods.button.applymods": "Použít módy",
     "lution.mods.button.openmods": "Otevřít složku s mody",
     "lution.mods.button.resetmods": "Resetovat Roblox na výchozí",
     "lution.mods.caption.bloxstrapsupport": "Podporujeme většinu módů Bloxstrap! Pokud vaše mody nefungují, podívejte se na stránku GitHub.",
     "lution.mods.toggle.useoldsound": "Použít staré Roblox zvuky",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Vrať ovsa",
     "lution.fflags.toggle.rpc": "Povolit Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Zakázat chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Použít vlastní kurzor",
     "lution.appearance.text.laucher": "Přizpůsobení vzhledu spouštěče",
     "lution.save.button.downloadcf": "Stáhnout konfiguraci",
-    "lution.save.button.apply": "Použít změny"
+    "lution.save.button.apply": "Použít změny",
+    "lution.dropdown.languages": "Jazyky",
+    "lution.button.applylanguage": "Použít jazyk"
 }
