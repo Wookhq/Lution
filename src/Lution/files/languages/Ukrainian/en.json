@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Прийняти",
     "lution.marketplace.installed.delete": "Видалити",
     "lution.marketplace.tab.marketplacesettings": "Налаштування магазину",
+    "lution.marketplace.marketplace.button.reload": "Перезавантажити Ринок",
     "lution.marketplace.marketplacesettings.changeheader": "Тут Ви можете змінити постачальника послуг маркетингу",
     "lution.marketplace.marketplacesettings.provider": "Постачальник маркетингу",
     "lution.marketplace.marketplacesettings.changeprovider": "Змінити постачальника магазину",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Нестабільна</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Unknown</span>",
     "lution.marketplace.marketplace.by": "**Б:**",
+    "lution.marketplace.invaildprovider.theme": "Ваш постачальник не має тем. Змінити провайдера зараз.",
+    "lution.marketplace.invaildprovider.mods": "Ваш провайдер не має модів. Змінити провайдера зараз.",
     "lution.mods.button.applymods": "Застосувати моди",
     "lution.mods.button.openmods": "Відкрити папку модів",
     "lution.mods.button.resetmods": "Відновити Роблокс за замовчуванням",
     "lution.mods.caption.bloxstrapsupport": "Ми підтримуємо більшість модів Bloxstrap! Якщо ваші моди не працюють, будь ласка, перевірте сторінку з питаннями GitHub.",
     "lution.mods.toggle.useoldsound": "Використовувати старі звуки Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Поверніть назад oof",
     "lution.fflags.toggle.rpc": "Увімкнути Rich Presence в Discord",
     "lution.fflags.toggle.bbchat": "Вимкнути чат",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Застосувати користувацький курсор",
     "lution.appearance.text.laucher": "Launcher Налаштування зовнішнього вигляду",
     "lution.save.button.downloadcf": "Завантажити конфігурацію",
-    "lution.save.button.apply": "Застосувати зміни"
+    "lution.save.button.apply": "Застосувати зміни",
+    "lution.dropdown.languages": "Мови",
+    "lution.button.applylanguage": "Застосувати мову"
 }

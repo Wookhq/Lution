@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Toepasse",
     "lution.marketplace.installed.delete": "Verwieder",
     "lution.marketplace.tab.marketplacesettings": "Marktplaats Instèllinge",
+    "lution.marketplace.marketplace.button.reload": "Reload Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Hiej kins dien marktplaats-provider wiesjigje",
     "lution.marketplace.marketplacesettings.provider": "Marktplaats-Provider",
     "lution.marketplace.marketplacesettings.changeprovider": "Marktplaats-provider wiesjigje",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Onstabiel</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Onbekènd</span>",
     "lution.marketplace.marketplace.by": "**Vaan:**",
+    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
+    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
     "lution.mods.button.applymods": "Mods toepasse",
     "lution.mods.button.openmods": "Mods-map oapen",
     "lution.mods.button.resetmods": "Reset Roblox to default",
     "lution.mods.caption.bloxstrapsupport": "Wae supportere de mieëste Bloxstrap-mods! Es dien mods neet wirk, check dan de GitHub-issues-pagina.",
     "lution.mods.toggle.useoldsound": "Ouwe Roblox-gelùide gebroeke",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Oof trök bringe",
     "lution.fflags.toggle.rpc": "Discord Rich Presence inschakelje",
     "lution.fflags.toggle.bbchat": "Chat uitschakelje",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Eigen cursor toepasse",
     "lution.appearance.text.laucher": "Launcher-oetzien-aanpassinge",
     "lution.save.button.downloadcf": "Config downloade",
-    "lution.save.button.apply": "Wiesjiginge toepasse"
+    "lution.save.button.apply": "Wiesjiginge toepasse",
+    "lution.dropdown.languages": "Languages",
+    "lution.button.applylanguage": "Apply Language"
 }

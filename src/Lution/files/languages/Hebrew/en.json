@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Apply",
     "lution.marketplace.installed.delete": "Delete",
     "lution.marketplace.tab.marketplacesettings": "Marketplace Settings",
+    "lution.marketplace.marketplace.button.reload": "Reload Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Here you can change your marketplace provider",
     "lution.marketplace.marketplacesettings.provider": "Marketplace Provider",
     "lution.marketplace.marketplacesettings.changeprovider": "Change Marketplace Provider",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Unstable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Unknown</span>",
     "lution.marketplace.marketplace.by": "**By:**",
+    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
+    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
     "lution.mods.button.applymods": "Apply Mods",
     "lution.mods.button.openmods": "Open mods folder",
     "lution.mods.button.resetmods": "Reset Roblox to default",
     "lution.mods.caption.bloxstrapsupport": "We support most Bloxstrap mods! If your mods don't work, please check the GitHub issues page.",
     "lution.mods.toggle.useoldsound": "Use old Roblox sounds",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Bring back oof",
     "lution.fflags.toggle.rpc": "Enable Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Disable Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Apply custom Cursor",
     "lution.appearance.text.laucher": "Launcher Appearance Customization",
     "lution.save.button.downloadcf": "Download Config",
-    "lution.save.button.apply": "Apply Changes"
+    "lution.save.button.apply": "Apply Changes",
+    "lution.dropdown.languages": "Languages",
+    "lution.button.applylanguage": "Apply Language"
 }

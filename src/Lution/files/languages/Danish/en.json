@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Anvend",
     "lution.marketplace.installed.delete": "Slet",
     "lution.marketplace.tab.marketplacesettings": "Marketplace Indstillinger",
+    "lution.marketplace.marketplace.button.reload": "Genindlæs Markedsplads",
     "lution.marketplace.marketplacesettings.changeheader": "Her kan du ændre din marketplace udbyder",
     "lution.marketplace.marketplacesettings.provider": "Marketplace Udbyder",
     "lution.marketplace.marketplacesettings.changeprovider": "Skift Marketplace Udbyder",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Ustabil</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Ukendt</span>",
     "lution.marketplace.marketplace.by": "**Af:**",
+    "lution.marketplace.invaildprovider.theme": "Din udbyder har ikke temaer. Skift din udbyder nu.",
+    "lution.marketplace.invaildprovider.mods": "Din udbyder har ikke mods. Skift din udbyder nu.",
     "lution.mods.button.applymods": "Anvend Modifikationer",
     "lution.mods.button.openmods": "Åbn modifikationsmappe",
     "lution.mods.button.resetmods": "Nulstil Roblox til standard",
     "lution.mods.caption.bloxstrapsupport": "Vi understøtter de fleste Bloxstrap mods! Hvis dine mods ikke virker, så tjek venligst GitHub issues siden.",
     "lution.mods.toggle.useoldsound": "Brug gamle Roblox lyde",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Bringe bagud",
     "lution.fflags.toggle.rpc": "Aktiver Discord Rig Tilstedeværelse",
     "lution.fflags.toggle.bbchat": "Deaktivér Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Anvend brugerdefineret markør",
     "lution.appearance.text.laucher": "Launcher Udseende Tilpasning",
     "lution.save.button.downloadcf": "Download Konfiguration",
-    "lution.save.button.apply": "Anvend Ændringer"
+    "lution.save.button.apply": "Anvend Ændringer",
+    "lution.dropdown.languages": "Sprog",
+    "lution.button.applylanguage": "Anvend Sprog"
 }

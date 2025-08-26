@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Áp dụng",
     "lution.marketplace.installed.delete": "Xóa",
     "lution.marketplace.tab.marketplacesettings": "Cài đặt Marketplace",
+    "lution.marketplace.marketplace.button.reload": "Reload Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Ở đây bạn có thể thay đổi nhà cung cấp marketplace",
     "lution.marketplace.marketplacesettings.provider": "Nhà cung cấp marketplace",
     "lution.marketplace.marketplacesettings.changeprovider": "Đổi nhà cung cấp",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Không ổn định</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Không rõ</span>",
     "lution.marketplace.marketplace.by": "**Bởi:**",
+    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
+    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
     "lution.mods.button.applymods": "Áp dụng Mod",
     "lution.mods.button.openmods": "Mở thư mục mod",
     "lution.mods.button.resetmods": "Reset Roblox to default",
     "lution.mods.caption.bloxstrapsupport": "Chúng tôi hỗ trợ Bloxstrap mod! Nếu mod của bạn không hoạt động, hãy xem github",
     "lution.mods.toggle.useoldsound": "Dùng tiếng Roblox cũ",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Mang âm thanh 'oof' trở lại",
     "lution.fflags.toggle.rpc": "Bật Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Tắt trò chuyện",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Áp dụng con trỏ tùy chỉnh",
     "lution.appearance.text.laucher": "**Tùy chỉnh giao diện launcher**",
     "lution.save.button.downloadcf": "Tải xuống cấu hình",
-    "lution.save.button.apply": "Áp dụng thay đổi"
+    "lution.save.button.apply": "Áp dụng thay đổi",
+    "lution.dropdown.languages": "Languages",
+    "lution.button.applylanguage": "Apply Language"
 }

@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Εφαρμογή",
     "lution.marketplace.installed.delete": "Διαγραφή",
     "lution.marketplace.tab.marketplacesettings": "Ρυθμίσεις Αγοράς",
+    "lution.marketplace.marketplace.button.reload": "Επαναφόρτωση Marketplace",
     "lution.marketplace.marketplacesettings.changeheader": "Εδώ μπορείτε να αλλάξετε τον πάροχο της αγοράς σας",
     "lution.marketplace.marketplacesettings.provider": "Πάροχος Αγοράς",
     "lution.marketplace.marketplacesettings.changeprovider": "Αλλαγή Παροχής Marketplace",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Unstable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Άγνωστο</span>",
     "lution.marketplace.marketplace.by": "**By:**",
+    "lution.marketplace.invaildprovider.theme": "Ο πάροχος σας δεν έχει θέματα. Αλλάξτε τον πάροχο σας τώρα.",
+    "lution.marketplace.invaildprovider.mods": "Ο πάροχος σας δεν έχει mods. Αλλάξτε τον πάροχο σας τώρα.",
     "lution.mods.button.applymods": "Εφαρμογή Mods",
     "lution.mods.button.openmods": "Άνοιγμα φακέλου mods",
     "lution.mods.button.resetmods": "Επαναφορά του Roblox στις προεπιλογές",
     "lution.mods.caption.bloxstrapsupport": "Υποστηρίζουμε τα περισσότερα mods Bloxstrap! Αν τα mods σας δεν λειτουργούν, παρακαλώ ελέγξτε τη σελίδα ζητημάτων του GitHub.",
     "lution.mods.toggle.useoldsound": "Χρήση παλαιών ήχων Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Φέρτε πίσω oof",
     "lution.fflags.toggle.rpc": "Ενεργοποίηση Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Απενεργοποίηση Συνομιλίας",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Εφαρμογή προσαρμοσμένου δρομέα",
     "lution.appearance.text.laucher": "Προσαρμογή Εμφάνισης Εκκινητή",
     "lution.save.button.downloadcf": "Λήψη Ρυθμίσεων",
-    "lution.save.button.apply": "Εφαρμογή Αλλαγών"
+    "lution.save.button.apply": "Εφαρμογή Αλλαγών",
+    "lution.dropdown.languages": "Γλώσσες",
+    "lution.button.applylanguage": "Εφαρμογή Γλώσσας"
 }

@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Aplică",
     "lution.marketplace.installed.delete": "Ștergere",
     "lution.marketplace.tab.marketplacesettings": "Setările Pieței",
+    "lution.marketplace.marketplace.button.reload": "Reîncarcă bazarul",
     "lution.marketplace.marketplacesettings.changeheader": "Aici puteți schimba furnizorul din bazar",
     "lution.marketplace.marketplacesettings.provider": "Furnizor Marketplace",
     "lution.marketplace.marketplacesettings.changeprovider": "Schimbă Furnizorul Marketplace",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Instabil</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Necunoscut</span>",
     "lution.marketplace.marketplace.by": "**De către:**",
+    "lution.marketplace.invaildprovider.theme": "Furnizorul dvs. nu are teme. Schimbați acum furnizorul dvs.",
+    "lution.marketplace.invaildprovider.mods": "Furnizorul dvs. nu are moduri. Schimbați acum furnizorul dvs.",
     "lution.mods.button.applymods": "Aplică Moduri",
     "lution.mods.button.openmods": "Deschide dosarul mods",
     "lution.mods.button.resetmods": "Resetează Roblox la valorile implicite",
     "lution.mods.caption.bloxstrapsupport": "Suportăm majoritatea modurilor Bloxstrap! Dacă modurile tale nu funcționează, te rugăm să verifici pagina de probleme a GitHub.",
     "lution.mods.toggle.useoldsound": "Folosește sunete Roblox vechi",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Adu oof înapoi",
     "lution.fflags.toggle.rpc": "Activează Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Dezactivează Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Aplică un cursor personalizat",
     "lution.appearance.text.laucher": "Personalizare aspect lansator",
     "lution.save.button.downloadcf": "Descarcă configurația",
-    "lution.save.button.apply": "Aplică modificările"
+    "lution.save.button.apply": "Aplică modificările",
+    "lution.dropdown.languages": "Limbi",
+    "lution.button.applylanguage": "Aplică limba"
 }

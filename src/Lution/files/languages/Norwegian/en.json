@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Bruk",
     "lution.marketplace.installed.delete": "Slett",
     "lution.marketplace.tab.marketplacesettings": "Innstillinger for markedsplass",
+    "lution.marketplace.marketplace.button.reload": "Oppdater markedsplass",
     "lution.marketplace.marketplacesettings.changeheader": "Her kan du endre din leverandør av markedsplassen",
     "lution.marketplace.marketplacesettings.provider": "Markedsplassens operatør",
     "lution.marketplace.marketplacesettings.changeprovider": "Endre markedsplassoperatør",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Ustabil</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Ukjent</span>",
     "lution.marketplace.marketplace.by": "**Av:**",
+    "lution.marketplace.invaildprovider.theme": "Din leverandør har ikke temaer. Endre leverandør nå.",
+    "lution.marketplace.invaildprovider.mods": "Leverandøren din har ikke modifikasjoner. Endre leverandør nå.",
     "lution.mods.button.applymods": "Bruk modifikasjoner",
     "lution.mods.button.openmods": "Åpne mods mappe",
     "lution.mods.button.resetmods": "Tilbakestill Roblox til standard",
     "lution.mods.caption.bloxstrapsupport": "Vi støtter de fleste Bloxstrap moduser! Hvis dine modifikasjoner ikke fungerer, vennligst sjekk GitHub problemsiden.",
     "lution.mods.toggle.useoldsound": "Bruk gamle Roblox lyder",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Få tilbake en av",
     "lution.fflags.toggle.rpc": "Aktiver Discord Rich Presence",
     "lution.fflags.toggle.bbchat": "Deaktiver Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Bruk egendefinert markør",
     "lution.appearance.text.laucher": "Appearance Customization",
     "lution.save.button.downloadcf": "Last ned konfigurasjon",
-    "lution.save.button.apply": "Bruk endringer"
+    "lution.save.button.apply": "Bruk endringer",
+    "lution.dropdown.languages": "Språk",
+    "lution.button.applylanguage": "Bruk språk"
 }

@@ -25,6 +25,7 @@
     "lution.marketplace.installed.apply": "Aplicar",
     "lution.marketplace.installed.delete": "Eliminar",
     "lution.marketplace.tab.marketplacesettings": "Configuración de la tienda",
+    "lution.marketplace.marketplace.button.reload": "Recargar la tienda",
     "lution.marketplace.marketplacesettings.changeheader": "Aquí puede cambiar su proveedor de mercado",
     "lution.marketplace.marketplacesettings.provider": "Proveedor de Mercados",
     "lution.marketplace.marketplacesettings.changeprovider": "Cambiar proveedor de mercado",
@@ -33,11 +34,14 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Inestable</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Desconocido</span>",
     "lution.marketplace.marketplace.by": "**Por:**",
+    "lution.marketplace.invaildprovider.theme": "Su proveedor no tiene temas. Cambie su proveedor ahora.",
+    "lution.marketplace.invaildprovider.mods": "Su proveedor no tiene mods. Cambie su proveedor ahora.",
     "lution.mods.button.applymods": "Aplicar Mods",
     "lution.mods.button.openmods": "Abrir carpeta de mods",
     "lution.mods.button.resetmods": "Restablecer Roblox por defecto",
     "lution.mods.caption.bloxstrapsupport": "¡Soportamos la mayoría de los mods de Bloxstrap! Si sus mods no funcionan, por favor revise la página de incidencias de GitHub.",
     "lution.mods.toggle.useoldsound": "Usar sonidos antiguos de Roblox",
+    "lution.fflags.button.reloadfflag": "Reload Fast Flag",
     "lution.fflags.toggle.bringbackoof": "Traer de vuelta el olor",
     "lution.fflags.toggle.rpc": "Habilitar la presencia de Discord Rich",
     "lution.fflags.toggle.bbchat": "Desactivar Chat",
@@ -59,5 +63,7 @@
     "lution.appearance.button.cursor": "Aplicar cursor personalizado",
     "lution.appearance.text.laucher": "Personalización de apariencia de lanzador",
     "lution.save.button.downloadcf": "Descargar configuración",
-    "lution.save.button.apply": "Aplicar cambios"
+    "lution.save.button.apply": "Aplicar cambios",
+    "lution.dropdown.languages": "Idiomas",
+    "lution.button.applylanguage": "Aplicar idioma"
 }
