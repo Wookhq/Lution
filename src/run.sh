@@ -63,7 +63,7 @@ elif grep -qi 'fedora' /etc/os-release; then
     fi
 
 elif grep -qi 'gentoo' /etc/os-release; then
-    if ! grep -qi 'dev-python/virtualenv' cat /var/lib/portage/world >/dev/null 2>&1; then
+    if ! grep -qi 'dev-python/virtualenv' /var/lib/portage/world >/dev/null 2>&1; then
         echo "Installing virtualenv..."
         sudo emerge dev-python/virtualenv
     else
