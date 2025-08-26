@@ -19,13 +19,13 @@ banner() {
 
     while IFS= read -r line; do
         # interpolate colors
-        local r=$(( r1 + (r2 - r1) * i / (lines_count - 1) ))
-        local g=$(( g1 + (g2 - g1) * i / (lines_count - 1) ))
-        local b=$(( b1 + (b2 - b1) * i / (lines_count - 1) ))
+        local r=$((r1 + (r2 - r1) * i / (lines_count - 1)))
+        local g=$((g1 + (g2 - g1) * i / (lines_count - 1)))
+        local b=$((b1 + (b2 - b1) * i / (lines_count - 1)))
 
         printf "\033[38;2;%s;%s;%sm%s\033[0m\n" "$r" "$g" "$b" "$line"
         ((i++))
-    done << 'EOF'
+    done <<'EOF'
  __         __  __     ______   __     ______     __   __
 /\ \       /\ \/\ \   /\__  _\ /\ \   /\  __ \   /\ ".-. \
 \ \ \____  \ \ \_\ \  \/_/\ \/ \ \ \  \ \ \/\ \  \ \ \-.  \
@@ -60,6 +60,14 @@ elif grep -qi 'fedora' /etc/os-release; then
         sudo dnf install -y python3-virtualenv
     else
         echo "python3-virtualenv is already installed."
+    fi
+
+elif grep -qi 'gentoo' /etc/os-release; then
+    if ! grep -qi 'dev-python/virtualenv' cat /var/lib/portage/world >/dev/null 2>&1; then
+        echo "Installing virtualenv..."
+        sudo emerge dev-python/virtualenv
+    else
+        echo "virtualenv is already installed."
     fi
 
 else
