@@ -20,6 +20,8 @@ class contributors():
             return None
         
     def get_bio(self, username):
+        if username == "gio-exe":
+            return "i untangle spaghetti code"
         response = requests.get(f"https://api.github.com/users/{username}")
 
         if response.status_code == 200:
