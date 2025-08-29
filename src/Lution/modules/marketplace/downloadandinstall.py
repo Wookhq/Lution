@@ -6,14 +6,12 @@ import zipfile
 import requests
 import json
 import time
-import urllib
 import base64
 import shutil
 
-
 cf = Config()
-
 ff = FilesFunctions()
+
 class MarketplaceManager:
     def __init__(self):
         pass
@@ -49,100 +47,87 @@ class MarketplaceManager:
                     content = base64.b64decode(file_info['content'])
                 else:
                     raise Exception("Unable to retrieve file content from GitHub API.")
+
                 try:
                     print(f"[debug] output_path: {output_path}")
                     print(f"[debug] parent dir exists: {os.path.exists(os.path.dirname(output_path))}")
                     print(f"[debug] parent dir writable: {os.access(os.path.dirname(output_path), os.W_OK)}")
                     print(f"[debug] file size to write: {len(content)} bytes")
+                    
                     with open(output_path, "wb") as f:
                         f.write(content)
                     print(f"Successfully downloaded '{file_path}' from '{repo_name}' to '{output_path}'")
-                    return 
+                    return
                 except OSError as e:
                     print(f"OS error occurred: {e}")
                     raise
+
             except requests.exceptions.RequestException as e:
                 print(f"Download failed (Attempt {attempt + 1}/{max_retries}): {e}")
                 if attempt < max_retries - 1:
                     print(f"Retrying in {retry_delay} seconds...")
                     time.sleep(retry_delay)
                 else:
-                    print(f"Max retries reached. Download failed.")
+                    print("Max retries reached. Download failed.")
                     raise
             except Exception as e:
                 print(f"An unexpected error occurred: {e}")
                 raise
 
-    def DownloadMarketplace(self, Name, type):
+    def downloaditems(self, Name, type, installedlist):
+        curf = cf.Read("marketplace", installedlist)
+        if not curf:
+            curf = ""
+        if Name not in curf:
+            cf.Update("marketplace", installedlist, Name + "," + curf if curf else Name)
+
         repo_name = cf.Read("marketplace", "marketplaceprd")
         repo = g().get_repo(repo_name)
         download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
         os.makedirs(download_dir, exist_ok=True)
 
         if type == "theme":
-            curf = cf.Read("marketplace", "InstalledThemes")
-            if not curf:
-                curf = ""
-            if Name not in curf:
-                cf.Update("marketplace", "InstalledThemes", Name + "," + curf if curf else Name)
-
             info_file_path = "Assets/Themes/info.json"
-            content = repo.get_contents(info_file_path)
-            info_list = json.loads(content.decoded_content.decode())
-            entry = next((item for item in info_list if item["name"] == Name), None)
-
-            if entry:
-                zip_path = entry["path"]
-                local_zip_path = os.path.join(download_dir, os.path.basename(zip_path))
-                self.GHFiles(repo_name, zip_path, local_zip_path)
-
-                if zipfile.is_zipfile(local_zip_path):
-                    self.Unzip(local_zip_path, download_dir)
-                    os.remove(local_zip_path)
-                    return download_dir
-                else:
-                    print(f"Error: {local_zip_path} is not a valid zip file.")
-            else:
-                print(f"No theme found with name '{Name}'")
-
         elif type == "mod":
-            curf = cf.Read("marketplace", "InstalledMods")
-            if not curf:
-                curf = ""
-            if Name not in curf:
-                cf.Update("marketplace", "InstalledMods", Name + "," + curf if curf else Name)
-
             info_file_path = "Assets/Mods/info.json"
-            content = repo.get_contents(info_file_path)
-            info_list = json.loads(content.decoded_content.decode())
-            entry = next((item for item in info_list if item["name"] == Name), None)
+        else:
+            print(f"Unknown type '{type}'")
+            return None
 
-            if entry:
-                zip_path = entry["path"]
-                local_zip_path = os.path.join(download_dir, os.path.basename(zip_path))
-                self.GHFiles(repo_name, zip_path, local_zip_path)
+        content = repo.get_contents(info_file_path)
+        info_list = json.loads(content.decoded_content.decode())
+        entry = next((item for item in info_list if item["name"] == Name), None)
 
-                if zipfile.is_zipfile(local_zip_path):
-                    self.Unzip(local_zip_path, download_dir)
-                    os.remove(local_zip_path)
-                    return download_dir
-                else:
-                    print(f"Error: {local_zip_path} is not a valid zip file.")
+        if entry:
+            zip_path = entry["path"]
+            local_zip_path = os.path.join(download_dir, os.path.basename(zip_path))
+            self.GHFiles(repo_name, zip_path, local_zip_path)
+
+            if zipfile.is_zipfile(local_zip_path):
+                self.Unzip(local_zip_path, download_dir)
+                os.remove(local_zip_path)
+                return download_dir
             else:
-                print(f"No mod found with name '{Name}'")
+                print(f"Error: {local_zip_path} is not a valid zip file.")
+        else:
+            print(f"No {type} found with name '{Name}'")
+        return None
 
+    def DownloadMarketplace(self, Name, type):
+        if type == "theme":
+            return self.downloaditems(Name, type, "InstalledThemes")
+        elif type == "mod":
+            return self.downloaditems(Name, type, "InstalledMods")
         return None
 
     def RemoveMarketplace(self, Name, Type):
         print("funtion called")
         path = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{Type}s/{Name}")
         if Type == "mod":
-            print(f"type: {Name}")
             cf.RemoveValueFromList("marketplace", "InstalledMods", Name)
             if os.path.isdir(path):
                 shutil.rmtree(path)
         if Type == "theme":
-            print(f"type: {Name}")
             cf.RemoveValueFromList("marketplace", "InstalledThemes", Name)
             if os.path.isdir(path):
                 shutil.rmtree(path)
