@@ -80,10 +80,10 @@ def whatsnew():
     with open("./markdown/whatsnew.md", "r") as f:
         st.markdown(f.read())
 
-st.header("Wellcome to Lution!")
+st.header("Welcome to Lution!")
 st.image("files/cooked.png")
 if st.button("What's new?"): 
     whatsnew()
-st.write("Lution is a boostrapper for sober, try out one of the feature!")
+st.write("Lution is a bootstrapper for Sober. Try out one of the features!")
 st.write("Thank you for using Lution!")
 st.write("-- Lution dev team")
