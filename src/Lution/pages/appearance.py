@@ -55,3 +55,6 @@ st.markdown(LANG["lution.appearance.text.laucher"])
 st.markdown("""
 no im not gonna do that 
 """)
+
+#but i might :3
+#todo: work on launcher customization
