@@ -29,4 +29,4 @@ st.button(
 st.caption("The languages feature still in beta, we are still working on it. If you want to help us translate, please go to the [GitHub repository](https://github.com/triisdang/Lution/)")
 st.caption("The language feature is not working with the sidebar right now.")
 # st.session_state.language = lang_choice
-st.markdown("""Should we add something? **Feature in the [isues](https://github.com/Lutionhq/Lution/issues) page!**""")
+st.markdown("""Should we add something? **Feature in the [issues](https://github.com/Lutionhq/Lution/issues) page!**""")
