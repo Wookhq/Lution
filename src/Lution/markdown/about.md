@@ -2,7 +2,7 @@
 
 This project made by Chip, using Streamlit, made possible with [Sober](https://sober.vinegarhq.org/).
     
-You can find the source code on [GitHub](https://github.com/Lutionhq/Lution), **Consider give us a star! ⭐**
+You can find the source code on [GitHub](https://github.com/Lutionhq/Lution), **consider giving us a star! ⭐**
 
 :rainbow[**Thank you for using Lution! ❤️**]
 
