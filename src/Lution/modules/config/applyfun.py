@@ -232,3 +232,8 @@ Terminal=false
             f.write(entrycontent)
 
         os.chmod(desktopentrypath, 0o755)  # make it executable
+    
+    def removedesktopentry(self):
+        desktopentrydir = os.path.expanduser("~/.local/share/applications/Lution.desktop")
+        if os.path.exists(desktopentrydir):
+            os.remove(desktopentrydir)
