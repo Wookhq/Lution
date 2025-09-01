@@ -53,6 +53,13 @@ if "customfont" not in st.session_state:
 if "language" not in st.session_state:
     log.info("Reading language")
     st.session_state.language = "en"
+if "plrlogs" not in st.session_state:
+    log.info("Reading language")
+    zf = cg.Read("lution", "plrlogs")
+    if zf is None:
+        st.session_state.plrlogs = False
+    else:
+        st.session_state.plrlogs = zf
 if "fflagseditor" not in st.session_state:
     log.info("Reading FFlags editor")
     spilted = client_settings.SplitClientSettingsContent()
