@@ -52,7 +52,7 @@ class MainApp(QObject):
             self.join_table.setColumnWidth(1, 160)
 
         # tray icon setup
-        self.tray = QSystemTrayIcon(QIcon.fromTheme("applications-games"))
+        self.tray = QSystemTrayIcon(QIcon("files/lution1.png"))
         self.tray.setToolTip("Lution")
 
         menu = QMenu()
