@@ -210,3 +210,30 @@ class ApplyFunctions:
             genconfig.Update("lution","CursorType", "Old 2013 Cursor")
         else:
             st.error("Invalid cursor type selected.")
+    
+    def createdesktopentry(self):
+        boostrap = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../boostrap.sh"))
+        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/lution1.png"))
+        desktopentrydir = os.path.expanduser("~/.local/share/applications")
+        os.makedirs(desktopentrydir, exist_ok=True)
+
+        desktopentrypath = os.path.join(desktopentrydir, "Lution.desktop")
+
+        entrycontent = f"""[Desktop Entry]
+Name=Lution with sober
+Exec={boostrap}
+Icon={icon}
+Type=Application
+Categories=Utility;
+Terminal=false
+    """
+
+        with open(desktopentrypath, 'w') as f:
+            f.write(entrycontent)
+
+        os.chmod(desktopentrypath, 0o755)  # make it executable
+    
+    def removedesktopentry(self):
+        desktopentrydir = os.path.expanduser("~/.local/share/applications/Lution.desktop")
+        if os.path.exists(desktopentrydir):
+            os.remove(desktopentrydir)
