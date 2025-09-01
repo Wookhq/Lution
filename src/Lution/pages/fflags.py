@@ -105,6 +105,8 @@ with log:
     if st.session_state.plrlogs:
         lf, mid ,rgt = st.columns(3)
         with lf:
-            st.button("Setup")
+            if st.button("Setup"):
+                af.createdesktopentry()
         with mid:
-            st.button("Remove")
+            if st.button("Remove"):
+                af.removedesktopentry()
