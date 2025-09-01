@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
-cd "$(dirname "$0")/Lution"
-source ../.venv/bin/activate
+
+cd ..
+source .venv/bin/activate
+cd "src/Lution"
 python boostrap.py
