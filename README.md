@@ -36,13 +36,13 @@ Oh, and yes — **it works with Bloxstrap mods too!!111**
 
 ![checkout](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/checkout.svg)
 
-- [Lucem](https://github.com/xTrayambak/lucem)
-- [Equinox](https://github.com/equinoxhq/equinox)
-- [Vinegar](https://vinegarhq.org/)
-- [Sober](https://sober.vinegarhq.org/)
-- [AppleBlox](https://github.com/AppleBlox/appleblox)
-- [Fishstrap](https://github.com/fishstrap/fishstrap)
+[![Lucem](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/lucem.svg)](https://github.com/xTrayambak/lucem)
+[![Vinegar](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/vinegarhq.svg)](https://vinegarhq.org/)
+[![Sober](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/ober.svg)](https://sober.vinegarhq.org/)
+[![Fishstrap](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/fihstrap.svg)](https://github.com/fishstrap/fishstrap)
+[![AppleBlox](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/appleblox.svg)](https://github.com/AppleBlox/appleblox)
 - [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)
+- [Equinox](https://github.com/equinoxhq/equinox)
 
 
 
