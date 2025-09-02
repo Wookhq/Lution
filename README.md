@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/src/Lution/files/lutiontext.svg" width="420">
+  <img src="https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/lution.svg" width="1000">
 </p>
 <sub>⭐ Star the repo if you like it — I'm broke fr 😭</sub>
 
@@ -30,23 +30,11 @@ Oh, and yes — **it works with Bloxstrap mods too!!111**
 
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
-# Get Started
-moved : https://lutiondocs.vercel.app/lution/installation/
+[![isntallation](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/installation.svg)](https://lutiondocs.vercel.app/lution/introduction/)
 
-<img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">  
-
-# Misc
-
-### How It Works
-
-Lution edits the contents in your **Assets Overlay** path to apply changes.
-
-### Lution Marketplace
-
-Find it [here](https://github.com/triisdang/Lution-Marketplace)
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
-# Also check out :
+![checkout](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/checkout.svg)
 
 - [Lucem](https://github.com/xTrayambak/lucem)
 - [Equinox](https://github.com/equinoxhq/equinox)
@@ -61,8 +49,8 @@ Find it [here](https://github.com/triisdang/Lution-Marketplace)
 - [Your mother](https://store.steampowered.com/app/3399950/Your_Mother/)
 
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
-                        
-## big numbers = chip happy
+
+![stars](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/stars.svg)
 [![starboard](https://starchart.cc/Wookhq/Lution.svg?variant=adaptive)](https://starchart.cc/Wookhq/Lution)
 
 yoo 35 stars lets goooo
