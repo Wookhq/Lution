@@ -213,6 +213,7 @@ class ApplyFunctions:
     
     def createdesktopentry(self):
         boostrap = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../boostrap.sh"))
+        lutiondir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
         icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/lution1.png"))
         desktopentrydir = os.path.expanduser("~/.local/share/applications")
         os.makedirs(desktopentrydir, exist_ok=True)
@@ -227,9 +228,23 @@ Type=Application
 Categories=Utility;
 Terminal=false
     """
+        boostrapshcontent = f"""
+
+#!/usr/bin/env bash
+set -e
+cd {lutiondir}
+source .venv/bin/activate
+cd src/Lution
+
+python boostrap.py
+
+"""
 
         with open(desktopentrypath, 'w') as f:
             f.write(entrycontent)
+        
+        with open(boostrap, 'w') as f:
+            f.write(boostrapshcontent)
 
         os.chmod(desktopentrypath, 0o755)  # make it executable
     
