@@ -228,9 +228,7 @@ Type=Application
 Categories=Utility;
 Terminal=false
     """
-        boostrapshcontent = f"""
-
-#!/usr/bin/env bash
+        boostrapshcontent = f"""#!/usr/bin/env bash
 set -e
 cd {lutiondir}
 source .venv/bin/activate
