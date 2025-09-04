@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-
-cd ..
+set -e
+cd /home/chip/Lution
 source .venv/bin/activate
-cd "src/Lution"
+cd src/Lution
+
 python boostrap.py
+
