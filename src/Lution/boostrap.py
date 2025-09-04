@@ -21,7 +21,6 @@ class MainApp(QObject):
 
     def __init__(self):
         super().__init__()
-        
 
         loader = QUiLoader()
         ui_file = QFile("files/playerlogs.ui")
@@ -29,9 +28,9 @@ class MainApp(QObject):
         self.window = loader.load(ui_file)
         ui_file.close()
 
-        self.window.hide()
+        self.window.installEventFilter(self)
 
-        self.window.closeEvent = self.closeEvent
+        self.window.hide()
 
         # map user id -> player name
         self.players = {}
@@ -73,19 +72,27 @@ class MainApp(QObject):
         def on_tray_activated(reason):
             if reason == QSystemTrayIcon.Trigger:  # left click
                 self.window.show()
-            elif reason == QSystemTrayIcon.Context: # right click
+            elif reason == QSystemTrayIcon.Context:  # right click
                 menu.exec(self.tray.geometry().center())
 
         self.tray.activated.connect(on_tray_activated)
         self.tray.show()
 
         self.finished_signal.connect(QApplication.instance().quit)
-        
+
         self.save_button = self.window.findChild(QPushButton, "pushButton")
         if self.save_button:
             self.save_button.clicked.connect(self.save_logs)
 
         threading.Thread(target=self.launch_and_watch, daemon=True).start()
+
+    def eventFilter(self, obj, event):
+        if obj == self.window and event.type() == QEvent.Close:
+            event.ignore()
+            self.window.hide()
+            return True
+        return super().eventFilter(obj, event)
+
 
     def closeEvent(self, event):
         event.ignore()
