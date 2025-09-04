@@ -1,7 +1,7 @@
 {
     "TRANSLATION NOTES": "Probeer de tekst niet te wijzigen in {}",
     "lution.message.warning.fflags.invalid": "Ongeldige JSON! Herstel fouten in de bewerker.",
-    "lution.spinner.applyfont": "no dont do this one its bad use the one below",
+    "lution.spinner.applyfont": "Aangepast lettertype toepassen...",
     "lution.message.success.fontapplied": "Eigen lettertype toegepast met succes!",
     "lution.message.error.unknown": "Er is een onverwachte fout gebeurd: {e}",
     "lution.message.error.jsondecode": "Fout: Kon JSON niet ontcijferen van bestand '{file_path}'.",
@@ -22,7 +22,7 @@
     "lution.marketplace.installed.title": "Geinstalleerd",
     "lution.marketplace.title.decs": "Hier kunt u de thema's en mods zien die u hebt geïnstalleerd.",
     "lution.marketplace.tab.marketplace": "Marktplaats",
-    "lution.marketplace.tab.installed": "Geinstalleerd",
+    "lution.marketplace.tab.installed": "Geïnstalleerd",
     "lution.marketplace.installed.apply": "Toepassen",
     "lution.marketplace.installed.delete": "Verwijderen",
     "lution.marketplace.tab.marketplacesettings": "Marktplaats Instellingen",
