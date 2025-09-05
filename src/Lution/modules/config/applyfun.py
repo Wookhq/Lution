@@ -245,6 +245,9 @@ python boostrap.py
             f.write(boostrapshcontent)
 
         os.chmod(desktopentrypath, 0o755)  # make it executable
+        genconfig.UpdateFflags("FStringDebugLuaLogPattern", "ExpChat/mountClientApp")
+        genconfig.UpdateFflags("FStringDebugLuaLogLevel", "trace")
+
     
     def removedesktopentry(self):
         desktopentrydir = os.path.expanduser("~/.local/share/applications/Lution.desktop")
