@@ -35,8 +35,8 @@
     "lution.marketplace.marketplace.badges.unstable": "<span style=\"background-color: #f44336; color: white; padding: 2px 8px; border-radius: 8px;\">⚠️ Không ổn định</span>",
     "lution.marketplace.marketplace.badges.unkown": "<span style=\"background-color: #9e9e9e; color: white; padding: 2px 8px; border-radius: 8px;\">❓ Không rõ</span>",
     "lution.marketplace.marketplace.by": "**Bởi:**",
-    "lution.marketplace.invaildprovider.theme": "Your provider does not have themes. Change your provider now.",
-    "lution.marketplace.invaildprovider.mods": "Your provider does not have mods. Change your provider now.",
+    "lution.marketplace.invaildprovider.theme": "Nhà cung cấp của bạn không có các chủ đề. Hãy thay đổi nhà cung cấp của bạn ngay.",
+    "lution.marketplace.invaildprovider.mods": "Nhà cung cấp của bạn không có các bản mod. Hãy thay đổi nhà cung cấp của bạn ngay.",
     "lution.mods.button.applymods": "Áp dụng Mod",
     "lution.mods.button.openmods": "Mở thư mục mod",
     "lution.mods.button.resetmods": "Đặt lại Roblox về mặc định",
@@ -66,5 +66,5 @@
     "lution.save.button.downloadcf": "Tải xuống cấu hình",
     "lution.save.button.apply": "Áp dụng thay đổi",
     "lution.dropdown.languages": "Ngôn ngữ",
-    "lution.button.applylanguage": "Apply Language"
+    "lution.button.applylanguage": "Áp dụng ngôn ngữ"
 }
