@@ -6,6 +6,7 @@ from modules.utils.logging import log
 from modules.utils.files import FilesFunctions
 from modules.config.genconfig import Config
 from modules.config.applyfun import ApplyFunctions
+from modules.vlz import run
 from modules.utils.sidebar import InitSidebar
 
 InitSidebar()
@@ -60,6 +61,9 @@ with gen:
         st.session_state.fflags_text = json.dumps(st.session_state.fflagseditor, indent=4)
 
     st.button(LANG["lution.fflags.button.reloadfflag"], on_click=reload_fflags)
+    
+    if st.button("goon"):
+        run()
 
     # fflags editor
     if "fflags_text" not in st.session_state:

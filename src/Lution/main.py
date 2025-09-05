@@ -10,7 +10,6 @@ from modules.mod.clientsettings import ClientSettings
 
 InitSidebar()
 
-file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
 
 log.info("Page : Home")
 
