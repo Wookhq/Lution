@@ -30,7 +30,7 @@ Oh, and yes — **it works with Bloxstrap mods too!!111**
 
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
-[![isntallation](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/installation.svg)](https://lutiondocs.vercel.app/lution/introduction/)
+[![isntallation](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/installation.svg)](https://lution.chip.is-a.dev/)
 
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
