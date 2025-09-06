@@ -106,7 +106,7 @@ def create_columns(contents, content_type, cols_per_row=3):
                 with cols[col_idx]:
                     st.markdown(f"### {content.get('title', 'Untitled')}")
                     st.markdown(content.get("body", LANG["lution.marketplace.marketplace.nodescprovidered"]))
-                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), use_container_width=True)
+                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), width="stretch")
                     if "version" in content:
                         st.caption(f"WINDOWSPLAYERVERSION: {content.get('version')}")
                     if "creator" in content:
@@ -137,7 +137,7 @@ def create_fast_flag_columns(contents, content_type, cols_per_row=3):
             if content_index < num_contents:
                 content = contents[content_index]
                 with cols[col_idx]:
-                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), use_container_width=True)
+                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), width="stretch")
                     st.code(content.get("preview", "no preview provided"), language="text")
                     
                     st.markdown(content.get("desc", "no description provided"))
