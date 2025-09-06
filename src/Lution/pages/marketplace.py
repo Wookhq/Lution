@@ -155,7 +155,16 @@ def warnoverwrite(path : str):
         st.rerun()
     if st.button("I know what I'm Doing!"):
         res = mm.get_fastflag_content(st.session_state.prd, path)
-        print(res)
+        cf.UpdateSoberConfig("fflags", {}) # nothing first
+
+        try:
+            decoded = res.decode()
+            fastflag_dict = json.loads(decoded)["fastflag"]
+            cf.UpdateSoberConfig("fflags", fastflag_dict)  # store as dict
+            st.success("Fast-flag applied, please restart Sober to see changes")
+        except json.JSONDecodeError as e:
+            st.error(f"JSON error: {e}")
+            st.code(decoded)
 
 with marketplace:
     st.header(LANG["lution.marketplace.marketplace.title"])
