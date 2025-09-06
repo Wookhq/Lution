@@ -137,23 +137,25 @@ def create_fast_flag_columns(contents, content_type, cols_per_row=3):
             if content_index < num_contents:
                 content = contents[content_index]
                 with cols[col_idx]:
+                    st.markdown(f"### {content.get('title', 'Untitled')}")
                     st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), width="stretch")
-                    st.code(content.get("preview", "no preview provided"), language="text")
+                    st.write(LANG["lution.marketplace.previewfastflag"])
+                    st.code(content.get("preview", LANG["lution.marketplace.marketplace.nodescprovidered"]), language="text")
                     
                     st.markdown(content.get("desc", "no description provided"))
-                    st.markdown(content.get("by", "no one made it"))
+                    st.markdown(f'{LANG["lution.marketplace.marketplace.by"]} {content.get("by", LANG["lution.marketplace.marketplace.unkownauthor"])}')
 
                     button_key = f"{content.get('title', 'Untitled')}_{fglobal_index}"
-                    if st.button("Use this", key=button_key):
+                    if st.button(LANG["lution.marketplace.marketplace.use"], key=button_key):
                         warnoverwrite(content.get("install"))
                     fglobal_index += 1
 
-@st.dialog("WARNING")
+@st.dialog(LANG["lution.marketplace.dialog.warnoverwrite"])
 def warnoverwrite(path : str):
-    st.write("This action will overwrite your current fast-flag, do you wish to continue?")
-    if st.button("Hold up..."):
+    st.write(LANG["lution.marketplace.dialog.warnoverwritecontent"])
+    if st.button(LANG["lution.marketplace.dialog.no"]):
         st.rerun()
-    if st.button("I know what I'm Doing!"):
+    if st.button(LANG["lution.marketplace.dialog.yes"]):
         res = mm.get_fastflag_content(st.session_state.prd, path)
         cf.UpdateSoberConfig("fflags", {}) # nothing first
 
@@ -161,7 +163,7 @@ def warnoverwrite(path : str):
             decoded = res.decode()
             fastflag_dict = json.loads(decoded)["fastflag"]
             cf.UpdateSoberConfig("fflags", fastflag_dict)  # store as dict
-            st.success("Fast-flag applied, please restart Sober to see changes")
+            st.success(LANG["lution.marketplace.appliedfastflag"])
         except json.JSONDecodeError as e:
             st.error(f"JSON error: {e}")
             st.code(decoded)
