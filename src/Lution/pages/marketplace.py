@@ -1,7 +1,7 @@
 import streamlit as st
 import json
+from github import Github as auth
 from modules.marketplace.downloadandinstall import MarketplaceManager
-from github import Github as g
 from github.GithubException import UnknownObjectException
 from modules.utils.lang import LANG
 from modules.utils.logging import log
@@ -14,7 +14,14 @@ log.info("Page : Marketplace")
 # work smarter, not harder
 cf = Config()
 
-mm = MarketplaceManager()
+authtoken = cf.Read("marketplace", "githubtoken")
+if authtoken is None:   
+    g = auth()
+else:
+    g = auth(authtoken)
+
+mm = MarketplaceManager(g)
+
 DownloadMarketplace = mm.DownloadMarketplace
 RemoveMarketplace = mm.RemoveMarketplace
 ApplyMarketplace = mm.ApplyMarketplace
@@ -22,7 +29,7 @@ ApplyMarketplace = mm.ApplyMarketplace
 @st.cache_data(ttl=3600)
 def GetItemCached(repo_name, item):
     try:
-        repo = g().get_repo(repo_name)
+        repo = g.get_repo(repo_name)
         return repo.get_contents(item)
     except UnknownObjectException:
         return "Not found"
@@ -138,17 +145,17 @@ def create_fast_flag_columns(contents, content_type, cols_per_row=3):
 
                     button_key = f"{content.get('title', 'Untitled')}_{fglobal_index}"
                     if st.button("Use this", key=button_key):
-                        warnoverwrite(content.get("title"))
+                        warnoverwrite(content.get("install"))
                     fglobal_index += 1
 
 @st.dialog("WARNING")
-def warnoverwrite(title : str):
+def warnoverwrite(path : str):
     st.write("This action will overwrite your current fast-flag, do you wish to continue?")
     if st.button("Hold up..."):
         st.rerun()
     if st.button("I know what I'm Doing!"):
-        sigmb = 67
-
+        res = mm.get_fastflag_content(st.session_state.prd, path)
+        print(res)
 
 with marketplace:
     st.header(LANG["lution.marketplace.marketplace.title"])
