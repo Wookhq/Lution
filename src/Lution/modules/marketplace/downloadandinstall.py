@@ -1,9 +1,8 @@
-from github import Github as g
+from github import Github as auth
 from modules.utils.files import FilesFunctions
 from modules.config.genconfig import Config
 import os
 import zipfile
-import requests
 import json
 import time
 import base64
@@ -12,9 +11,16 @@ import shutil
 cf = Config()
 ff = FilesFunctions()
 
+authtoken = cf.Read("marketplace", "githubtoken")
+
+if authtoken is None:   
+    g = auth()
+else:
+    g = auth(authtoken)
+    
 class MarketplaceManager:
-    def __init__(self):
-        pass
+    def __init__(self, github_obj):
+        self.g = github_obj
 
     def Unzip(self, zip_file_path, extract_to_path):
         try:
@@ -29,24 +35,15 @@ class MarketplaceManager:
             print(f"An error occurred: {e}")
 
     def GHFiles(self, repo_name, file_path, output_path, max_retries=3, retry_delay=5):
+        repo = self.g.get_repo(repo_name)
         for attempt in range(max_retries):
             try:
                 print(f"Attempting to download '{file_path}' from '{repo_name}' (Attempt {attempt + 1}/{max_retries})")
-                api_url = f"https://api.github.com/repos/{repo_name}/contents/{file_path}"
-                response = requests.get(api_url)
-                response.raise_for_status()
-                file_info = response.json()
-
-                if file_info.get('download_url'):
-                    url = file_info['download_url']
-                    print(url)
-                    file_response = requests.get(url)
-                    file_response.raise_for_status()
-                    content = file_response.content
-                elif file_info.get('content') and file_info.get('encoding') == 'base64':
-                    content = base64.b64decode(file_info['content'])
+                file_content = repo.get_contents(file_path)
+                if file_content.encoding == 'base64':
+                    content = base64.b64decode(file_content.content)
                 else:
-                    raise Exception("Unable to retrieve file content from GitHub API.")
+                    content = file_content.decoded_content
 
                 try:
                     print(f"[debug] output_path: {output_path}")
@@ -62,7 +59,7 @@ class MarketplaceManager:
                     print(f"OS error occurred: {e}")
                     raise
 
-            except requests.exceptions.RequestException as e:
+            except Exception as e:
                 print(f"Download failed (Attempt {attempt + 1}/{max_retries}): {e}")
                 if attempt < max_retries - 1:
                     print(f"Retrying in {retry_delay} seconds...")
@@ -70,9 +67,6 @@ class MarketplaceManager:
                 else:
                     print("Max retries reached. Download failed.")
                     raise
-            except Exception as e:
-                print(f"An unexpected error occurred: {e}")
-                raise
 
     def downloaditems(self, Name, type, installedlist):
         curf = cf.Read("marketplace", installedlist)
@@ -82,7 +76,7 @@ class MarketplaceManager:
             cf.Update("marketplace", installedlist, Name + "," + curf if curf else Name)
 
         repo_name = cf.Read("marketplace", "marketplaceprd")
-        repo = g().get_repo(repo_name)
+        repo = self.g.get_repo(repo_name)
         download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
         os.makedirs(download_dir, exist_ok=True)
 
@@ -136,3 +130,12 @@ class MarketplaceManager:
         ff.ResetMods2()
         download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
         ff.ApplyMarketplaceMods(download_dir)
+   
+    def get_fastflag_content(self, repo_name, file_path):
+        repo = self.g.get_repo(repo_name)
+        file_content = repo.get_contents(file_path)
+        if file_content.encoding == 'base64':
+            content = base64.b64decode(file_content.content)
+        else:
+            content = file_content.decoded_content
+        return content
