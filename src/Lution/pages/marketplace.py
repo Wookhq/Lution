@@ -1,7 +1,7 @@
 import streamlit as st
 import json
+from github import Github as auth
 from modules.marketplace.downloadandinstall import MarketplaceManager
-from github import Github as g
 from github.GithubException import UnknownObjectException
 from modules.utils.lang import LANG
 from modules.utils.logging import log
@@ -14,7 +14,14 @@ log.info("Page : Marketplace")
 # work smarter, not harder
 cf = Config()
 
-mm = MarketplaceManager()
+authtoken = cf.Read("marketplace", "githubtoken")
+if authtoken is None:   
+    g = auth()
+else:
+    g = auth(authtoken)
+
+mm = MarketplaceManager(g)
+
 DownloadMarketplace = mm.DownloadMarketplace
 RemoveMarketplace = mm.RemoveMarketplace
 ApplyMarketplace = mm.ApplyMarketplace
@@ -22,7 +29,7 @@ ApplyMarketplace = mm.ApplyMarketplace
 @st.cache_data(ttl=3600)
 def GetItemCached(repo_name, item):
     try:
-        repo = g().get_repo(repo_name)
+        repo = g.get_repo(repo_name)
         return repo.get_contents(item)
     except UnknownObjectException:
         return "Not found"
@@ -42,6 +49,9 @@ def loadbar():
     progress.progress(30)
 
     avdthemes = GetItemCached(st.session_state.prd, "Assets/Themes/content.json") != "Not found"
+    progress.progress(40)
+
+    avdfflag = GetItemCached(st.session_state.prd, "Assets/FastFlag/index.json") != "Not found"
     progress.progress(50)
 
     def loadcontent(key, path, prog_value):
@@ -54,15 +64,19 @@ def loadbar():
         progress.progress(prog_value)
 
     loadcontent("theme", "Assets/Themes/content.json", 75)
-    loadcontent("mod", "Assets/Mods/content.json", 100)
+    loadcontent("mod", "Assets/Mods/content.json", 90)
+    loadcontent("fflagmk", "Assets/FastFlag/index.json", 100)
+
 
     progress.empty()
-    return avdmods, avdthemes
+    return avdmods, avdthemes, avdfflag
 
 
 
-avdmods, avdthemes = loadbar()
+avdmods, avdthemes, avdfflag = loadbar()
 
+if avdfflag and "fflagmk" in st.session_state: # temp fix ig
+    st.session_state["fflags"] = True
 
 def ChangeProvider():
     new_provider = st.session_state.get("pr")
@@ -92,7 +106,7 @@ def create_columns(contents, content_type, cols_per_row=3):
                 with cols[col_idx]:
                     st.markdown(f"### {content.get('title', 'Untitled')}")
                     st.markdown(content.get("body", LANG["lution.marketplace.marketplace.nodescprovidered"]))
-                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), use_container_width=True)
+                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), width="stretch")
                     if "version" in content:
                         st.caption(f"WINDOWSPLAYERVERSION: {content.get('version')}")
                     if "creator" in content:
@@ -105,10 +119,54 @@ def create_columns(contents, content_type, cols_per_row=3):
                     else:
                         st.markdown(LANG["lution.marketplace.marketplace.badges.unkown"], unsafe_allow_html=True)
                     button_key = f"{content.get('title', 'Untitled')}_{global_index}"
-                    if st.button(content.get("button", "Install"), key=button_key):
+                    if st.button("Download", key=button_key):
                         log.info(f"Installing {content.get('title', 'Untitled')}")
                         DownloadMarketplace(content.get("title", 'Untitled'), type=content_type)
                     global_index += 1
+
+fglobal_index = 0
+
+def create_fast_flag_columns(contents, content_type, cols_per_row=3):
+    global fglobal_index
+    num_contents = len(contents)
+    num_rows = (num_contents + cols_per_row - 1) // cols_per_row
+    for row_num in range(num_rows):
+        cols = st.columns(cols_per_row, border=True)
+        for col_idx in range(cols_per_row):
+            content_index = row_num * cols_per_row + col_idx
+            if content_index < num_contents:
+                content = contents[content_index]
+                with cols[col_idx]:
+                    st.markdown(f"### {content.get('title', 'Untitled')}")
+                    st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), width="stretch")
+                    st.write(LANG["lution.marketplace.previewfastflag"])
+                    st.code(content.get("preview", LANG["lution.marketplace.marketplace.nodescprovidered"]), language="text")
+                    
+                    st.markdown(content.get("desc", "no description provided"))
+                    st.markdown(f'{LANG["lution.marketplace.marketplace.by"]} {content.get("by", LANG["lution.marketplace.marketplace.unkownauthor"])}')
+
+                    button_key = f"{content.get('title', 'Untitled')}_{fglobal_index}"
+                    if st.button(LANG["lution.marketplace.marketplace.use"], key=button_key):
+                        warnoverwrite(content.get("install"))
+                    fglobal_index += 1
+
+@st.dialog(LANG["lution.marketplace.dialog.warnoverwrite"])
+def warnoverwrite(path : str):
+    st.write(LANG["lution.marketplace.dialog.warnoverwritecontent"])
+    if st.button(LANG["lution.marketplace.dialog.no"]):
+        st.rerun()
+    if st.button(LANG["lution.marketplace.dialog.yes"]):
+        res = mm.get_fastflag_content(st.session_state.prd, path)
+        cf.UpdateSoberConfig("fflags", {}) # nothing first
+
+        try:
+            decoded = res.decode()
+            fastflag_dict = json.loads(decoded)["fastflag"]
+            cf.UpdateSoberConfig("fflags", fastflag_dict)  # store as dict
+            st.success(LANG["lution.marketplace.appliedfastflag"])
+        except json.JSONDecodeError as e:
+            st.error(f"JSON error: {e}")
+            st.code(decoded)
 
 with marketplace:
     st.header(LANG["lution.marketplace.marketplace.title"])
@@ -135,6 +193,13 @@ with marketplace:
                 create_columns(st.session_state.mod, "mod")
     else:
         st.write(LANG["lution.marketplace.invaildprovider.mods"])
+
+    if avdfflag and st.session_state.get("fflags"):
+        with st.spinner(LANG["lution.marketplace.marketplace.spinner.download"]):
+            log.info("Creating fflag col")
+            fflagsexpander = st.expander("Fast Flag")
+            with fflagsexpander:
+                create_fast_flag_columns(st.session_state.fflagmk, "fflag")
 
 with installed:
     st.header(LANG["lution.marketplace.installed.title"])
