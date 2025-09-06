@@ -44,24 +44,8 @@ def loadbar():
     avdthemes = GetItemCached(st.session_state.prd, "Assets/Themes/content.json") != "Not found"
     progress.progress(40)
 
-    avdfflag = [
-        {
-            "title": "Goon Script",
-            "image": "https://placehold.co/600x400?text=Goon+Script",
-            "code": "print('hello world')",
-            "desc": "gooning fast flag that make you goon faster 🤑🤑",
-            "button": "Install"
-        },
-        {
-            "title": "roof fastflag",
-            "image": "https://placehold.co/600x400?text=roof+fast+flag",
-            "code": "roof",
-            "desc": "roof ☠️🤣🤣",
-            "button": "Apply"
-        }
-    ]
-
-    progress.progress(40)
+    avdfflag = GetItemCached(st.session_state.prd, "Assets/FastFlag/index.json") != "Not found"
+    progress.progress(50)
 
     def loadcontent(key, path, prog_value):
         if key not in st.session_state:
@@ -73,7 +57,9 @@ def loadbar():
         progress.progress(prog_value)
 
     loadcontent("theme", "Assets/Themes/content.json", 75)
-    loadcontent("mod", "Assets/Mods/content.json", 100)
+    loadcontent("mod", "Assets/Mods/content.json", 90)
+    loadcontent("fflagmk", "Assets/FastFlag/index.json", 100)
+
 
     progress.empty()
     return avdmods, avdthemes, avdfflag
@@ -82,8 +68,8 @@ def loadbar():
 
 avdmods, avdthemes, avdfflag = loadbar()
 
-st.session_state.fflagmk = avdfflag
-st.session_state.fflags = True
+if avdfflag and "fflagmk" in st.session_state: # temp fix ig
+    st.session_state["fflags"] = True
 
 def ChangeProvider():
     new_provider = st.session_state.get("pr")
@@ -145,16 +131,24 @@ def create_fast_flag_columns(contents, content_type, cols_per_row=3):
                 content = contents[content_index]
                 with cols[col_idx]:
                     st.image(content.get("image", "https://placehold.co/600x400?text=No+Image"), use_container_width=True)
-                    st.code(content.get("code", "no code provided"), language="text")
+                    st.code(content.get("preview", "no preview provided"), language="text")
                     
                     st.markdown(content.get("desc", "no description provided"))
                     st.markdown(content.get("by", "no one made it"))
 
                     button_key = f"{content.get('title', 'Untitled')}_{fglobal_index}"
-                    if st.button(content.get("button", "Install"), key=button_key):
-                        log.info(f"Installing {content.get('title', 'Untitled')}")
-                        DownloadMarketplace(content.get("title", 'Untitled'), type=content_type)
+                    if st.button("Use this", key=button_key):
+                        warnoverwrite(content.get("title"))
                     fglobal_index += 1
+
+@st.dialog("WARNING")
+def warnoverwrite(title : str):
+    st.write("This action will overwrite your current fast-flag, do you wish to continue?")
+    if st.button("Hold up..."):
+        st.rerun()
+    if st.button("I know what I'm Doing!"):
+        sigmb = 67
+
 
 with marketplace:
     st.header(LANG["lution.marketplace.marketplace.title"])
