@@ -53,9 +53,7 @@ Oh, and yes — **it works with Bloxstrap mods too!!111**
 ![stars](https://raw.githubusercontent.com/Wookhq/Lution/refs/heads/latest/md/stars.svg)
 [![starboard](https://starchart.cc/Wookhq/Lution.svg?variant=adaptive)](https://starchart.cc/Wookhq/Lution)
 
-yoo 35 stars lets goooo
-
-can we go to 75 stars? that would be nice
+ok no 67 stars now
 <img src="https://raw.githubusercontent.com/Lutionhq/Lution/refs/heads/latest/md/bar.png" style="width: 100%;">
 
                     
