@@ -82,6 +82,24 @@ if "useoldrobloxsounds" not in st.session_state:
         a = False  
     st.session_state.useoldrobloxsounds = a
 
+@st.dialog("Hey there!")
+def notice():
+    st.markdown("""# announcing *open alpha* release of **silver**- a rewritten version of lution in electron
+you can get the dev build of silver [here](<https://github.com/Wookhq/silverr/actions/runs/18010305630>)
+although this is not stable but if you want you can try it
+
+## what will happen to lution? 
+well you can still use it but its will not be actively maintain by me, instead its will be maintain by @gio_guy (he have full prems now)
+
+# docs for silver coming soon (build from source etc)
+# STAR IT
+""")
+    
+if "notice" not in st.session_state:
+    notice()
+    st.session_state.notice = "done"
+
+ 
 @st.dialog("Dialog")
 def whatsnew():
     with open("./markdown/whatsnew.md", "r") as f:
