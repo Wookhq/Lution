@@ -27,7 +27,6 @@ class IconBlacklist:
 class RemoteConfig:
     blacklist: IconBlacklist
 
-
     def __init__(self, data: dict) -> None:
         blacklist = data.get("blacklist", {})
         prefixes: list[str] = blacklist.get("prefixes", [])

@@ -8,8 +8,12 @@ class RobloxVersion(Version):
     guid: str
     file_version: Version
 
-
-    def __init__(self, binary_type: Literal["WindowsPlayer", "WindowsStudio64"], guid: str, file_version: Version | str) -> None:
+    def __init__(
+        self,
+        binary_type: Literal["WindowsPlayer", "WindowsStudio64"],
+        guid: str,
+        file_version: Version | str,
+    ) -> None:
         self.binary_type = binary_type
         self.guid = guid
         if isinstance(file_version, Version):

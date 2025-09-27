@@ -5,9 +5,11 @@ from modules.utils.logging import log
 
 log = log()
 
+
 class Config:
     def __init__(self, config_filename="LutionConfig.toml"):
         from modules.utils.files import FilesFunctions
+
         self.ff = FilesFunctions()
         self.config_dir = os.path.expanduser("~/Documents/Lution")
         self.config_path = os.path.join(self.config_dir, config_filename)
@@ -20,7 +22,9 @@ class Config:
             try:
                 return toml.load(f)
             except toml.TomlDecodeError:
-                log.error(f"Failed to decode TOML config at '{self.config_path}'. It might be corrupted.")
+                log.error(
+                    f"Failed to decode TOML config at '{self.config_path}'. It might be corrupted."
+                )
                 return {}
 
     def _write_data(self, data):
@@ -44,12 +48,14 @@ class Config:
         if section in data and key in data[section]:
             current_value = data[section][key]
             if not isinstance(current_value, str):
-                log.warn(f"Cannot remove value from non-string key '{key}' in section '{section}'.")
+                log.warn(
+                    f"Cannot remove value from non-string key '{key}' in section '{section}'."
+                )
                 return
-            values = [v.strip() for v in current_value.split(',')]
+            values = [v.strip() for v in current_value.split(",")]
             if value_to_remove in values:
                 values.remove(value_to_remove)
-                data[section][key] = ','.join(values)
+                data[section][key] = ",".join(values)
                 self._write_data(data)
                 log.info(f"Removed '{value_to_remove}' from [{section}]['{key}'].")
             else:
@@ -60,7 +66,9 @@ class Config:
     def ConvertOldConfigs(self):
         log.info("Checking for old configuration files to convert...")
 
-        old_marketplace_config_path = os.path.expanduser("~/Documents/Lution/Lution Marketplace/Marketplace.toml")
+        old_marketplace_config_path = os.path.expanduser(
+            "~/Documents/Lution/Lution Marketplace/Marketplace.toml"
+        )
 
         current_data = self._read_data()
         config_was_updated = False
@@ -70,9 +78,9 @@ class Config:
             with open(old_marketplace_config_path, "r") as f:
                 marketplace_data = toml.load(f)
 
-            if 'marketplace' not in current_data:
-                current_data['marketplace'] = {}
-            current_data['marketplace'].update(marketplace_data)
+            if "marketplace" not in current_data:
+                current_data["marketplace"] = {}
+            current_data["marketplace"].update(marketplace_data)
 
             os.remove(old_marketplace_config_path)
             log.info(f"Removed old file: {old_marketplace_config_path}")
@@ -80,7 +88,9 @@ class Config:
                 os.rmdir(os.path.dirname(old_marketplace_config_path))
                 log.info("Removed old marketplace directory as it is now empty.")
             except OSError:
-                log.warn("Old marketplace directory is not empty, so it was not removed.")
+                log.warn(
+                    "Old marketplace directory is not empty, so it was not removed."
+                )
 
             config_was_updated = True
 
@@ -94,9 +104,9 @@ class Config:
 
         if lution_items:
             log.info("Found top-level settings. Moving them to [lution] section.")
-            if 'lution' not in other_sections:
-                other_sections['lution'] = {}
-            other_sections['lution'].update(lution_items)
+            if "lution" not in other_sections:
+                other_sections["lution"] = {}
+            other_sections["lution"].update(lution_items)
             current_data = other_sections
             config_was_updated = True
 
@@ -107,7 +117,9 @@ class Config:
             log.info("No old configuration files found or no conversion needed.")
 
     def ReadSoberConfig(self, key):
-        file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+        file_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+        )
         try:
             with open(file_path, "r") as f:
                 config = json.load(f)
@@ -117,7 +129,9 @@ class Config:
             return None
 
     def ReadFflagsConfig(self, flag_name):
-        file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+        file_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+        )
         try:
             with open(file_path, "r") as f:
                 config = json.load(f)
@@ -127,7 +141,9 @@ class Config:
             return None
 
     def DeleteFflag(self, flag_name):
-        file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+        file_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+        )
         try:
             with open(file_path, "r") as f:
                 config = json.load(f)
@@ -146,11 +162,15 @@ class Config:
             return False
 
     def UpdateFflags(self, flag_name, flag_value):
-        file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+        file_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+        )
         try:
             with open(file_path, "r") as f:
                 sober_config = json.load(f)
-            if "fflags" not in sober_config or not isinstance(sober_config["fflags"], dict):
+            if "fflags" not in sober_config or not isinstance(
+                sober_config["fflags"], dict
+            ):
                 sober_config["fflags"] = {}
             sober_config["fflags"][flag_name] = flag_value
             with open(file_path, "w") as f:
@@ -160,7 +180,9 @@ class Config:
             log.error(f"Failed to update fflags: {e}")
 
     def UpdateSoberConfig(self, key, value):
-        file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+        file_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+        )
         try:
             with open(file_path, "r") as f:
                 config = json.load(f)

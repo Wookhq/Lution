@@ -10,6 +10,7 @@ from github import Github
 CACHE_FILE = ".latest_commit_cache"
 CACHE_TTL = 300  # seconds
 
+
 def get_cached_commit():
     if os.path.exists(CACHE_FILE):
         age = time.time() - os.path.getmtime(CACHE_FILE)
@@ -18,9 +19,11 @@ def get_cached_commit():
                 return f.read().strip()
     return None
 
+
 def update_cache(sha):
     with open(CACHE_FILE, "w") as f:
         f.write(sha)
+
 
 cached_commit = get_cached_commit()
 if cached_commit is None:
@@ -35,5 +38,3 @@ if latest_commit.startswith(GIT_COMMITT):
     GIT_COMMIT = GIT_COMMITT
 else:
     GIT_COMMIT = f"{GIT_COMMITT} (outdated)"
-
-

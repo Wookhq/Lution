@@ -10,6 +10,7 @@ cf = Config()
 
 InitSidebar()
 
+
 def AppyAndUpdate():
     cg.ApplyChanges(
         st.session_state.fpslimit,
@@ -21,18 +22,19 @@ def AppyAndUpdate():
         st.session_state.useoldrobloxsounds,
         st.session_state.disableplayersh,
         st.session_state.texturequality,
-        st.session_state.msaa
+        st.session_state.msaa,
     )
     Currfflags = cf.ReadSoberConfig("fflags")
     log.info("Applying changes...")
     st.session_state.fflagseditor = Currfflags
 
+
 Currfflags = cf.ReadSoberConfig("fflags")
 st.session_state.fflagseditor = Currfflags
 
-left,mid,right = st.columns(3)
+left, mid, right = st.columns(3)
 mid.button(
     LANG["lution.save.button.apply"],
-    on_click=lambda : AppyAndUpdate(),
-    key="apply_changes_button"
+    on_click=lambda: AppyAndUpdate(),
+    key="apply_changes_button",
 )

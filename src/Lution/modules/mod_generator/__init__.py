@@ -11,7 +11,14 @@ from modules import filesystem
 from modules.deployments import RobloxVersion, LatestVersion, DeployHistory
 from modules.networking import requests, Response, Api
 
-from .utils import MaskStorage, locate_imagesets, locate_imagesetdata, ImageSetData, ImageSet, ImageSetIcon
+from .utils import (
+    MaskStorage,
+    locate_imagesets,
+    locate_imagesetdata,
+    ImageSetData,
+    ImageSet,
+    ImageSetIcon,
+)
 from .dataclasses import IconBlacklist, RemoteConfig, AdditionalFile, GradientColor
 from .exceptions import *
 
@@ -24,25 +31,44 @@ PREVIEW_DATA_DIR: Path = Path(__file__).parent / "preview_data"
 class ModGenerator:
     _LOG_PREFIX: str = "ModGenerator"
 
-
     @classmethod
-    def get_mask(cls, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image, size: tuple[int, int], angle: Optional[float] = None, dont_cache: bool = False)  -> Image.Image:
+    def get_mask(
+        cls,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+        size: tuple[int, int],
+        angle: Optional[float] = None,
+        dont_cache: bool = False,
+    ) -> Image.Image:
         """Assumes data has been validated"""
 
         match mode:
-            case "color": return MaskStorage.get_solid_color(data, size, dont_cache=dont_cache)  # type: ignore
-            case "gradient": return MaskStorage.get_gradient(data, angle or 0, size, dont_cache=dont_cache)  # type: ignore
-            case "custom": return MaskStorage.get_custom(data, size, dont_cache=dont_cache)  # type: ignore
-
+            case "color":
+                return MaskStorage.get_solid_color(data, size, dont_cache=dont_cache)  # type: ignore
+            case "gradient":
+                return MaskStorage.get_gradient(data, angle or 0, size, dont_cache=dont_cache)  # type: ignore
+            case "custom":
+                return MaskStorage.get_custom(data, size, dont_cache=dont_cache)  # type: ignore
 
     @classmethod
-    def generate_preview_mask(cls, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image, size: tuple[int, int], angle: Optional[float] = None)  -> Image.Image:
+    def generate_preview_mask(
+        cls,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+        size: tuple[int, int],
+        angle: Optional[float] = None,
+    ) -> Image.Image:
         cls._validate_data(mode, data)
         return cls.get_mask(mode, data, size, angle, dont_cache=True)
 
-
     @classmethod
-    def generate_preview_image(cls, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image, angle: Optional[float] = None, custom_roblox_icon: Optional[Image.Image] = None)  -> Image.Image:
+    def generate_preview_image(
+        cls,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+        angle: Optional[float] = None,
+        custom_roblox_icon: Optional[Image.Image] = None,
+    ) -> Image.Image:
         cls._validate_data(mode, data)
 
         index: Path = PREVIEW_DATA_DIR / "index.json"
@@ -63,31 +89,39 @@ class ModGenerator:
             icon_h: int = int(icon_size[1])
 
             if custom_roblox_icon is not None and icon_name == "roblox":
-                custom_icon_resized: Image.Image = custom_roblox_icon.resize((icon_w, icon_h), resample=Image.Resampling.LANCZOS)
+                custom_icon_resized: Image.Image = custom_roblox_icon.resize(
+                    (icon_w, icon_h), resample=Image.Resampling.LANCZOS
+                )
                 image.paste(custom_icon_resized, (icon_x, icon_y))
             else:
-                icon: Image.Image = image.crop((icon_x, icon_y, icon_x + icon_w, icon_y + icon_h))
+                icon: Image.Image = image.crop(
+                    (icon_x, icon_y, icon_x + icon_w, icon_y + icon_h)
+                )
                 cls.apply_mask(icon, mode, data, angle)
                 image.paste(icon, (icon_x, icon_y))
         MaskStorage.cache.clear()
 
         return image
 
-
     @classmethod
-    def _validate_data(cls, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image) -> None:
+    def _validate_data(
+        cls,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+    ) -> None:
         match mode:
             case "color":
                 if (
                     not isinstance(data, (tuple, list))
                     or len(data) != 3
                     or not all(
-                        isinstance(item, int)
-                        and item >= 0
-                        and item <= 255
+                        isinstance(item, int) and item >= 0 and item <= 255
                         for item in data
                     )
-                ): raise ValueError("data must be a list or tuple of 3 int values between 0 and 255")
+                ):
+                    raise ValueError(
+                        "data must be a list or tuple of 3 int values between 0 and 255"
+                    )
 
             case "gradient":
                 if (
@@ -96,7 +130,8 @@ class ModGenerator:
                     or not all(  # type: ignore
                         isinstance(gradient_color, GradientColor)
                         and isinstance(gradient_color.stop, (int, float))
-                        and gradient_color.stop >= 0 and gradient_color.stop <= 1
+                        and gradient_color.stop >= 0
+                        and gradient_color.stop <= 1
                         and isinstance(gradient_color.color, (tuple, list))
                         and len(gradient_color.color) == 3
                         and all(
@@ -107,18 +142,28 @@ class ModGenerator:
                         )
                         for gradient_color in data
                     )
-                ): raise ValueError("data must be a GradientColor with a float stop value between 0 and tuple tuple color value of 3 int values between 0 and 255")
+                ):
+                    raise ValueError(
+                        "data must be a GradientColor with a float stop value between 0 and tuple tuple color value of 3 int values between 0 and 255"
+                    )
 
             case "custom":
                 if not isinstance(data, Image.Image):
                     raise ValueError("data must be an Image.Image object")
 
             case invalid:
-                raise ValueError(f"Invalid mode: '{invalid}', must be one of 'color', 'gradient', 'custom'")
-
+                raise ValueError(
+                    f"Invalid mode: '{invalid}', must be one of 'color', 'gradient', 'custom'"
+                )
 
     @classmethod
-    def apply_mask(cls, image: Image.Image, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image, angle: Optional[float] = None):
+    def apply_mask(
+        cls,
+        image: Image.Image,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+        angle: Optional[float] = None,
+    ):
         """Modifies the image in place. Assumes data has been validated"""
 
         size = image.size
@@ -132,9 +177,20 @@ class ModGenerator:
             mask.putalpha(image.getchannel("A"))
             image.paste(mask)
 
-
     @classmethod
-    def generate_mod(cls, mode: Literal["color", "gradient", "custom"], data: tuple[int, int, int] | list[GradientColor] | Image.Image, output_dir: str | Path, angle: Optional[float] = None, file_version: Optional[int] = None, use_remote_config: bool = True, icon_sizes: Literal[0, 1, 2, 3] = 0, custom_roblox_icon: Optional[Image.Image] = None, additional_files: Optional[list[AdditionalFile]] = None, stop_event: Optional[Event] = None) -> bool:
+    def generate_mod(
+        cls,
+        mode: Literal["color", "gradient", "custom"],
+        data: tuple[int, int, int] | list[GradientColor] | Image.Image,
+        output_dir: str | Path,
+        angle: Optional[float] = None,
+        file_version: Optional[int] = None,
+        use_remote_config: bool = True,
+        icon_sizes: Literal[0, 1, 2, 3] = 0,
+        custom_roblox_icon: Optional[Image.Image] = None,
+        additional_files: Optional[list[AdditionalFile]] = None,
+        stop_event: Optional[Event] = None,
+    ) -> bool:
         """Returns True if the mod was generated, False if it was cancelled (stop_event.is_set())"""
 
         Logger.info(f"Generating mod (mode={mode})...", prefix=cls._LOG_PREFIX)
@@ -149,14 +205,17 @@ class ModGenerator:
                 if item.file_version.minor == file_version:
                     deployment = item
                     break
-            else: raise InvalidVersionError(file_version)
+            else:
+                raise InvalidVersionError(file_version)
         mod_info: dict[str, str | int] = {
             "clientVersionUpload": deployment.guid,
             "fileVersion": deployment.file_version.minor,
-            "watermark": "Generated with Kliko modding tools using Lution"
+            "watermark": "Generated with Kliko modding tools using Lution",
         }
         metadata = PngImagePlugin.PngInfo()
-        metadata.add_text("Watermark", "Generated with Kliko modding tools using Lution")
+        metadata.add_text(
+            "Watermark", "Generated with Kliko modding tools using Lution"
+        )
 
         if stop_event is not None and stop_event.is_set():
             Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
@@ -190,10 +249,17 @@ class ModGenerator:
             if stop_event is not None and stop_event.is_set():
                 Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
                 return False
-            
+
             Logger.info("Downloading ImageSets...", prefix=cls._LOG_PREFIX)
-            filesystem.download(Api.Roblox.Deployment.download(deployment.guid, "extracontent-luapackages.zip"), temporary_directory / "luapackages.zip")
-            filesystem.extract(temporary_directory / "luapackages.zip", luapackages_target)
+            filesystem.download(
+                Api.Roblox.Deployment.download(
+                    deployment.guid, "extracontent-luapackages.zip"
+                ),
+                temporary_directory / "luapackages.zip",
+            )
+            filesystem.extract(
+                temporary_directory / "luapackages.zip", luapackages_target
+            )
 
             if stop_event is not None and stop_event.is_set():
                 Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
@@ -202,8 +268,15 @@ class ModGenerator:
             Logger.info("Locating ImageSets...", prefix=cls._LOG_PREFIX)
             imagesetdata_path: Path = locate_imagesetdata(luapackages_target)
             imagesets_dir: Path = locate_imagesets(luapackages_target)
-            temp_target_imageset_path: Path = temp_target / "ExtraContent" / "Luapackages" / imagesets_dir.relative_to(luapackages_target)
-            shutil.copytree(imagesets_dir, temp_target_imageset_path, dirs_exist_ok=True)
+            temp_target_imageset_path: Path = (
+                temp_target
+                / "ExtraContent"
+                / "Luapackages"
+                / imagesets_dir.relative_to(luapackages_target)
+            )
+            shutil.copytree(
+                imagesets_dir, temp_target_imageset_path, dirs_exist_ok=True
+            )
 
             if stop_event is not None and stop_event.is_set():
                 Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
@@ -222,7 +295,9 @@ class ModGenerator:
                 return False
 
             Logger.info(f"Parsing {imagesetdata_path.name}...", prefix=cls._LOG_PREFIX)
-            image_set_data: ImageSetData = ImageSetData(imagesetdata_path, temp_target_imageset_path, icon_sizes=icon_sizes)
+            image_set_data: ImageSetData = ImageSetData(
+                imagesetdata_path, temp_target_imageset_path, icon_sizes=icon_sizes
+            )
 
             if stop_event is not None and stop_event.is_set():
                 Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
@@ -231,7 +306,9 @@ class ModGenerator:
             Logger.info("Generating ImageSets...", prefix=cls._LOG_PREFIX)
             ROBLOX_LOGO_NAME: str = "icons/logo/block"
             for imageset in image_set_data.imagesets:
-                with Image.open(imageset.path, formats=("PNG",)) as imageset_image_object:
+                with Image.open(
+                    imageset.path, formats=("PNG",)
+                ) as imageset_image_object:
                     if imageset_image_object.mode != "RGBA":
                         imageset_image_object = imageset_image_object.convert("RGBA")
 
@@ -239,13 +316,25 @@ class ModGenerator:
                         if cls._is_icon_blacklisted(icon.name, remote_config.blacklist):
                             continue
 
-                        if custom_roblox_icon is not None and icon.name == ROBLOX_LOGO_NAME:
-                            imageset_image_object.paste(custom_roblox_icon.resize((icon.w, icon.h), resample=Image.Resampling.LANCZOS), (icon.x, icon.y))
+                        if (
+                            custom_roblox_icon is not None
+                            and icon.name == ROBLOX_LOGO_NAME
+                        ):
+                            imageset_image_object.paste(
+                                custom_roblox_icon.resize(
+                                    (icon.w, icon.h), resample=Image.Resampling.LANCZOS
+                                ),
+                                (icon.x, icon.y),
+                            )
                         else:
-                            cropped: Image.Image = imageset_image_object.crop((icon.x, icon.y, icon.x + icon.w, icon.y + icon.h))
+                            cropped: Image.Image = imageset_image_object.crop(
+                                (icon.x, icon.y, icon.x + icon.w, icon.y + icon.h)
+                            )
                             cls.apply_mask(cropped, mode=mode, data=data, angle=angle)
                             imageset_image_object.paste(cropped, (icon.x, icon.y))
-                    imageset_image_object.save(imageset.path, format="PNG", pnginfo=metadata)
+                    imageset_image_object.save(
+                        imageset.path, format="PNG", pnginfo=metadata
+                    )
 
                 if stop_event is not None and stop_event.is_set():
                     Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
@@ -259,21 +348,28 @@ class ModGenerator:
 
                     if additional_file_counter % 20 == 0:
                         if stop_event is not None and stop_event.is_set():
-                            Logger.info("Mod generator cancelled!", prefix=cls._LOG_PREFIX)
+                            Logger.info(
+                                "Mod generator cancelled!", prefix=cls._LOG_PREFIX
+                            )
                             return False
 
-
-                    target: Path = Path(temp_target, *re.split(r"[\\/]", additional_file.target))
+                    target: Path = Path(
+                        temp_target, *re.split(r"[\\/]", additional_file.target)
+                    )
 
                     if target.suffix != ".png":
-                        Logger.warning(f"Skipping file '{target.name}'... (Invalid filetype, must be '.png')")
+                        Logger.warning(
+                            f"Skipping file '{target.name}'... (Invalid filetype, must be '.png')"
+                        )
                         continue
 
-                    match = re.search(r'@(\d+)x$', target.stem)
+                    match = re.search(r"@(\d+)x$", target.stem)
                     if match:
                         icon_size = int(match.group(1))
                         if icon_size != icon_sizes:
-                            Logger.warning(f"Skipping file '{target.name}'... (Only generating @{icon_sizes}x sizes)")
+                            Logger.warning(
+                                f"Skipping file '{target.name}'... (Only generating @{icon_sizes}x sizes)"
+                            )
                             continue
 
                     image_copy: Image.Image = additional_file.image.copy()
@@ -292,7 +388,6 @@ class ModGenerator:
             shutil.copytree(temp_target, output_dir, dirs_exist_ok=True)
             Logger.info("Mod generated successfully!", prefix=cls._LOG_PREFIX)
             return True
-
 
     @classmethod
     def _is_icon_blacklisted(cls, name: str, blacklist: IconBlacklist) -> bool:

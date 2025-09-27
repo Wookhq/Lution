@@ -1,16 +1,18 @@
 # src/Lution/app.py
-import streamlit as st 
-import os 
+import streamlit as st
+import os
 import json
 from modules.config.genconfig import Config
 from modules.utils.sidebar import InitSidebar
 from modules.utils.logging import log
-from modules.config.applyfun import ApplyFunctions  
+from modules.config.applyfun import ApplyFunctions
 from modules.mod.clientsettings import ClientSettings
 
 InitSidebar()
 
-file_path = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/config/sober/config.json")
+file_path = os.path.expanduser(
+    "~/.var/app/org.vinegarhq.Sober/config/sober/config.json"
+)
 
 log.info("Page : Home")
 
@@ -24,15 +26,15 @@ if "fpslimit" not in st.session_state:
     log.info("Reading fpslimit")
     fpslimit = cg.ReadFflagsConfig("DFIntTaskSchedulerTargetFps")
     st.session_state.fpslimit = fpslimit
-if "lightingtech" not in st.session_state: 
+if "lightingtech" not in st.session_state:
     log.info("Reading Lighting technology")
     tech = af.LoadLightTechConfig()
     st.session_state.lightingtech = tech
-if "texturequality" not in st.session_state: 
+if "texturequality" not in st.session_state:
     log.info("Reading Texture Quality")
     qua = af.LoadTextureQuality()
     st.session_state.texturequality = qua
-if "mssa" not in st.session_state: 
+if "mssa" not in st.session_state:
     log.info("Reading msaa")
     msaa = af.LoadMSAA()
     st.session_state.msaa = msaa
@@ -71,7 +73,7 @@ if "fontsize" not in st.session_state:
 if "disableplayersh" not in st.session_state:
     log.info("Reading Disnable player shadows")
     dis = cg.Read("lution", "disableplayersh")
-    if dis == None :
+    if dis == None:
         st.session_state.disableplayersh = False
     else:
         st.session_state.disableplayersh = dis
@@ -79,12 +81,14 @@ if "useoldrobloxsounds" not in st.session_state:
     log.info("Reading Old roblox sounds")
     a = cg.Read("lution", "OldRlbxSd")
     if a is None:
-        a = False  
+        a = False
     st.session_state.useoldrobloxsounds = a
+
 
 @st.dialog("Hey there!")
 def notice():
-    st.markdown("""# announcing *open alpha* release of **silver**- a rewritten version of lution in electron
+    st.markdown(
+        """# announcing *open alpha* release of **silver**- a rewritten version of lution in electron
 you can get the dev build of silver [here](<https://github.com/Wookhq/silverr/actions/runs/18010305630>)
 although this is not stable but if you want you can try it
 
@@ -93,21 +97,24 @@ well you can still use it but its will not be actively maintain by me, instead i
 
 # docs for silver coming soon (build from source etc)
 # STAR IT
-""")
-    
+"""
+    )
+
+
 if "notice" not in st.session_state:
     notice()
     st.session_state.notice = "done"
 
- 
+
 @st.dialog("Dialog")
 def whatsnew():
     with open("./markdown/whatsnew.md", "r") as f:
         st.markdown(f.read())
 
+
 st.header("Welcome to Lution!")
 st.image("files/cooked.png")
-if st.button("What's new?"): 
+if st.button("What's new?"):
     whatsnew()
 st.write("Lution is a bootstrapper for Sober. Try out one of the features!")
 st.write("Thank you for using Lution!")

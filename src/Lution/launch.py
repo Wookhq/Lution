@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 
+
 def waitready(url, timeout=10):
     start_time = time.time()
     while time.time() - start_time < timeout:
@@ -17,6 +18,7 @@ def waitready(url, timeout=10):
             pass
         time.sleep(0.3)
     return False
+
 
 def main():
     weebserver = subprocess.Popen(["streamlit", "run", "main.py"])
@@ -33,12 +35,13 @@ def main():
     browser.load(QUrl("http://localhost:8501"))
     browser.show()
 
-    exitCode=app.exec()
+    exitCode = app.exec()
 
     weebserver.terminate()
     weebserver.wait()
-    
+
     sys.exit(exitCode)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

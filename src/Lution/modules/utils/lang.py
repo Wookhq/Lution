@@ -6,18 +6,17 @@ if "language" not in st.session_state:
     st.session_state.language = "English"
 
 LANG_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "files/languages"
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "files/languages"
 )
 
 # grab folder names
 LANG_CODES = [
-    d for d in os.listdir(LANG_DIR)
-    if os.path.isdir(os.path.join(LANG_DIR, d))
+    d for d in os.listdir(LANG_DIR) if os.path.isdir(os.path.join(LANG_DIR, d))
 ]
 
 # build display names from folder codes
 LANG_NAMES = {code: code for code in LANG_CODES}
+
 
 def readlang():
     folder = st.session_state.language
@@ -30,7 +29,9 @@ def readlang():
     with open(lang_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 LANG = readlang()
+
 
 def ApplyLanguage(lang):
     st.session_state.language = lang

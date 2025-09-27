@@ -1,38 +1,53 @@
-#src/sostrapter/modules/json/json.py
+# src/sostrapter/modules/json/json.py
 from modules.config.genconfig import Config
 from modules.mod.fontreplacer import *
 from modules.utils.files import FilesFunctions
 from modules.utils.messages import STMessages
 import os
+
 genconfig = Config()
 ff = FilesFunctions()
 
 st = STMessages()
 
+
 class ApplyFunctions:
     def __init__(self):
         pass
 
-    def ApplyChanges(self,fpslimit, lightingtech, rpc1, rendertech, bbchat, fontsize, useoldrobloxsounds, disableprsh, texturequa, msaa):
+    def ApplyChanges(
+        self,
+        fpslimit,
+        lightingtech,
+        rpc1,
+        rendertech,
+        bbchat,
+        fontsize,
+        useoldrobloxsounds,
+        disableprsh,
+        texturequa,
+        msaa,
+    ):
         """Apply changes based on user input."""
         # Lighting Tech
-        if lightingtech == "Voxel Lighting (Phase 1)" : 
-            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel",True)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2",False)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3",False)
-        if lightingtech == "Shadowmap Lighting (Phase 2)" :
-            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel",False)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2",True)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3",False)
-        if lightingtech == "Future Lighting (Phase 3)" :
-            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel",False)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2",False)
-            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3",True)
+        if lightingtech == "Voxel Lighting (Phase 1)":
+            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel", True)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2", False)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3", False)
+        if lightingtech == "Shadowmap Lighting (Phase 2)":
+            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel", False)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2", True)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3", False)
+        if lightingtech == "Future Lighting (Phase 3)":
+            genconfig.UpdateFflags("DFFlagDebugRenderForceTechnologyVoxel", False)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase2", False)
+            genconfig.UpdateFflags("FFlagDebugForceFutureIsBrightPhase3", True)
+
         # Texture quality
         def chektexture(texturequa1):
             genconfig.UpdateFflags("DFFlagTextureQualityOverrideEnabled", True)
             match texturequa1:
-                case "Off" :
+                case "Off":
                     genconfig.DeleteFflag("DFFlagTextureQualityOverrideEnabled")
                     genconfig.DeleteFflag("DFIntTextureQualityOverride")
                 case "Level 0 (potato)":
@@ -45,12 +60,14 @@ class ApplyFunctions:
                     genconfig.UpdateFflags("DFIntTextureQualityOverride", 3)
                 case "Level 4 (Ultra)":
                     genconfig.UpdateFflags("DFIntTextureQualityOverride", 4)
+
         chektexture(texturequa)
-            # Texture quality
+
+        # Texture quality
         def msaaapply(msaa1):
             genconfig.UpdateFflags("FFlagDebugDisableMSAA", False)
             match msaa1:
-                case "Off" :
+                case "Off":
                     genconfig.UpdateFflags("DFFlagTextureQualityOverrideEnabled", True)
                     genconfig.DeleteFflag("FIntMSAASampleCount")
                 case "x1":
@@ -64,18 +81,18 @@ class ApplyFunctions:
 
         msaaapply(msaa)
         # FPS limit
-        genconfig.UpdateFflags("DFIntTaskSchedulerTargetFps",fpslimit)
-        genconfig.UpdateFflags("FFlagGameBasicSettingsFramerateCap5",True)
-        genconfig.UpdateFflags("FFlagTaskSchedulerLimitTargetFpsTo2402",False)
+        genconfig.UpdateFflags("DFIntTaskSchedulerTargetFps", fpslimit)
+        genconfig.UpdateFflags("FFlagGameBasicSettingsFramerateCap5", True)
+        genconfig.UpdateFflags("FFlagTaskSchedulerLimitTargetFpsTo2402", False)
         # Disnabel Discord RPC
-        genconfig.UpdateSoberConfig("discord_rpc_enabled",rpc1)
+        genconfig.UpdateSoberConfig("discord_rpc_enabled", rpc1)
         # Disable Player shadows
-        if disableprsh == True :
+        if disableprsh == True:
             genconfig.UpdateFflags("FIntRenderShadowIntensity", "0")
             genconfig.Update("lution", "disableplayersh", True)
         else:
             genconfig.UpdateFflags("FIntRenderShadowIntensity", "75")
-            genconfig.Update("lution","disableplayersh", False)
+            genconfig.Update("lution", "disableplayersh", False)
         # Render Technology
         if rendertech == "OpenGL":
             genconfig.UpdateSoberConfig("use_opengl", True)
@@ -88,26 +105,69 @@ class ApplyFunctions:
 
         # force Overwrite meshes
         ff.OverwriteFiles(
-            os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/avatar/meshes/"),
+            os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/avatar/meshes/"
+            ),
             [
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/mesh/leftarm.mesh")),
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/mesh/rightarm.mesh")),
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/mesh/leftleg.mesh")),
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/mesh/rightleg.mesh")),
-                os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/mesh/torso.mesh")),
-            ]
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__), "../../files/mesh/leftarm.mesh"
+                    )
+                ),
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__), "../../files/mesh/rightarm.mesh"
+                    )
+                ),
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__), "../../files/mesh/leftleg.mesh"
+                    )
+                ),
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__), "../../files/mesh/rightleg.mesh"
+                    )
+                ),
+                os.path.abspath(
+                    os.path.join(
+                        os.path.dirname(__file__), "../../files/mesh/torso.mesh"
+                    )
+                ),
+            ],
         )
         # use old roblox sounds
-        genconfig.Update("lution","OldRlbxSd",useoldrobloxsounds)
+        genconfig.Update("lution", "OldRlbxSd", useoldrobloxsounds)
         if useoldrobloxsounds:
             ff.OverwriteFiles(
-                os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/sounds/"),
+                os.path.expanduser(
+                    "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/sounds/"
+                ),
                 [
-                    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/sounds/action_footsteps_plastic.mp3")),
-                    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/sounds/action_get_up.mp3")),
-                    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/sounds/action_jump.mp3")),
-                    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/sounds/ouch.ogg")),
-                ]
+                    os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__),
+                            "../../files/sounds/action_footsteps_plastic.mp3",
+                        )
+                    ),
+                    os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__),
+                            "../../files/sounds/action_get_up.mp3",
+                        )
+                    ),
+                    os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__),
+                            "../../files/sounds/action_jump.mp3",
+                        )
+                    ),
+                    os.path.abspath(
+                        os.path.join(
+                            os.path.dirname(__file__), "../../files/sounds/ouch.ogg"
+                        )
+                    ),
+                ],
             )
 
     def Applyfflags(self, fflags):
@@ -136,28 +196,28 @@ class ApplyFunctions:
         if flag == False:
             return "Off"
         else:
-            match flag2 :
-                case 1 :
+            match flag2:
+                case 1:
                     return "x1"
-                case 2 : 
+                case 2:
                     return "x2"
-                case 4 :
+                case 4:
                     return "x4"
                 case _:
                     return "Auto"
-                
+
     def LoadTextureQuality(self):
         flag = genconfig.ReadFflagsConfig("DFIntTextureQualityOverride")
-        match flag :
-            case 0 :
+        match flag:
+            case 0:
                 return "Level 0 (potato)"
-            case 1 :
+            case 1:
                 return "Level 1 (Low)"
-            case 2 :
-                return "Level 2 (Medium)"    
-            case 3 :
+            case 2:
+                return "Level 2 (Medium)"
+            case 3:
                 return "Level 3 (High)"
-            case 4 :
+            case 4:
                 return "Level 4 (Ultra)"
             case _:
                 return "Off"
@@ -170,10 +230,13 @@ class ApplyFunctions:
         else:
             return False
 
-
     def UpdateCursor(self, cursortype):
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files"))
-        CursorFolder = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/textures/Cursors/KeyboardMouse")
+        base_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../files")
+        )
+        CursorFolder = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/textures/Cursors/KeyboardMouse"
+        )
 
         def cursor_file(*parts):
             return os.path.join(base_dir, *parts)
@@ -185,9 +248,9 @@ class ApplyFunctions:
                     cursor_file("customcursor", "new", "ArrowCursor.png"),
                     cursor_file("customcursor", "new", "ArrowFarCursor.png"),
                     cursor_file("customcursor", "new", "IBeamCursor.png"),
-                ]
+                ],
             )
-            genconfig.Update("lution","CursorType", "Default")
+            genconfig.Update("lution", "CursorType", "Default")
         elif cursortype == "Old 2007 Cursor":
             ff.OverwriteFiles(
                 CursorFolder,
@@ -195,9 +258,9 @@ class ApplyFunctions:
                     cursor_file("customcursor", "old2006", "ArrowCursor.png"),
                     cursor_file("customcursor", "old2006", "ArrowFarCursor.png"),
                     cursor_file("customcursor", "old2006", "IBeamCursor.png"),
-                ]
+                ],
             )
-            genconfig.Update("lution","CursorType", "Old 2007 Cursor")
+            genconfig.Update("lution", "CursorType", "Old 2007 Cursor")
         elif cursortype == "Old 2013 Cursor":
             ff.OverwriteFiles(
                 CursorFolder,
@@ -205,16 +268,22 @@ class ApplyFunctions:
                     cursor_file("customcursor", "old2013", "ArrowCursor.png"),
                     cursor_file("customcursor", "old2013", "ArrowFarCursor.png"),
                     cursor_file("customcursor", "old2013", "IBeamCursor.png"),
-                ]
+                ],
             )
-            genconfig.Update("lution","CursorType", "Old 2013 Cursor")
+            genconfig.Update("lution", "CursorType", "Old 2013 Cursor")
         else:
             st.error("Invalid cursor type selected.")
-    
+
     def createdesktopentry(self):
-        boostrap = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../boostrap.sh"))
-        lutiondir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
-        icon = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../files/lution1.png"))
+        boostrap = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../boostrap.sh")
+        )
+        lutiondir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../../../")
+        )
+        icon = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../files/lution1.png")
+        )
         desktopentrydir = os.path.expanduser("~/.local/share/applications")
         os.makedirs(desktopentrydir, exist_ok=True)
 
@@ -238,18 +307,19 @@ python boostrap.py
 
 """
 
-        with open(desktopentrypath, 'w') as f:
+        with open(desktopentrypath, "w") as f:
             f.write(entrycontent)
-        
-        with open(boostrap, 'w') as f:
+
+        with open(boostrap, "w") as f:
             f.write(boostrapshcontent)
 
         os.chmod(desktopentrypath, 0o755)  # make it executable
         genconfig.UpdateFflags("FStringDebugLuaLogPattern", "ExpChat/mountClientApp")
         genconfig.UpdateFflags("FStringDebugLuaLogLevel", "trace")
 
-    
     def removedesktopentry(self):
-        desktopentrydir = os.path.expanduser("~/.local/share/applications/Lution.desktop")
+        desktopentrydir = os.path.expanduser(
+            "~/.local/share/applications/Lution.desktop"
+        )
         if os.path.exists(desktopentrydir):
             os.remove(desktopentrydir)

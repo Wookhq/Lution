@@ -2,23 +2,24 @@ import requests
 import json
 
 
-class contributors():
+class contributors:
     def __init__(self):
         self.contributors = []
 
     def get_contributors(self):
-        response = requests.get("https://api.github.com/repos/Wookhq/Lution/contributors")
+        response = requests.get(
+            "https://api.github.com/repos/Wookhq/Lution/contributors"
+        )
 
         if response.status_code == 200:
             self.contributors = [
-                c for c in response.json()
-                if c.get("login") not in ["crowdin-bot"]
+                c for c in response.json() if c.get("login") not in ["crowdin-bot"]
             ]
             return self.contributors
         else:
             print(f"Error: {response.status_code}")
             return None
-        
+
     def get_bio(self, username):
         if username == "gio-exe":
             return "i untangle spaghetti code"
@@ -29,4 +30,3 @@ class contributors():
         else:
             print(f"Error: {response.status_code}")
             return None
-            

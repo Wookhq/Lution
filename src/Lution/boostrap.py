@@ -4,7 +4,16 @@ import re
 import datetime
 import threading
 import csv
-from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QPushButton
+from PySide6.QtWidgets import (
+    QApplication,
+    QSystemTrayIcon,
+    QMenu,
+    QTableWidget,
+    QTableWidgetItem,
+    QFileDialog,
+    QMessageBox,
+    QPushButton,
+)
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, QEvent, Signal, QObject
@@ -13,8 +22,10 @@ chat_pattern = re.compile(r"Success Text: (.*)")
 player_pattern = re.compile(r"Player (added|removed): (.+) (\d+)")
 chat_player_pattern = re.compile(r"Player (\d+): (.+)")
 
+
 def timestamp():
     return datetime.datetime.now().strftime("%H:%M:%S")
+
 
 class MainApp(QObject):
     finished_signal = Signal()
@@ -93,35 +104,48 @@ class MainApp(QObject):
             return True
         return super().eventFilter(obj, event)
 
-
     def closeEvent(self, event):
         event.ignore()
         self.window.hide()
-    
+
     def save_logs(self):
-        default_filename = f"LutionLogs_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-        file_path, _ = QFileDialog.getSaveFileName(self.window, "Save Logs", default_filename, "CSV Files (*.csv)")
+        default_filename = (
+            f"LutionLogs_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+        )
+        file_path, _ = QFileDialog.getSaveFileName(
+            self.window, "Save Logs", default_filename, "CSV Files (*.csv)"
+        )
 
         if not file_path:
-            return  
+            return
 
         try:
             self._save_table_to_csv(self.chat_table, f"{file_path}_chat.csv")
-            
+
             if self.join_table:
                 self._save_table_to_csv(self.join_table, f"{file_path}_join.csv")
-            
-            QMessageBox.information(self.window, "Save Successful", f"Logs saved successfully to {file_path}_chat.csv and {file_path}_join.csv.")
+
+            QMessageBox.information(
+                self.window,
+                "Save Successful",
+                f"Logs saved successfully to {file_path}_chat.csv and {file_path}_join.csv.",
+            )
         except Exception as e:
-            QMessageBox.critical(self.window, "Save Failed", f"An error occurred while saving the logs: {e}")
+            QMessageBox.critical(
+                self.window,
+                "Save Failed",
+                f"An error occurred while saving the logs: {e}",
+            )
 
     def _save_table_to_csv(self, table, filename):
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
+        with open(filename, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            
-            header = [table.horizontalHeaderItem(i).text() for i in range(table.columnCount())]
+
+            header = [
+                table.horizontalHeaderItem(i).text() for i in range(table.columnCount())
+            ]
             writer.writerow(header)
-            
+
             for row in range(table.rowCount()):
                 row_data = []
                 for col in range(table.columnCount()):
@@ -152,7 +176,7 @@ class MainApp(QObject):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                bufsize=1
+                bufsize=1,
             )
             for line in proc.stdout:
                 line = line.strip()
@@ -191,6 +215,7 @@ def main():
     app = QApplication(sys.argv)
     main_app = MainApp()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

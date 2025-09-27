@@ -13,18 +13,19 @@ ff = FilesFunctions()
 
 authtoken = cf.Read("marketplace", "githubtoken")
 
-if authtoken is None:   
+if authtoken is None:
     g = auth()
 else:
     g = auth(authtoken)
-    
+
+
 class MarketplaceManager:
     def __init__(self, github_obj):
         self.g = github_obj
 
     def Unzip(self, zip_file_path, extract_to_path):
         try:
-            with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
                 zip_ref.extractall(extract_to_path)
             print(f"Successfully extracted '{zip_file_path}' to '{extract_to_path}'")
         except FileNotFoundError:
@@ -38,22 +39,30 @@ class MarketplaceManager:
         repo = self.g.get_repo(repo_name)
         for attempt in range(max_retries):
             try:
-                print(f"Attempting to download '{file_path}' from '{repo_name}' (Attempt {attempt + 1}/{max_retries})")
+                print(
+                    f"Attempting to download '{file_path}' from '{repo_name}' (Attempt {attempt + 1}/{max_retries})"
+                )
                 file_content = repo.get_contents(file_path)
-                if file_content.encoding == 'base64':
+                if file_content.encoding == "base64":
                     content = base64.b64decode(file_content.content)
                 else:
                     content = file_content.decoded_content
 
                 try:
                     print(f"[debug] output_path: {output_path}")
-                    print(f"[debug] parent dir exists: {os.path.exists(os.path.dirname(output_path))}")
-                    print(f"[debug] parent dir writable: {os.access(os.path.dirname(output_path), os.W_OK)}")
+                    print(
+                        f"[debug] parent dir exists: {os.path.exists(os.path.dirname(output_path))}"
+                    )
+                    print(
+                        f"[debug] parent dir writable: {os.access(os.path.dirname(output_path), os.W_OK)}"
+                    )
                     print(f"[debug] file size to write: {len(content)} bytes")
-                    
+
                     with open(output_path, "wb") as f:
                         f.write(content)
-                    print(f"Successfully downloaded '{file_path}' from '{repo_name}' to '{output_path}'")
+                    print(
+                        f"Successfully downloaded '{file_path}' from '{repo_name}' to '{output_path}'"
+                    )
                     return
                 except OSError as e:
                     print(f"OS error occurred: {e}")
@@ -77,7 +86,9 @@ class MarketplaceManager:
 
         repo_name = cf.Read("marketplace", "marketplaceprd")
         repo = self.g.get_repo(repo_name)
-        download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
+        download_dir = os.path.expanduser(
+            f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}"
+        )
         os.makedirs(download_dir, exist_ok=True)
 
         if type == "theme":
@@ -116,7 +127,9 @@ class MarketplaceManager:
 
     def RemoveMarketplace(self, Name, Type):
         print("funtion called")
-        path = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{Type}s/{Name}")
+        path = os.path.expanduser(
+            f"~/Documents/Lution/Lution Marketplace/{Type}s/{Name}"
+        )
         if Type == "mod":
             cf.RemoveValueFromList("marketplace", "InstalledMods", Name)
             if os.path.isdir(path):
@@ -128,13 +141,15 @@ class MarketplaceManager:
 
     def ApplyMarketplace(self, Name, type):
         ff.ResetMods2()
-        download_dir = os.path.expanduser(f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}")
+        download_dir = os.path.expanduser(
+            f"~/Documents/Lution/Lution Marketplace/{type}s/{Name}"
+        )
         ff.ApplyMarketplaceMods(download_dir)
-   
+
     def get_fastflag_content(self, repo_name, file_path):
         repo = self.g.get_repo(repo_name)
         file_content = repo.get_contents(file_path)
-        if file_content.encoding == 'base64':
+        if file_content.encoding == "base64":
             content = base64.b64decode(file_content.content)
         else:
             content = file_content.decoded_content

@@ -12,7 +12,7 @@ ff = FilesFunctions()
 cf = Config()
 af = ApplyFunctions()
 
-log.info('Page : Apperance')
+log.info("Page : Apperance")
 
 ff.JsonSetup()
 curcf = cf.Read("lution", "CursorType")
@@ -31,30 +31,29 @@ st.header(LANG["lution.tab.appearance"])
 st.session_state.customfont = st.file_uploader(
     LANG["lution.appearance.uploader.customfont"],
     type=["ttf", "otf"],
-    key="custom_font_uploader"
+    key="custom_font_uploader",
+)
+st.button(LANG["lution.appearance.button.applyfont"], on_click=lambda: ff.ApplyFont())
+st.session_state.cursor = st.selectbox(
+    LANG["lution.appearance.mutichoices.cursor"],
+    ["Default", "Old 2007 Cursor", "Old 2013 Cursor"],
+    index=["Default", "Old 2007 Cursor", "Old 2013 Cursor"].index(
+        st.session_state.cursor
+    ),
 )
 st.button(
-    LANG["lution.appearance.button.applyfont"],
-    on_click=lambda : ff.ApplyFont()
-    )
-st.session_state.cursor = st.selectbox(
-        LANG["lution.appearance.mutichoices.cursor"],
-        ["Default", "Old 2007 Cursor", "Old 2013 Cursor"],
-        index=["Default", "Old 2007 Cursor", "Old 2013 Cursor"].index(st.session_state.cursor)
-    )
-st.button(
-        LANG["lution.appearance.button.applycursor"],
-        on_click=lambda: af.UpdateCursor(st.session_state.cursor),
-        key="apply_cursor_button"
-    )
-
-
+    LANG["lution.appearance.button.applycursor"],
+    on_click=lambda: af.UpdateCursor(st.session_state.cursor),
+    key="apply_cursor_button",
+)
 
 
 st.markdown(LANG["lution.appearance.text.laucher"])
-st.markdown("""
+st.markdown(
+    """
 no im not gonna do that 
-""")
+"""
+)
 
-#but i might :3
-#todo: work on launcher customization
+# but i might :3
+# todo: work on launcher customization

@@ -12,11 +12,12 @@ from modules.mod.fontreplacer import Replace
 from modules.mod.clientsettings import ClientSettings
 
 stt = STMessages()
+
+
 class FilesFunctions:
     def __init__(self):
         self.client_settings = ClientSettings()
 
-    
     def OverwriteFiles(self, dest_dir, src_files):
         os.makedirs(dest_dir, exist_ok=True)
 
@@ -53,8 +54,6 @@ class FilesFunctions:
         if not no_success:
             stt.success()
 
-
-
     def JsonSetup(self, filename="LutionConfig.json", default_data=None):
         documents_dir = os.path.expanduser("~/Documents/Lution/")
         os.makedirs(documents_dir, exist_ok=True)
@@ -71,7 +70,6 @@ class FilesFunctions:
                 toml.dump(default_data if default_data is not None else {}, f)
 
         return toml_path
-
 
     def JsonSetup(self, filename="LutionConfig.json", default_data=None):
         documents_dir = os.path.expanduser("~/Documents/Lution/")
@@ -96,9 +94,6 @@ class FilesFunctions:
             os.makedirs(mods_dir)
         self.OpenFolder(mods_dir)
 
-
-
-
     def OpenFolder(self, path):
         self.OverlaySetup()
         if platform.system() == "Darwin":  # macOS shiz
@@ -106,10 +101,10 @@ class FilesFunctions:
         else:  # Linux and others
             subprocess.Popen(["xdg-open", path])
 
-
-
     def OverlaySetup(self):
-        dest_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay")
+        dest_dir = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay"
+        )
         src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets")
 
         os.makedirs(dest_dir, exist_ok=True)
@@ -125,10 +120,13 @@ class FilesFunctions:
                 else:
                     shutil.copy2(s, d)
 
-
     def Fontsetup(self):
-        dest_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/")
-        src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/fonts/")
+        dest_dir = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/"
+        )
+        src_dir = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/fonts/"
+        )
 
         os.makedirs(dest_dir, exist_ok=True)
 
@@ -145,29 +143,70 @@ class FilesFunctions:
 
     def ApplyMods(self):
         with st.spinner("Applying mods..."):
-            dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ExtraContent/")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/content/")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],no_success=True)
-            self.client_settings.CheckClientSettings("~/Documents/Lution/Mods/ClientSettings")
-            stt.warning("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
+            dest_dirr = os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/"
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser("~/Documents/Lution/Mods/ExtraContent/")],
+                no_success=True,
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser("~/Documents/Lution/Mods/content/")],
+                no_success=True,
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser("~/Documents/Lution/Mods/ClientSettings")],
+                no_success=True,
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser("~/Documents/Lution/Mods/PlatformContent")],
+                no_success=True,
+            )
+            self.client_settings.CheckClientSettings(
+                "~/Documents/Lution/Mods/ClientSettings"
+            )
+            stt.warning(
+                "Restart Sober to apply the mods. If you not opened Sober, you can ignore this message."
+            )
 
     def ApplyMarketplaceMods(self, dir):
         with st.spinner("Applying mods..."):
-            dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ExtraContent/")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/content/")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/ClientSettings")],no_success=True)
-            self.OverwriteFolders(dest_dirr, [os.path.expanduser(f"{dir}/PlatformContent")],no_success=True)
+            dest_dirr = os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/"
+            )
+            self.OverwriteFolders(
+                dest_dirr, [os.path.expanduser(f"{dir}/ExtraContent/")], no_success=True
+            )
+            self.OverwriteFolders(
+                dest_dirr, [os.path.expanduser(f"{dir}/content/")], no_success=True
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser(f"{dir}/ClientSettings")],
+                no_success=True,
+            )
+            self.OverwriteFolders(
+                dest_dirr,
+                [os.path.expanduser(f"{dir}/PlatformContent")],
+                no_success=True,
+            )
             self.client_settings.CheckClientSettings(f"{dir}/ClientSettings")
-            stt.warning("Restart Sober to apply the mods. If you not opened Sober, you can ignore this message.")
-
+            stt.warning(
+                "Restart Sober to apply the mods. If you not opened Sober, you can ignore this message."
+            )
 
     def ResetMods(self):
         with st.spinner("Resetting mods..."):
-            dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/")
-            src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/")
+            dest_dirr = os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/"
+            )
+            src_dir = os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/assets/"
+            )
             if not os.path.isdir(src_dir):
                 st.warning(f"Source directory does not exist: {src_dir}")
                 return
@@ -183,11 +222,13 @@ class FilesFunctions:
                     shutil.copy2(s, d)
             stt.success()
 
-
-
     def ResetMods2(self):
-        dest_dirr = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/")
-        src_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/")
+        dest_dirr = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/"
+        )
+        src_dir = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/"
+        )
         if not os.path.isdir(src_dir):
             return
         if os.path.isdir(dest_dirr):
@@ -201,34 +242,41 @@ class FilesFunctions:
             else:
                 shutil.copy2(s, d)
 
-
-
     def OverwriteEmoji(self, dest_dir):
-        src_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../files/RobloxEmoji.ttf'))
+        src_file = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../files/RobloxEmoji.ttf")
+        )
         os.makedirs(dest_dir, exist_ok=True)
         dest_file = os.path.join(dest_dir, os.path.basename(src_file))
         shutil.copy2(src_file, dest_file)
-
 
     def ApplyFont(self):
         with st.spinner(LANG["lution.spinner.applyfont"]):
             if st.session_state.customfont:
                 # setup the overlay
                 self.Fontsetup()
-                font_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts")
+                font_dir = os.path.expanduser(
+                    "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"
+                )
                 os.makedirs(font_dir, exist_ok=True)
                 font_path = os.path.join(font_dir, st.session_state.customfont.name)
                 with open(font_path, "wb") as f:
                     f.write(st.session_state.customfont.getbuffer())
                 Replace(
                     font_path,
-                    os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts")
+                    os.path.expanduser(
+                        "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"
+                    ),
                 )
                 try:
                     os.remove(font_path)
                 except Exception as e:
                     stt.warning(f"Could not delete temp font: {e}")
-                self.OverwriteEmoji(os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"))
+                self.OverwriteEmoji(
+                    os.path.expanduser(
+                        "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"
+                    )
+                )
                 stt.success(LANG["lution.message.success.fontapplied"])
             else:
                 stt.warning(LANG["lution.appearance.warning.customfontnotuploaded"])
