@@ -1,4 +1,6 @@
 import json
+import zipfile
+import shutil
 from pathlib import Path
 from modules.utils.logging import log
 from modules.config.genconfig import Config
@@ -73,10 +75,96 @@ class crossover:
                 try:
                     lg.info("CROSSOVER : Applying mods ...")
                     ff.ApplyMarketplaceMods(mod_path)
-                    
+
                 except Exception as e:
                     lg.error(f"Unkown error : {e}")
             
         except KeyError as e:
             lg.error(f"Missing key: {e}")
             return f"Missing {e}"
+    
+    def create(self, folder: str | Path, roblox_platform: str = "android", crossover_version: int = 1):
+        folder = Path(folder).expanduser()
+        folder.mkdir(parents=True, exist_ok=True)
+
+        lg.info(f"CROSSOVER CREATE : Creating new crossover folder at {folder}")
+
+        crossover_json = {
+            "metadata": {
+                "crossoverVerison": crossover_version,
+                "from": "linux",
+                "roblox": roblox_platform,
+                "date": "unknown"
+            },
+            "crossover": {
+                "fastflag": "./roblox/clientsettings/ClientSettings.json",
+                "mod": "./roblox/mod/"
+            }
+        }
+
+        crossover_file = folder / "crossover.json"
+        crossover_file.write_text(json.dumps(crossover_json, indent=4), encoding="utf-8")
+        lg.info(f"CROSSOVER CREATE : Wrote crossover.json at {crossover_file}")
+
+        clientsettings_folder = folder / "roblox" / "clientsettings"
+        clientsettings_folder.mkdir(parents=True, exist_ok=True)
+
+        mod_folder = folder / "roblox" / "mod"
+        mod_folder.mkdir(parents=True, exist_ok=True)
+
+        source_mods = Path("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/").expanduser()
+        if source_mods.exists() and source_mods.is_dir():
+            lg.info(f"CROSSOVER CREATE : Copying mods from {source_mods} to {mod_folder}")
+            for item in source_mods.iterdir():
+                dest = mod_folder / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
+        else:
+            lg.info(f"CROSSOVER CREATE : No mods found in {source_mods}")
+
+        clientsettings = cg.ReadSoberConfig('fflags')
+        dump = json.dumps(clientsettings, indent=4)
+        (clientsettings_folder / "ClientSettings.json").write_text(dump, encoding="utf-8")
+        lg.info(f"CROSSOVER CREATE : Created placeholder ClientSettings.json")
+
+        lg.info(f"CROSSOVER CREATE : Created mod folder at {mod_folder}")
+
+        return folder
+
+    def pack(self, folder: str | Path):
+        folder = Path(folder)
+        if not folder.exists() or not folder.is_dir():
+            lg.error(f"CROSSOVER PACK : Folder not found at {folder}")
+            return
+
+        crossover_file = folder.with_suffix(".crossover")  
+        lg.info(f"CROSSOVER PACK : Creating {crossover_file}")
+
+        with zipfile.ZipFile(crossover_file, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file in folder.rglob("*"):
+                zf.write(file, arcname=file.relative_to(folder))
+        
+        lg.info(f"CROSSOVER PACK : Finished packing {crossover_file}")
+        return crossover_file
+    
+    def unpack(self, crossover_file: str | Path, dest_folder: str | Path = None):
+        crossover_file = Path(crossover_file)
+        if not crossover_file.exists() or crossover_file.suffix != ".crossover":
+            lg.error(f"CROSSOVER UNPACK : File not found or invalid extension {crossover_file}")
+            return
+
+        if dest_folder is None:
+            dest_folder = crossover_file.with_suffix("") 
+        else:
+            dest_folder = Path(dest_folder)
+
+        dest_folder.mkdir(parents=True, exist_ok=True)
+        lg.info(f"CROSSOVER UNPACK : Extracting {crossover_file} to {dest_folder}")
+
+        with zipfile.ZipFile(crossover_file, "r") as zf:
+            zf.extractall(dest_folder)
+
+        lg.info(f"CROSSOVER UNPACK : Finished extracting to {dest_folder}")
+        return dest_folder
