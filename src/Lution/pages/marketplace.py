@@ -273,7 +273,7 @@ with installed:
                     st.markdown(f"- {t}")
                 with colmid1:
                     if st.button(
-                        f"{LANG["lution.marketplace.installed.apply"]} {t}",
+                        f'{LANG["lution.marketplace.installed.apply"]} {t}',
                         use_container_width=True,
                     ):
                         with st.spinner("Applying theme..."):
@@ -281,7 +281,7 @@ with installed:
                             ApplyMarketplace(t, "theme")
                 with colright1:
                     if st.button(
-                        f"{LANG["lution.marketplace.installed.delete"]}",
+                        f'{LANG["lution.marketplace.installed.delete"]}',
                         key=f"deletebutton_{t}",
                         use_container_width=True,
                     ):
@@ -307,7 +307,7 @@ with installed:
                             ApplyMarketplace(m, "mod")
                 with colright2:
                     if st.button(
-                        f"{LANG["lution.marketplace.installed.delete"]}",
+                        f'{LANG["lution.marketplace.installed.delete"]}',
                         key=f"deletebutton_{m}",
                         use_container_width=True,
                     ):
