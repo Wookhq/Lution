@@ -1,5 +1,4 @@
 #!/bin/bash
-./update.sh
 clear
 
 banner() {
