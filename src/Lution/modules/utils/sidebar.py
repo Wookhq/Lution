@@ -19,7 +19,7 @@ def InitSidebar():
     st.logo(image="files/spookylogo.svg", icon_image="files/spookylogo.svg")
     st.sidebar.markdown("<h2>Lution</h2>", unsafe_allow_html=True)
     st.sidebar.badge("Stable", icon=":material/check:", color="green")
-    st.sidebar.caption("Version 0.2.9r")
+    st.sidebar.caption("Version 0.3.0r")
 
     st.sidebar.page_link("main.py", label="Home", icon="🏠")
     st.sidebar.page_link(
