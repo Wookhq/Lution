@@ -46,9 +46,6 @@ class Backend(QObject):
     def setBackendParent(self, parent):
         self.parent = parent
 
-    @Slot()
-    def getClips(self):
-        self.parent.load_clips()
 
     @Slot(result=str)
     def getVersion(self):
