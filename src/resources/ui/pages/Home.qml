@@ -16,5 +16,4 @@ FluentPage {
         text: qsTr("Wellcome back!")
     }
 
-
 }
