@@ -34,3 +34,4 @@ env/
 .latest_commit_cache
 app.log
 src/RinUI/config/rin_ui.json
+src/resources_rc.py

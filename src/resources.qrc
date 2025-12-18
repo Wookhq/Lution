@@ -1,0 +1,14 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file>resources/playerlogs.ui</file>
+    <file>resources/RobloxEmoji.ttf</file>
+    <file>resources/spooky.svg</file>
+    <file>resources/spookylogo.svg</file>
+    <file>resources/sounds/action_footsteps_plastic.mp3</file>
+    <file>resources/sounds/action_get_up.mp3</file>
+    <file>resources/sounds/action_jump.mp3</file>
+    <file>resources/sounds/ouch.ogg</file>
+    <file>resources/ui/MainWindow.qml</file>
+  </qresource>
+</RCC>
