@@ -56,6 +56,6 @@ FluentWindow {
     Component { id: homePage; Home {} }
     Component { id: modPage; Mods {} }
 //    Component { id: intergation; PlayerLog {} }
-    Component { id: marketplace; Marketplace {} }
+    Component { id: marketplace; MarketplaceTest {} }
 
 }

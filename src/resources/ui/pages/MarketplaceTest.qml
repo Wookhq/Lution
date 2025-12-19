@@ -8,11 +8,23 @@ FluentPage {
     id: root
     title: "Marketplace"
 
+
+    Component.onCompleted: {
+        Backend.getMarketplaceItems()
+    }
+
     ListModel {
         id: clipModel
-        ListElement { title: "cool clip #1"; desc: "2025-01-01"}
-        ListElement { title: "banger clip #2"; desc: "2025-01-02" }
-        ListElement { title: "mid clip #3"; desc: "2025-01-03" }
+    }
+
+    Connections {
+        target: Backend
+        function onMarketplaceReady(list) {
+            clipModel.clear()
+            for (var i = 0; i < list.length; i++) {
+                clipModel.append(list[i])
+            }
+        }
     }
 
    ScrollView {

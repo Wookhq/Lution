@@ -5,10 +5,10 @@ import subprocess
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Signal, QObject, Slot
+from PySide6.QtCore import Signal, QObject, Slot, QTranslator, QLocale
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from RinUI import RinUIWindow
+from RinUI import RinUIWindow, RinUITranslator
 import resources_rc
 
 SCRIPT_DIR = Path(__file__).parent
@@ -79,7 +79,7 @@ class AppInit(RinUIWindow):
 
 
 class Backend(QObject):
-    clipsReady = Signal(list)
+    marketplaceReady = Signal(list)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -124,12 +124,45 @@ class Backend(QObject):
         modpath = Path("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay").expanduser()
         subprocess.Popen(["xdg-open", str(modpath)])
 
+    @Slot()
+    def getMarketplaceItems(self):
+        items = [
+            {
+                "title": "Marketplace mod 1",
+                "desc": "seia",
+            },
+            {
+                "title": "Marketplace mod 2",
+                "desc": "mika",
+            },
+            {
+                "title": "Marketplace mod 3",
+                "desc": "nagisa",
+            }
+        ]
+        self.marketplaceReady.emit(items)
 
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
+    # pick language (hardcoded for now)
+    lang = "vi_VN" # QLocale.system().name()  # e.g. en_US, vi_VN
+
+    ui_translator = RinUITranslator(QLocale(lang))
+    app.installTranslator(ui_translator)
+
+    translator = QTranslator()
+    lang_file = SCRIPT_DIR / "resources" / "i18n" / f"{lang}.qm"
+
+    if lang_file.exists():
+        translator.load(str(lang_file))
+        app.installTranslator(translator)
+    else:
+        print("no language file, falling back to english")
+
     window = AppInit()
     window.show()
+
     app.exec()
