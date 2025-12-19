@@ -10,7 +10,7 @@ import "pages/playerlog"
 FluentWindow {
     id: window
     visible: true
-    width: 1200
+    width: 1278
     height: 700
     minimumWidth: 550
     minimumHeight: 400
@@ -25,7 +25,7 @@ FluentWindow {
             {
                 icon: "ic_fluent_shopping_bag_20_regular",
                 title: qsTr("Marketplace"),
-                // page: cloudPage
+                page: marketplace
             },
             {
                 icon : "ic_fluent_box_20_regular",
@@ -56,6 +56,6 @@ FluentWindow {
     Component { id: homePage; Home {} }
     Component { id: modPage; Mods {} }
 //    Component { id: intergation; PlayerLog {} }
-    // Component { id: cloudPage; Cloud {} }
+    Component { id: marketplace; Marketplace {} }
 
 }
