@@ -1,7 +1,8 @@
-import sys, os, webbrowser
+import sys, webbrowser
 import darkdetect  # installed in rinui
 from pathlib import Path
 import subprocess
+from modules.config import Config
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication
@@ -17,12 +18,13 @@ __version__ = "0.1.0"
 
 # rcs = Resource(SCRIPT_DIR=SCRIPT_DIR)  # new method
 
+cfg = Config(Path("LutionConfig.toml"))
+
 
 class AppInit(RinUIWindow):
     def __init__(self):
         qml_file = SCRIPT_DIR / "resources" / "ui" / "MainWindow.qml"
         super().__init__(str(qml_file))
-
 
         # backend
         self.backend = Backend()
@@ -31,7 +33,7 @@ class AppInit(RinUIWindow):
 
         # title
         self.setProperty("title", "LutionRT")
-        
+
         QApplication.instance().setQuitOnLastWindowClosed(False)
 
         self.initTray()
@@ -41,7 +43,6 @@ class AppInit(RinUIWindow):
             "application-x-executable",
         )
 
-
         self.tray = QSystemTrayIcon(icon, QApplication.instance())
 
         menu = QMenu()
@@ -49,8 +50,6 @@ class AppInit(RinUIWindow):
         about = QAction("LutionRT", QApplication.instance())
         show_action = QAction("Show", QApplication.instance())
         quit_action = QAction("Quit", QApplication.instance())
-
-
 
         show_action.triggered.connect(self.show)
         quit_action.triggered.connect(QApplication.quit)
@@ -64,18 +63,15 @@ class AppInit(RinUIWindow):
 
         self.tray.activated.connect(self.onTrayClick)
 
-
     def onTrayClick(self, reason):
         if reason == QSystemTrayIcon.Trigger:
             self.show()
             self.raise_()
             self.activateWindow()
 
-
     def closeEvent(self, event):
         event.ignore()
         self.hide()
-
 
 
 class Backend(QObject):
@@ -93,7 +89,6 @@ class Backend(QObject):
 
     def setBackendParent(self, parent):
         self.parent = parent
-
 
     @Slot(result=str)
     def getVersion(self):
@@ -114,14 +109,16 @@ class Backend(QObject):
     @Slot(str, result=str)
     def findResource(self, resource):
         return self.resc.find(resource)
-    
+
     @Slot(str)
     def openInBroswer(self, url):
         webbrowser.open(url=url)
 
     @Slot()
     def openModFolder(self):
-        modpath = Path("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay").expanduser()
+        modpath = Path(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay"
+        ).expanduser()
         subprocess.Popen(["xdg-open", str(modpath)])
 
     @Slot()
@@ -138,29 +135,61 @@ class Backend(QObject):
             {
                 "title": "Marketplace mod 3",
                 "desc": "nagisa",
-            }
+            },
         ]
         self.marketplaceReady.emit(items)
+
+    @Slot(result=str)
+    def getSystemLanguage(self):
+        return QLocale.system().name()
+
+    @Slot(result=str)
+    def getLanguage(self):
+        return cfg.get_row("Lutionconfig", "language")
+
+    @Slot(str)
+    def setLanguage(self, lang: str):
+        global ui_translator, translator
+
+        app = QApplication.instance()
+        lang_path = SCRIPT_DIR / "resources" / "i18n" / f"{lang}.qm"
+
+        if not lang_path.exists():
+            lang = "en_US"
+            lang_path = SCRIPT_DIR / "resources" / "i18n" / f"{lang}.qm"
+
+        cfg.add_row("Lution", "language", lang)
+        cfg.save()
+
+        app.removeTranslator(ui_translator)
+        app.removeTranslator(translator)
+
+        ui_translator = RinUITranslator(QLocale(lang))
+        translator = QTranslator()
+        translator.load(str(lang_path))
+
+        app.installTranslator(ui_translator)
+        app.installTranslator(translator)
+
+        self.parent.engine.retranslate()
 
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # pick language (hardcoded for now)
-    lang = "vi_VN" # QLocale.system().name()  # e.g. en_US, vi_VN
+    lang = cfg.get_row("Lutionconfig", "language")
 
     ui_translator = RinUITranslator(QLocale(lang))
     app.installTranslator(ui_translator)
 
     translator = QTranslator()
-    lang_file = SCRIPT_DIR / "resources" / "i18n" / f"{lang}.qm"
+    lang_qm = f":/resources/i18n/{lang}.qm"
 
-    if lang_file.exists():
-        translator.load(str(lang_file))
+    if translator.load(lang_qm):
         app.installTranslator(translator)
     else:
-        print("no language file, falling back to english")
+        print("no language file, falling back to english 🫠")
 
     window = AppInit()
     window.show()

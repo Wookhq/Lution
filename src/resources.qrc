@@ -13,5 +13,9 @@
     <file>resources/ui/components/BigClip.qml</file>
     <file alias="placeholder">resources/placeholders/wallpaper-3.png</file>
     <file>resources/ui/components/marketplace/ItemCard.qml</file>
+    <file>resources/i18n/vi_VN.ts</file>
+    <file>resources/i18n/vi_VN.qm</file>
+    <file>resources/i18n/en_US.ts</file>
+    <file>resources/i18n/en_US.qm</file>
   </qresource>
 </RCC>
