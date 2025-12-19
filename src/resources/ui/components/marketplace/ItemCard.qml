@@ -10,8 +10,10 @@ Frame {
     height: 220
     padding: 0
 
-    property string title: "Example Mod"
-    property string desc: "Placeholder text"
+    property string title: qsTr("Example Mod")
+    property string desc: qsTr("Placeholder text")
+    property string sb: qsTr("Unkown")
+    property string creator: qsTr("Unkown")
     property string img: "qrc:/placeholder"
 
     background: Rectangle {
@@ -113,8 +115,9 @@ Frame {
 
         Flyout {
             id: desc
-            parent: descbutton // Positions the flyout relative to myButton
-            text: root.desc
+            text: qsTr(
+                "Description: %1\nCreator: %2\n%3"
+            ).arg(root.desc).arg(root.creator).arg(root.sb)
         }
     }
 }
