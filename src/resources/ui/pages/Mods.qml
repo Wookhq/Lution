@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
+import QtQuick.Dialogs
 import RinUI
 import "qrc:/resources/ui/components"
 
@@ -32,6 +33,42 @@ FluentPage {
 
                 iconName: "ic_fluent_book_information_20_regular"
 
+            }
+        }
+
+        SettingCard {
+            Layout.fillWidth: true 
+            icon.name: "ic_fluent_text_font_size_20_regular"
+
+            title: qsTr("Custom Cursor")
+            description: qsTr("Change cursor to old/new")
+            content: ComboBox { model: ["Default", "2006", "2013"] }
+        }
+
+
+        SettingCard {
+            Layout.fillWidth: true 
+            icon.name: "ic_fluent_cursor_20_regular"
+
+            title: qsTr("Custom Font")
+            description: qsTr("Set your font to your liking!")
+
+            content: Button {
+                    text: "Open File"
+                    anchors.centerIn: parent
+                    onClicked: fileDialog.open()
+                }
+        }
+
+        FileDialog {
+            id: fileDialog
+            title: qsTr("Select a File")
+            nameFilters: [ "Font File (*.tff)", "All files (*.*)" ]
+            onAccepted: {
+                console.log("Selected file: " + selectedFile)
+            }
+            onRejected: {
+                console.log("Selection cancelled")
             }
         }
     }
