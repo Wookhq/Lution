@@ -1,12 +1,13 @@
 import sys, webbrowser
-import darkdetect  # installed in rinui
+import darkdetect
 from pathlib import Path
 import subprocess
+from time import sleep
 from modules.config import Config
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Signal, QObject, Slot, QTranslator, QLocale
+from PySide6.QtCore import Signal, QObject, Slot, QTranslator, QLocale, QThread
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from RinUI import RinUIWindow, RinUITranslator
@@ -15,10 +16,37 @@ import resources_rc
 SCRIPT_DIR = Path(__file__).parent
 __version__ = "0.1.0"
 
-
-# rcs = Resource(SCRIPT_DIR=SCRIPT_DIR)  # new method
-
 cfg = Config(Path("LutionConfig.toml"))
+
+
+class MarketplaceWorker(QThread):
+    finished = Signal(list)
+    error = Signal(str)
+    
+    def run(self):
+        try:
+            sleep(4)
+            items = [
+                {
+                    "title": "Marketplace mod 1",
+                    "desc": "seia",
+                    "img": "qrc:/resources/images/mod1.png"
+                },
+                {
+                    "title": "Marketplace mod 2",
+                    "desc": "mika",
+                    "img": "qrc:/resources/images/mod2.png"
+                },
+                {
+                    "title": "Marketplace mod 3",
+                    "desc": "nagisa",
+                    "img": "qrc:/resources/images/mod3.png"
+                },
+            ]
+            
+            self.finished.emit(items)
+        except Exception as e:
+            self.error.emit(str(e))
 
 
 class AppInit(RinUIWindow):
@@ -26,7 +54,7 @@ class AppInit(RinUIWindow):
         qml_file = SCRIPT_DIR / "resources" / "ui" / "MainWindow.qml"
         super().__init__(str(qml_file))
 
-        # backend
+        # register backend
         self.backend = Backend()
         self.backend.setBackendParent(self)
         self.engine.rootContext().setContextProperty("Backend", self.backend)
@@ -39,14 +67,10 @@ class AppInit(RinUIWindow):
         self.initTray()
 
     def initTray(self):
-        icon = QIcon.fromTheme(
-            "application-x-executable",
-        )
-
+        icon = QIcon.fromTheme("application-x-executable")
         self.tray = QSystemTrayIcon(icon, QApplication.instance())
 
         menu = QMenu()
-
         about = QAction("LutionRT", QApplication.instance())
         show_action = QAction("Show", QApplication.instance())
         quit_action = QAction("Quit", QApplication.instance())
@@ -60,7 +84,6 @@ class AppInit(RinUIWindow):
 
         self.tray.setContextMenu(menu)
         self.tray.show()
-
         self.tray.activated.connect(self.onTrayClick)
 
     def onTrayClick(self, reason):
@@ -76,16 +99,11 @@ class AppInit(RinUIWindow):
 
 class Backend(QObject):
     marketplaceReady = Signal(list)
+    marketplaceError = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        # self.rpc = VimalPresence("1442032843290181703") as you can tell this code is from vimal
-        # self.resc = rcs
-
-    # @Slot(str, str)
-    # def setPresence(self, state, details):
-    #     print("woops presence changed, presence setin!!!!")
-    #     self.rpc.set(state=state, details=details)  # so confusing mate
+        self.worker = None
 
     def setBackendParent(self, parent):
         self.parent = parent
@@ -106,10 +124,6 @@ class Backend(QObject):
         print("darkdetect:", t)
         return t == "Dark"
 
-    @Slot(str, result=str)
-    def findResource(self, resource):
-        return self.resc.find(resource)
-
     @Slot(str)
     def openInBroswer(self, url):
         webbrowser.open(url=url)
@@ -123,21 +137,36 @@ class Backend(QObject):
 
     @Slot()
     def getMarketplaceItems(self):
-        items = [
-            {
-                "title": "Marketplace mod 1",
-                "desc": "seia",
-            },
-            {
-                "title": "Marketplace mod 2",
-                "desc": "mika",
-            },
-            {
-                "title": "Marketplace mod 3",
-                "desc": "nagisa",
-            },
-        ]
+        """Fetch marketplace items asynchronously"""
+        # Clean up previous worker if exists
+        if self.worker is not None:
+            self.worker.finished.disconnect()
+            self.worker.error.disconnect()
+            self.worker.quit()
+            self.worker.wait()
+        
+        self.worker = MarketplaceWorker()
+        self.worker.finished.connect(self._onMarketplaceLoaded)
+        self.worker.error.connect(self._onMarketplaceError)
+        self.worker.start()
+
+    @Slot(list)
+    def _onMarketplaceLoaded(self, items):
+        print(f"Marketplace loaded: {len(items)} items")
         self.marketplaceReady.emit(items)
+        
+        if self.worker:
+            self.worker.quit()
+            self.worker.wait()
+
+    @Slot(str)
+    def _onMarketplaceError(self, error):
+        print(f"Marketplace error: {error}")
+        self.marketplaceError.emit(error)
+        
+        if self.worker:
+            self.worker.quit()
+            self.worker.wait()
 
     @Slot(result=str)
     def getSystemLanguage(self):
@@ -172,7 +201,6 @@ class Backend(QObject):
         app.installTranslator(translator)
 
         self.parent.engine.retranslate()
-
 
 
 if __name__ == "__main__":
