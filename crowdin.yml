@@ -1,6 +1,37 @@
-project_id_env: CROWDIN_PROJECT_ID
-api_token_env: CROWDIN_PERSONAL_TOKEN
-base_path: .
-files:
-  - source: src/Lution/files/languages/English/*.json
-    translation: src/Lution/files/languages/%language%/%original_file_name%
+#
+# Basic Crowdin CLI configuration
+# See https://crowdin.github.io/crowdin-cli/configuration for more information
+# See https://support.crowdin.com/developer/configuration-file/ for all available options
+#
+
+#
+# Your Crowdin credentials
+#
+"project_id": "856110"
+base_path: "./src"
+"base_url": "https://api.crowdin.com"
+
+#
+# Defines whether to preserve the original directory structure in the Crowdin project
+# Recommended to set to true
+#
+"preserve_hierarchy": true
+
+#
+# Files configuration.
+# See https://support.crowdin.com/developer/configuration-file/ for all available options
+#
+files: [
+  {
+    #
+    # Source files filter
+    # e.g. "/resources/en/*.json"
+    #
+   source: "resources/i18n/en_US.ts",
+    #
+    # Translation files filter
+    # e.g. "/resources/%two_letters_code%/%original_file_name%"
+    #
+    "translation": "resources/i18n/%locale_with_underscore%.%file_extension%",
+  }
+]
