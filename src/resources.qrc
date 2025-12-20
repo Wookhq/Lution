@@ -17,5 +17,7 @@
     <file>resources/i18n/vi_VN.qm</file>
     <file>resources/i18n/en_US.ts</file>
     <file>resources/i18n/en_US.qm</file>
+    <file>resources/QuickPromise/PromiseTimer.qml</file>
+    <file>resources/QuickPromise/promise.js</file>
   </qresource>
 </RCC>
