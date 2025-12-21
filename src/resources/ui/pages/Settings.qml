@@ -100,7 +100,7 @@ FluentPage {
         }
 
         SettingExpander {
-            property string img: "qrc:/placeholder"
+            property string img: "qrc:/logo"
 
             icon.source: img
             width: parent.width

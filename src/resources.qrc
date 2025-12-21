@@ -19,5 +19,7 @@
     <file>resources/i18n/en_US.qm</file>
     <file>resources/QuickPromise/PromiseTimer.qml</file>
     <file>resources/QuickPromise/promise.js</file>
+    <file alias="logo">resources/logo.svg</file>
+    <file alias="logopng">resources/logo.png</file>
   </qresource>
 </RCC>
