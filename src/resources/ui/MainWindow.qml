@@ -5,7 +5,6 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 import RinUI
 import "pages"
-import "pages/playerlog"
 
 FluentWindow {
     id: window
