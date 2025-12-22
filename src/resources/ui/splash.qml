@@ -8,6 +8,7 @@ import "qrc:/resources/ui/components"
 Window {
     id: window
     visible: true
+    title : "Chroma"
     width: 700
     height: 400
 
@@ -62,6 +63,8 @@ Window {
                 iconName: "ic_fluent_play_20_regular"
                 width: parent.width
                 height: parent.height / 2 - 8
+
+                onActivated: Backend.launchMenu()
             }
 
             BigClip {

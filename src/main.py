@@ -3,6 +3,8 @@ import sys
 import webbrowser
 from pathlib import Path
 from time import sleep
+from tkinter.constants import NONE
+from types import LambdaType
 
 import darkdetect
 from PySide6.QtCore import QLocale, QObject, QThread, QTranslator, Signal, Slot
@@ -56,6 +58,17 @@ class MenuSplash(RinUIWindow):
 
         # register backend
         self.backend = Backend()
+        self.backend.setBackendParent(self)
+        self.engine.rootContext().setContextProperty("Backend", self.backend)
+
+
+class LaunchMenu(RinUIWindow):
+    def __init__(self):
+        qml_file = SCRIPT_DIR / "resources" / "ui" / "LaunchMenu.qml"
+        super().__init__(str(qml_file))
+
+        # register backend with sandbox
+        self.backend = LaunchSplashBackend()
         self.backend.setBackendParent(self)
         self.engine.rootContext().setContextProperty("Backend", self.backend)
 
@@ -221,6 +234,46 @@ class Backend(QObject):
 
         self.app_window = AppInit()
         self.app_window.show()
+
+    @Slot()
+    def launchMenu(self):
+        splash = self.parent
+        splash.close()
+        splash.deleteLater()
+
+        self.launch_menu = LaunchMenu()
+        self.launch_menu.show()
+
+
+class LaunchSplashBackend(QObject):
+    # this to prevent backend doing shit
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def setBackendParent(self, parent):
+        self.parent = parent
+
+    @Slot(result=str)
+    def getVersion(self):
+        return __version__
+
+    @Slot(str)
+    def copyToClipboard(self, text):
+        clipboard = QGuiApplication.clipboard()
+        clipboard.setText(text)
+        print(f"Copied: {text}")
+
+    @Slot(result=bool)
+    def isDark(self):
+        t = darkdetect.theme()
+        print("darkdetect:", t)
+        return t == "Dark"
+
+    @Slot()
+    def cancel(self):
+        window = self.parent
+        window.close()
 
 
 if __name__ == "__main__":
