@@ -1,0 +1,17 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file>resources/playerlogs.ui</file>
+    <file>resources/RobloxEmoji.ttf</file>
+    <file>resources/spooky.svg</file>
+    <file>resources/spookylogo.svg</file>
+    <file>resources/sounds/action_footsteps_plastic.mp3</file>
+    <file>resources/sounds/action_get_up.mp3</file>
+    <file>resources/sounds/action_jump.mp3</file>
+    <file>resources/sounds/ouch.ogg</file>
+    <file>resources/ui/MainWindow.qml</file>
+    <file>resources/ui/components/BigClip.qml</file>
+    <file alias="placeholder">resources/placeholders/wallpaper-3.png</file>
+    <file>resources/ui/components/marketplace/ItemCard.qml</file>
+  </qresource>
+</RCC>
