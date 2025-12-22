@@ -80,9 +80,9 @@ FluentPage {
                 delegate: ItemCard {
                     width: 240
                     height: 180
-                    title: model.title || ""
-                    desc: model.desc || ""
-                    img: model.img || ""
+                    title: model.title 
+                    desc: model.desc 
+                    img: model.img
                 }
             }
         }
