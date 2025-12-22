@@ -1,17 +1,17 @@
-import sys, webbrowser
-import darkdetect
-from pathlib import Path
 import subprocess
+import sys
+import webbrowser
+from pathlib import Path
 from time import sleep
-from modules.config import Config
-from PySide6.QtWidgets import QSystemTrayIcon, QMenu
-from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Signal, QObject, Slot, QTranslator, QLocale, QThread
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
-from RinUI import RinUIWindow, RinUITranslator
+
+import darkdetect
+from PySide6.QtCore import QLocale, QObject, QThread, QTranslator, Signal, Slot
+from PySide6.QtGui import QAction, QGuiApplication, QIcon
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+
 import resources_rc
+from modules.config import Config
+from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent
 __version__ = "0.1.0"
@@ -22,7 +22,7 @@ cfg = Config(Path("LutionConfig.toml"))
 class MarketplaceWorker(QThread):
     finished = Signal(list)
     error = Signal(str)
-    
+
     def run(self):
         try:
             sleep(4)
@@ -30,23 +30,34 @@ class MarketplaceWorker(QThread):
                 {
                     "title": "Marketplace mod 1",
                     "desc": "seia",
-                    "img": "qrc:/resources/images/mod1.png"
+                    "img": "qrc:/resources/images/mod1.png",
                 },
                 {
                     "title": "Marketplace mod 2",
                     "desc": "mika",
-                    "img": "qrc:/resources/images/mod2.png"
+                    "img": "qrc:/resources/images/mod2.png",
                 },
                 {
                     "title": "Marketplace mod 3",
                     "desc": "nagisa",
-                    "img": "qrc:/resources/images/mod3.png"
+                    "img": "qrc:/resources/images/mod3.png",
                 },
             ]
-            
+
             self.finished.emit(items)
         except Exception as e:
             self.error.emit(str(e))
+
+
+class MenuSplash(RinUIWindow):
+    def __init__(self):
+        qml_file = SCRIPT_DIR / "resources" / "ui" / "splash.qml"
+        super().__init__(str(qml_file))
+
+        # register backend
+        self.backend = Backend()
+        self.backend.setBackendParent(self)
+        self.engine.rootContext().setContextProperty("Backend", self.backend)
 
 
 class AppInit(RinUIWindow):
@@ -144,7 +155,7 @@ class Backend(QObject):
             self.worker.error.disconnect()
             self.worker.quit()
             self.worker.wait()
-        
+
         self.worker = MarketplaceWorker()
         self.worker.finished.connect(self._onMarketplaceLoaded)
         self.worker.error.connect(self._onMarketplaceError)
@@ -154,7 +165,7 @@ class Backend(QObject):
     def _onMarketplaceLoaded(self, items):
         print(f"Marketplace loaded: {len(items)} items")
         self.marketplaceReady.emit(items)
-        
+
         if self.worker:
             self.worker.quit()
             self.worker.wait()
@@ -163,7 +174,7 @@ class Backend(QObject):
     def _onMarketplaceError(self, error):
         print(f"Marketplace error: {error}")
         self.marketplaceError.emit(error)
-        
+
         if self.worker:
             self.worker.quit()
             self.worker.wait()
@@ -202,6 +213,15 @@ class Backend(QObject):
 
         self.parent.engine.retranslate()
 
+    @Slot()
+    def launchChroma(self):
+        splash = self.parent
+        splash.close()
+        splash.deleteLater()
+
+        self.app_window = AppInit()
+        self.app_window.show()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -217,9 +237,9 @@ if __name__ == "__main__":
     if translator.load(lang_qm):
         app.installTranslator(translator)
     else:
-        print("no language file, falling back to english 🫠")
+        print("no language file, falling back to english")
 
-    window = AppInit()
+    window = MenuSplash()
     window.show()
 
     app.exec()
