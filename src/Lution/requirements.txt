@@ -1,0 +1,5 @@
+streamlit
+PyGithub
+rich
+PySide6
+toml
