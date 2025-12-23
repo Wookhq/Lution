@@ -5,8 +5,8 @@
     <name>Home</name>
     <message>
       <location filename="../ui/pages/Home.qml" line="16"/>
-      <source>Wellcome back!</source>
-      <translation type="unfinished">Wellcome back!</translation>
+      <source>Welcome back!</source>
+      <translation type="unfinished">Welcome back!</translation>
     </message>
   </context>
   <context>
@@ -56,13 +56,13 @@ Creator: %2
     </message>
     <message>
       <location filename="../ui/MainWindow.qml" line="37"/>
-      <source>Feature flag</source>
-      <translation type="unfinished">Feature flag</translation>
+      <source>Fast flags</source>
+      <translation type="unfinished">Fast flags</translation>
     </message>
     <message>
       <location filename="../ui/MainWindow.qml" line="41"/>
-      <source>Intergation</source>
-      <translation type="unfinished">Intergation</translation>
+      <source>Integration</source>
+      <translation type="unfinished">Integration</translation>
     </message>
     <message>
       <location filename="../ui/MainWindow.qml" line="46"/>

@@ -13,7 +13,7 @@ FluentPage {
         verticalAlignment: Text.AlignVCenter   
         font.pixelSize: 20
         id : wellcomeText
-        text: qsTr("Wellcome back!")
+        text: qsTr("Welcome back!")
     }
 
 }

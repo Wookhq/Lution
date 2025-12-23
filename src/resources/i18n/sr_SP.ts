@@ -56,12 +56,12 @@ Creator: %2
     </message>
     <message>
       <location filename="../ui/MainWindow.qml" line="37"/>
-      <source>Feature flag</source>
+      <source>Fast flags</source>
       <translation type="unfinished">Feature flag</translation>
     </message>
     <message>
       <location filename="../ui/MainWindow.qml" line="41"/>
-      <source>Intergation</source>
+      <source>Integration</source>
       <translation type="unfinished">Intergation</translation>
     </message>
     <message>
