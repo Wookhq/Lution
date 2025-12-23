@@ -145,6 +145,6 @@ FluentPage {
 
     Label {
         text: "notice : this page forked from RinUI's settings page."
-        color: "gray"
+        color: Theme.currentTheme.colors.textSecondaryColor
     }
 }
