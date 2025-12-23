@@ -34,11 +34,13 @@ class Config:
         self.config_path.write_text(dumps(self.configdata), encoding="utf-8")
 
     def initConfig(self):
-        if self.get_row("Lution", "FirstTimeLaunch"):
+        if not self.get_row("Lution", "FirstTimeLaunch"):
             self.add_row("Lution", "language", "en_US")
             self.add_row("LutionSplash", "CurrentSplash", "Default")
             self.add_row(
-                "LutionSplash", "Splashs", '["Default", "Calling"]'
+                "LutionSplash", "Splashs", ["Default", "Calling"]
             )  # hard coded for now
+            self.add_row("Lution", "FirstTimeLaunch", "False")
+            self.save()
         else:
             return
