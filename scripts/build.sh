@@ -2,6 +2,7 @@
 set -e
 
 echo "Building LutionRT..."
+cd ..
 
 # Check if virtual environment exists
 if [ ! -d ".venv" ]; then
