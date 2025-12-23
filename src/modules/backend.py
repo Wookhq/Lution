@@ -104,6 +104,8 @@ class Backend(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.worker = None
+        self.ui_translator = None
+        self.translator = None
 
     def setBackendParent(self, parent):
         self.parent = parent
@@ -178,8 +180,6 @@ class Backend(QObject):
 
     @Slot(str)
     def setLanguage(self, lang: str):
-        global ui_translator, translator
-
         app = QApplication.instance()
         lang_path = SCRIPT_DIR / "resources" / "i18n" / f"{lang}.qm"
 
@@ -190,15 +190,17 @@ class Backend(QObject):
         cfg.add_row("Lution", "language", lang)
         cfg.save()
 
-        app.removeTranslator(ui_translator)
-        app.removeTranslator(translator)
+        if self.ui_translator:
+            app.removeTranslator(self.ui_translator)
+        if self.translator:
+            app.removeTranslator(self.translator)
 
-        ui_translator = RinUITranslator(QLocale(lang))
-        translator = QTranslator()
-        translator.load(str(lang_path))
+        self.ui_translator = RinUITranslator(QLocale(lang))
+        self.translator = QTranslator()
+        self.translator.load(str(lang_path))
 
-        app.installTranslator(ui_translator)
-        app.installTranslator(translator)
+        app.installTranslator(self.ui_translator)
+        app.installTranslator(self.translator)
 
         self.parent.engine.retranslate()
 
