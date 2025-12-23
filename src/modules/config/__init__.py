@@ -1,5 +1,6 @@
-from tomlkit import dumps, loads, table
 from pathlib import Path
+
+from tomlkit import dumps, loads, table
 
 
 class Config:
@@ -36,5 +37,8 @@ class Config:
         if self.get_row("Lution", "FirstTimeLaunch"):
             self.add_row("Lution", "language", "en_US")
             self.add_row("LutionSplash", "CurrentSplash", "Default")
+            self.add_row(
+                "LutionSplash", "Splashs", '["Default", "Calling"]'
+            )  # hard coded for now
         else:
             return
