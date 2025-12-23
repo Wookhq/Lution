@@ -38,7 +38,7 @@ FluentWindow {
             {
                 icon : "ic_fluent_sparkle_20_regular",
                 title: qsTr("Integration"),
-                // page : integration
+                page : integration
             },
             {
                 icon: "ic_fluent_settings_20_regular",
@@ -54,8 +54,8 @@ FluentWindow {
 
     Component { id: homePage; Home {} }
     Component { id: modPage; Mods {} }
-//    Component { id: integration; PlayerLog {} }
-    Component { id : settingsPage; Settings {} } 
+    Component { id: integration; Integration {} }
+    Component { id : settingsPage; Settings {} }
     Component { id: marketplace; MarketplaceTest {} }
 
 }

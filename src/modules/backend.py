@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 import resources_rc
 from modules.config import Config
 from modules.launchmenu import LaunchMenu
+from modules.launchmenu.splashMan import SplashMan
 from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent.parent
@@ -106,6 +107,7 @@ class Backend(QObject):
         self.worker = None
         self.ui_translator = None
         self.translator = None
+        self.splashMan = SplashMan()
 
     def setBackendParent(self, parent):
         self.parent = parent
@@ -151,6 +153,18 @@ class Backend(QObject):
         self.worker.finished.connect(self._onMarketplaceLoaded)
         self.worker.error.connect(self._onMarketplaceError)
         self.worker.start()
+
+    @Slot(result="QVariant")
+    def getSplash(self):
+        return self.splashMan.getSplash()
+
+    @Slot(result=str)
+    def getCurrentSplash(self):
+        return self.splashMan.getCurrentSplash()
+
+    @Slot(str)
+    def setSplash(self, name):
+        self.splashMan.setSplash(name)
 
     @Slot(list)
     def _onMarketplaceLoaded(self, items):

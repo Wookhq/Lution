@@ -9,6 +9,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication
 
 import resources_rc
+from modules.launchmenu.splashMan import SplashMan
 from RinUI import RinUIWindow
 
 __version__ = "0.1.0"
@@ -193,12 +194,16 @@ SCRIPT_DIR = Path(__file__).parent
 
 class LaunchMenu(RinUIWindow):
     def __init__(self):
+        super().__init__()
+        self.splashMan = SplashMan()
+        currentSplash = self.splashMan.getCurrentSplash()
+
         qml_file = (
             SCRIPT_DIR.parent.parent
             / "resources"
             / "ui"
             / "DefaultSplash"
-            / "Calling.qml"
+            / f"{currentSplash}.qml"
         )
         self.load(str(qml_file))
 

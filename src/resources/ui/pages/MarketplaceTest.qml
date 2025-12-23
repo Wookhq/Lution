@@ -20,18 +20,13 @@ FluentPage {
         errorMessage = ""
 
         Q.promise(function(resolve, reject) {
-            var connections = {
-                success: null,
-                error: null
-            }
-
-            var onSuccess = function(list) {
+            function onSuccess(list) {
                 Backend.marketplaceReady.disconnect(onSuccess)
                 Backend.marketplaceError.disconnect(onError)
                 resolve(list)
             }
 
-            var onError = function(error) {
+            function onError(error) {
                 Backend.marketplaceReady.disconnect(onSuccess)
                 Backend.marketplaceError.disconnect(onError)
                 reject(error)
@@ -71,8 +66,7 @@ FluentPage {
             clip: true
 
             GridView {
-                anchors.fill: parent
-                anchors.margins: 12
+                width: parent.width
                 model: clipModel
                 cellWidth: 260
                 cellHeight: 200
