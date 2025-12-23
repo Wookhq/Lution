@@ -31,3 +31,10 @@ class Config:
 
     def save(self):
         self.config_path.write_text(dumps(self.configdata), encoding="utf-8")
+
+    def initConfig(self):
+        if self.get_row("Lution", "FirstTimeLaunch"):
+            self.add_row("Lution", "language", "en_US")
+            self.add_row("LutionSplash", "CurrentSplash", "Default")
+        else:
+            return

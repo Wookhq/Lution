@@ -4,21 +4,29 @@ import webbrowser
 from pathlib import Path
 from time import sleep
 from tkinter.constants import NONE
-from types import LambdaType
 
 import darkdetect
-from PySide6.QtCore import QLocale, QObject, QThread, QTranslator, Signal, Slot
+from PySide6.QtCore import (
+    QLocale,
+    QObject,
+    QThread,
+    QTranslator,
+    Signal,
+    Slot,
+)
 from PySide6.QtGui import QAction, QGuiApplication, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 import resources_rc
 from modules.config import Config
+from modules.launchmenu import LaunchMenu
 from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent
 __version__ = "0.1.0"
 
 cfg = Config(Path("LutionConfig.toml"))
+cfg.initConfig()
 
 
 class MarketplaceWorker(QThread):
@@ -54,23 +62,14 @@ class MarketplaceWorker(QThread):
 class MenuSplash(RinUIWindow):
     def __init__(self):
         qml_file = SCRIPT_DIR / "resources" / "ui" / "splash.qml"
-        super().__init__(str(qml_file))
+        super().__init__(None)
 
         # register backend
         self.backend = Backend()
         self.backend.setBackendParent(self)
         self.engine.rootContext().setContextProperty("Backend", self.backend)
 
-
-class LaunchMenu(RinUIWindow):
-    def __init__(self):
-        qml_file = SCRIPT_DIR / "resources" / "ui" / "LaunchMenu.qml"
-        super().__init__(str(qml_file))
-
-        # register backend with sandbox
-        self.backend = LaunchSplashBackend()
-        self.backend.setBackendParent(self)
-        self.engine.rootContext().setContextProperty("Backend", self.backend)
+        self.load(str(qml_file))
 
 
 class AppInit(RinUIWindow):
@@ -86,9 +85,9 @@ class AppInit(RinUIWindow):
         # title
         self.setProperty("title", "LutionRT")
 
-        QApplication.instance().setQuitOnLastWindowClosed(False)
+        # QApplication.instance().setQuitOnLastWindowClosed(False)
 
-        self.initTray()
+        # self.initTray()
 
     def initTray(self):
         icon = QIcon.fromTheme("application-x-executable")
@@ -116,9 +115,9 @@ class AppInit(RinUIWindow):
             self.raise_()
             self.activateWindow()
 
-    def closeEvent(self, event):
-        event.ignore()
-        self.hide()
+    # def closeEvent(self, event):
+    #   event.ignore()
+    #   self.hide()
 
 
 class Backend(QObject):
@@ -245,41 +244,10 @@ class Backend(QObject):
         self.launch_menu.show()
 
 
-class LaunchSplashBackend(QObject):
-    # this to prevent backend doing shit
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-    def setBackendParent(self, parent):
-        self.parent = parent
-
-    @Slot(result=str)
-    def getVersion(self):
-        return __version__
-
-    @Slot(str)
-    def copyToClipboard(self, text):
-        clipboard = QGuiApplication.clipboard()
-        clipboard.setText(text)
-        print(f"Copied: {text}")
-
-    @Slot(result=bool)
-    def isDark(self):
-        t = darkdetect.theme()
-        print("darkdetect:", t)
-        return t == "Dark"
-
-    @Slot()
-    def cancel(self):
-        window = self.parent
-        window.close()
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    lang = cfg.get_row("Lutionconfig", "language")
+    lang = cfg.get_row("Lution", "language")
 
     ui_translator = RinUITranslator(QLocale(lang))
     app.installTranslator(ui_translator)
