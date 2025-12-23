@@ -33,12 +33,12 @@ FluentWindow {
             },
             {
                 icon : "ic_fluent_flag_20_regular",
-                title: qsTr("Feature flag")
+                title: qsTr("Fast flags")
             },
             {
                 icon : "ic_fluent_sparkle_20_regular",
-                title: qsTr("Intergation"),
-                // page : intergation
+                title: qsTr("Integration"),
+                // page : integration
             },
             {
                 icon: "ic_fluent_settings_20_regular",
@@ -54,7 +54,7 @@ FluentWindow {
 
     Component { id: homePage; Home {} }
     Component { id: modPage; Mods {} }
-//    Component { id: intergation; PlayerLog {} }
+//    Component { id: integration; PlayerLog {} }
     Component { id : settingsPage; Settings {} } 
     Component { id: marketplace; MarketplaceTest {} }
 
