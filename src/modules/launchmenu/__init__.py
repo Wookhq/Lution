@@ -1,17 +1,18 @@
-
-from PySide6.QtCore import Property, QThread, Signal, Slot, QObject
-from PySide6.QtWidgets import QApplication
-import subprocess
-import darkdetect
-from pathlib import Path
-import resources_rc
 import re
+import subprocess
+from pathlib import Path
 from time import sleep
+
+import darkdetect
+from PySide6.QtCore import Property, QObject, QThread, Signal, Slot
 from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QApplication
+
+import resources_rc
 from RinUI import RinUIWindow
 
-
 __version__ = "0.1.0"
+
 
 class LaunchSplashChecks(QThread):
     progressUpdate = Signal(str)
@@ -189,16 +190,19 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 
+
 class LaunchMenu(RinUIWindow):
     def __init__(self):
-        qml_file = SCRIPT_DIR.parent.parent / "resources" / "ui" / "DefaultSplash" / "Calling.qml"
-
-        super().__init__(None)  # do NOT load qml yet
+        qml_file = (
+            SCRIPT_DIR.parent.parent
+            / "resources"
+            / "ui"
+            / "DefaultSplash"
+            / "Calling.qml"
+        )
+        self.load(str(qml_file))
 
         self.backend = LaunchSplashBackend()
         self.backend.setBackendParent(self)
 
         self.engine.rootContext().setContextProperty("Backend", self.backend)
-
-        self.load(str(qml_file))  # NOW load qml
-
