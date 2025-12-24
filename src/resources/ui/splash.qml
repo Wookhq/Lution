@@ -69,7 +69,7 @@ Window {
 
             BigClip {
                 title: qsTr("Launch Chroma")
-                description: qsTr("Launch Chroma and start customize stuffs!")
+                description: qsTr("Launch Chroma and start customize stuff!")
                 iconName: "ic_fluent_wrench_20_regular"
                 width: parent.width
                 height: parent.height / 2 - 8
