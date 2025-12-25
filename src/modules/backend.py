@@ -13,10 +13,12 @@ import resources_rc
 from modules.config import Config
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
+from modules.mod.fontreplace import Replace
+from modules.mod.patch import patch
 from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent.parent
-cfg = Config(Path("LutionConfig.toml"))
+cfg = Config()
 __version__ = "0.1.0"
 
 
@@ -46,6 +48,30 @@ class MarketplaceWorker(QThread):
             ]
 
             self.finished.emit(items)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
+class FontWorker(QThread):
+    finished = Signal()
+    error = Signal(str)
+
+    def __init__(self, font_path):
+        super().__init__()
+        self.font_path = font_path
+
+    def run(self):
+        try:
+            patch()
+
+            clean_path = self.font_path.replace("file://", "")
+
+            Replace(
+                clean_path,
+                "/home/chip/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/",
+            )
+
+            self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
 
@@ -101,10 +127,13 @@ class AppInit(RinUIWindow):
 class Backend(QObject):
     marketplaceReady = Signal(list)
     marketplaceError = Signal(str)
+    fontApplied = Signal()
+    fontError = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.worker = None
+        self.font_worker = None
         self.ui_translator = None
         self.translator = None
         self.splashMan = SplashMan()
@@ -141,8 +170,6 @@ class Backend(QObject):
 
     @Slot()
     def getMarketplaceItems(self):
-        """Fetch marketplace items asynchronously"""
-        # Clean up previous worker if exists
         if self.worker is not None:
             self.worker.finished.disconnect()
             self.worker.error.disconnect()
@@ -157,6 +184,39 @@ class Backend(QObject):
     @Slot(result="QVariant")
     def getSplash(self):
         return self.splashMan.getSplash()
+
+    @Slot(str)
+    def setFont(self, path):
+        if self.font_worker is not None:
+            self.font_worker.finished.disconnect()
+            self.font_worker.error.disconnect()
+            self.font_worker.quit()
+            self.font_worker.wait()
+
+        print(f"Starting font application: {path}")
+
+        self.font_worker = FontWorker(path)
+        self.font_worker.finished.connect(self._onFontApplied)
+        self.font_worker.error.connect(self._onFontError)
+        self.font_worker.start()
+
+    @Slot()
+    def _onFontApplied(self):
+        print("Font applied successfully")
+        self.fontApplied.emit()
+
+        if self.font_worker:
+            self.font_worker.quit()
+            self.font_worker.wait()
+
+    @Slot(str)
+    def _onFontError(self, error):
+        print(f"Font application error: {error}")
+        self.fontError.emit(error)
+
+        if self.font_worker:
+            self.font_worker.quit()
+            self.font_worker.wait()
 
     @Slot(result=str)
     def getCurrentSplash(self):
