@@ -4,7 +4,7 @@ from tomlkit import dumps, loads, table
 
 
 class Config:
-    def __init__(self, config_path):
+    def __init__(self, config_path="LutionConfig.toml"):
         self.config_path = Path(config_path)
 
         if not self.config_path.exists():
@@ -41,6 +41,7 @@ class Config:
                 "LutionSplash", "Splashs", ["Default", "Calling"]
             )  # hard coded for now
             self.add_row("Lution", "FirstTimeLaunch", "False")
+            self.add_row("Sober", "Path", "~/.var/app/org.vinegarhq.Sober")
             self.save()
         else:
             return
