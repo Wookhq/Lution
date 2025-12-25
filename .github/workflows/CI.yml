@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [backend-rt]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: run build script
+        working-directory: scripts
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lution
+          path: ./dist/LutionRT
