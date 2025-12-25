@@ -19,6 +19,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from modules.backend import AppInit, Backend
 from modules.config import Config
+from modules.launchmenu import LaunchMenu
 from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent
@@ -87,7 +88,11 @@ if __name__ == "__main__":
     else:
         print("no language file, falling back to english")
 
-    window = MenuSplash()
-    window.show()
+    if "--quick-launch" in sys.argv:
+        launchmenu = LaunchMenu()
+        launchmenu.show()
+    else:
+        window = MenuSplash()
+        window.show()
 
     app.exec()
