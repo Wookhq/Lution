@@ -26,6 +26,36 @@ SCRIPT_DIR = Path(__file__).parent
 
 cfg = Config(Path("LutionConfig.toml"))
 cfg.initConfig()
+__version__ = "0.1.0"
+
+print(f"""
+    CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    CCCCCCCCCCC                                CCCCC
+    CCCCCCCCCCCCC                              CCCCC
+    CCCCCCCCCCCCCCC                            CCCCC
+    CCCCCCCCCCCCCCCC                           CCCCC
+    CCCCCC CCCCCCCCCCC                         CCCCC
+    CCCCCC   CCCCCCCCCCCCCCCCCCCCCCCCC         CCCCC
+    CCCCCC    CCCCCCCCCCCCCCCCCCCCCCCC         CCCCC
+    CCCCCC      CCCCCCCCCCCCCCCCCCCCCC         CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                                 Lution Chroma
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                        Built by wookhq and contributors
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                                    v{__version__}
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCCC        CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCCCCC      CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCCCCCCC    CCCCC
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCCCCCCCCC  CCCCC
+    CCCCCC                         CCCCCCCCCCC CCCCC
+    CCCCCC                           CCCCCCCCCCCCCCC
+    CCCCCC                            CCCCCCCCCCCCCC
+    CCCCCC                              CCCCCCCCCCCC
+    CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+""")
 
 
 class MenuSplash(RinUIWindow):
