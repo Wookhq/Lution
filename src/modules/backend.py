@@ -14,7 +14,7 @@ from modules.config import Config
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
 from modules.mod.fontreplace import Replace
-from modules.mod.patch import patch
+from modules.mod.patch import Patcher
 from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent.parent
@@ -62,7 +62,7 @@ class FontWorker(QThread):
 
     def run(self):
         try:
-            patch()
+            Patcher().patch()
 
             clean_path = self.font_path.replace("file://", "")
 
