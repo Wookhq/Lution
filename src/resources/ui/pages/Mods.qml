@@ -86,7 +86,7 @@ FluentPage {
 
         SettingCard {
             Layout.fillWidth: true
-            icon.name: "ic_fluent_text_font_size_20_regular"
+            icon.name: "ic_fluent_cursor_20_regular"
             title: qsTr("Custom Cursor")
             description: qsTr("Change cursor to old/new")
             content: ComboBox {
@@ -96,7 +96,7 @@ FluentPage {
 
         SettingCard {
             Layout.fillWidth: true
-            icon.name: "ic_fluent_cursor_20_regular"
+            icon.name: "ic_fluent_text_font_size_20_regular"
             title: qsTr("Custom Font")
             description: qsTr("Set your font to your liking!")
             content: Button {
