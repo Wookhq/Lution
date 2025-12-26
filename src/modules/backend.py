@@ -228,6 +228,10 @@ class Backend(QObject):
     def getSplash(self):
         return self.splashMan.getSplash()
 
+    @Slot(result=str)
+    def getSoberPath(self):
+        return cfg.get_row("Sober", "Path")
+
     @Slot(str)
     def setFont(self, path):
         if self.font_worker is not None:

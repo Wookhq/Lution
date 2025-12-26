@@ -32,25 +32,30 @@ FluentPage {
                 }
             }
         }
+    }
+
+    Column {
+        Layout.fillWidth: true
+        spacing: 3
+
+        Text {
+            typography: Typography.BodyStrong
+            text: qsTr("Sober")
+        }
 
         SettingCard {
             width: parent.width
-            title: qsTr("Window Backdrop Effect")
-            description: qsTr("Adjust the appearance of the window background (Only available on Windows platform, some styles may only support on Windows 11)")
-            icon.name: "ic_fluent_square_hint_sparkles_20_regular"
+            title: qsTr("Sober Path")
+            description: qsTr("Adjust the your sober path")
+            icon.name: "ic_fluent_location_20_regular"
 
-            ComboBox {
-                property var data: ["mica", "acrylic", "tabbed", "none"]
-                model: ListModel {
-                    ListElement { text: qsTr("Mica") }
-                    ListElement { text: qsTr("Acrylic") }
-                    ListElement { text: qsTr("Tabbed") }
-                    ListElement { text: qsTr("None") }
-                }
-                currentIndex: data.indexOf(Theme.getBackdropEffect())
-                onCurrentIndexChanged: {
-                    Theme.setBackdropEffect(data[currentIndex])
-                }
+            TextArea {
+                placeholderText: qsTr("Path")
+                width: 200
+                Layout.fillWidth: true
+                text: Backend.getSoberPath()
+
+
             }
         }
     }
