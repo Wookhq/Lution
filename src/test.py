@@ -1,7 +1,9 @@
-from modules.config import Config
-from pathlib import Path
+from modules.utils.namegrabber import getCookie, getName
 
-config = Config(Path("test.toml"))
-config.add_row("settings", "theme", "dark")
-config.remove_row("settings", "theme")
-config.save()
+c = getCookie()
+
+print(c[".ROBLOSECURITY"])
+
+r = getName(c)
+
+print(r)
