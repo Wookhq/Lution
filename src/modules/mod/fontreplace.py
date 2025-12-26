@@ -1,5 +1,10 @@
 import os
 import shutil
+import tempfile
+
+from PySide6.QtCore import QFile
+
+import resources_rc
 
 
 def Replace(source_file_path, target_folder_path):
@@ -37,3 +42,18 @@ def Replace(source_file_path, target_folder_path):
                 continue
         else:
             print(f"Skipping (not a file): {target_file_path}")
+
+    print("place the emoji")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        target_path = os.path.join(tmpdir, "RobloxEmoji.ttf")
+
+        file = QFile(":/resources/RobloxEmoji.ttf")
+        file.open(QFile.ReadOnly)
+        data = file.readAll()
+        file.close()
+
+        with open(target_path, "wb") as f:
+            f.write(data)
+
+        print("font written successfully:")
