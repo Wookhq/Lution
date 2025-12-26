@@ -20,9 +20,68 @@
 <context>
     <name>Home</name>
     <message>
-        <location filename="../ui/pages/Home.qml" line="16"/>
         <source>Welcome back!</source>
-        <translation type="unfinished">Welcome back!</translation>
+        <translation type="obsolete">Welcome back!</translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="13"/>
+        <source>gng lets get started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="13"/>
+        <source>yo %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="13"/>
+        <source>%1 returns!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="13"/>
+        <source>👋</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="13"/>
+        <source>%1, 👋</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="41"/>
+        <source>Let&apos;s get started!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="81"/>
+        <source>Mods</source>
+        <translation type="unfinished">Mods</translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="89"/>
+        <source>Start modding stuff inside Sober/Roblox!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="126"/>
+        <source>Marketplace</source>
+        <translation type="unfinished">Marketplace</translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="134"/>
+        <source>If you not want to find mods, Let&apos;s explore the marketplace!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="171"/>
+        <source>Settings</source>
+        <translation type="unfinished">Settings</translation>
+    </message>
+    <message>
+        <location filename="../ui/pages/Home.qml" line="179"/>
+        <source>Customize Chroma and preferences</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
