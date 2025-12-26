@@ -22,6 +22,30 @@ cfg = Config()
 __version__ = "0.1.0"
 
 
+class NameUpdate(QObject):
+    def __init__(self, cfg):
+        super().__init__()
+        self.cfg = cfg
+        self.running = True
+
+    @Slot()
+    def run(self):
+        while self.running:
+            try:
+                self.cfg.reloadName()
+                self.cfg.save()
+            except Exception as e:
+                print("cfg reload error:", e)
+
+            for _ in range(600):
+                if not self.running:
+                    return
+                sleep(1)
+
+    def stop(self):
+        self.running = False
+
+
 class MarketplaceWorker(QThread):
     finished = Signal(list)
     error = Signal(str)
@@ -88,6 +112,7 @@ class AppInit(RinUIWindow):
 
         # title
         self.setProperty("title", "LutionRT")
+        QApplication.instance().aboutToQuit.connect(self.backend.shutdown)
 
         # QApplication.instance().setQuitOnLastWindowClosed(False)
 
@@ -138,8 +163,21 @@ class Backend(QObject):
         self.translator = None
         self.splashMan = SplashMan()
 
+        self.cfg_thread = QThread()
+        self.cfg_worker = NameUpdate(cfg)
+        self.cfg_worker.moveToThread(self.cfg_thread)
+        self.cfg_thread.started.connect(self.cfg_worker.run)
+        self.cfg_thread.start()
+
     def setBackendParent(self, parent):
         self.parent = parent
+
+    def shutdown(self):
+        if self.cfg_worker:
+            self.cfg_worker.stop()
+        if self.cfg_thread:
+            self.cfg_thread.quit()
+            self.cfg_thread.wait()
 
     @Slot(result=str)
     def getVersion(self):
@@ -160,6 +198,11 @@ class Backend(QObject):
     @Slot(str)
     def openInBroswer(self, url):
         webbrowser.open(url=url)
+
+    @Slot(result=str)
+    def getName(self):
+        cfg.reload()
+        return cfg.get_row("Misc", "UserDisplayName")
 
     @Slot()
     def openModFolder(self):

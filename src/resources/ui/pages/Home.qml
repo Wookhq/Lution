@@ -9,7 +9,7 @@ FluentPage {
     id: root
     title: "Home"
 
-    property string name: "user"
+    property string name: Backend.getName()
     property var titles: [qsTr("gng lets get started"), qsTr("yo %1").arg(name), qsTr("%1 returns!").arg(name), qsTr("👋"), qsTr("%1, 👋").arg(name)]
 
     function getRandomTitles() {
