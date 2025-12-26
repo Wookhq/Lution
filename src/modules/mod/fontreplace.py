@@ -56,4 +56,6 @@ def Replace(source_file_path, target_folder_path):
         with open(target_path, "wb") as f:
             f.write(data)
 
-        print("font written successfully:")
+        shutil.copy2(target_path, target_folder_path)
+
+    print("font written successfully")
