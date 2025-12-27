@@ -46,17 +46,18 @@ FluentPage {
         SettingCard {
             width: parent.width
             title: qsTr("Sober Path")
-            description: qsTr("Adjust the your sober path")
+            description: qsTr("Adjust the your sober path, leave blank to reset to default")
             icon.name: "ic_fluent_location_20_regular"
 
             TextArea {
-                placeholderText: qsTr("Path")
+                id: soberPathInput
+                placeholderText: qsTr("~/.var/app/org.vinegarhq.Sober")
                 width: 200
                 Layout.fillWidth: true
                 text: Backend.getSoberPath()
-
-
+                onTextChanged: Backend.setSoberPath(soberPathInput.text)
             }
+
         }
     }
 

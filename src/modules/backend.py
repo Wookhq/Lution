@@ -233,6 +233,17 @@ class Backend(QObject):
         return cfg.get_row("Sober", "Path")
 
     @Slot(str)
+    def setSoberPath(self, path):
+        if path:
+            cfg.remove_row("Sober", "Path")
+            cfg.add_row("Sober", "Path", path)
+            cfg.save()
+        else:
+            cfg.remove_row("Sober", "Path")
+            cfg.add_row("Sober", "Path", "~/.var/app/org.vinegarhq.Sober")
+            cfg.save()
+
+    @Slot(str)
     def setFont(self, path):
         if self.font_worker is not None:
             self.font_worker.finished.disconnect()
