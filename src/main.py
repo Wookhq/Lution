@@ -45,8 +45,8 @@ print(f"""
     CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC
     CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                                 Lution Chroma
     CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                        Built by wookhq and contributors
+    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                        https://github.com/Wookhq/Lution
     CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC                                    v{__version__}
-    CCCCCC       CCCCCCCCCCCCCCCCCCCCC         CCCCC
     CCCCCC       CCCCCCCCCCCCCCCCCCCCCC        CCCCC
     CCCCCC       CCCCCCCCCCCCCCCCCCCCCCCC      CCCCC
     CCCCCC       CCCCCCCCCCCCCCCCCCCCCCCCCC    CCCCC
