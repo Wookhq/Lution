@@ -16,7 +16,7 @@ def initConfig():
         cfg.add_row("Lution", "language", "en_US")
         cfg.add_row("LutionSplash", "CurrentSplash", "Default")
         cfg.add_row(
-            "LutionSplash", "Splashs", ["Default", "Calling"]
+            "LutionSplash", "Splashs", ["Default", "Calling", "Terminal", "Sober"]
         )  # hard coded for now
         cfg.add_row("Lution", "FirstTimeLaunch", "False")
         cfg.add_row("Sober", "Path", "~/.var/app/org.vinegarhq.Sober")

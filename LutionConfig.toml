@@ -3,8 +3,8 @@ language = "en_US"
 FirstTimeLaunch = "False"
 
 [LutionSplash]
-Splashs = ["Default", "Calling"]
-CurrentSplash = "Default"
+Splashs = ["Default", "Calling", "Terminal", "Sober"]
+CurrentSplash = "Sober"
 
 [Sober]
 Path = "~/.var/app/org.vinegarhq.Sober"
