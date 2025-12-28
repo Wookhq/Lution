@@ -13,7 +13,6 @@ Window {
 
     property string currentProgress: ""
 
-    // Gradient background
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
@@ -119,7 +118,6 @@ Window {
                 }
             }
 
-            // Custom styled button
             Rectangle {
                 width: 200
                 height: 52
@@ -152,7 +150,6 @@ Window {
         }
     }
 
-    // Custom progress bar
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right

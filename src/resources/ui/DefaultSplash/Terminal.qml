@@ -67,7 +67,6 @@ Window {
 
     flags: Qt.Window | Qt.FramelessWindowHint
 
-    // Terminal border
     Rectangle {
         anchors.fill: parent
         color: "transparent"
@@ -80,7 +79,6 @@ Window {
         spacing: 20
         width: parent.width - 100
 
-        // ASCII Art Logo
         Text {
             text: "╔═══════════════════════════╗\n" +
                   "║    SYSTEM INITIALIZING    ║\n" +
@@ -92,7 +90,6 @@ Window {
             color: "#00ff00"
         }
 
-        // Progress text with terminal styling
         Rectangle {
             width: parent.width
             height: 60
@@ -118,7 +115,6 @@ Window {
             }
         }
 
-        // Cancel button with terminal style
         Rectangle {
             width: 200
             height: 40
@@ -145,7 +141,6 @@ Window {
         }
     }
 
-    // Terminal-style progress bar
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
