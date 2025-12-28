@@ -35,4 +35,4 @@ env/
 app.log
 src/RinUI/config/rin_ui.json
 src/resources_rc.py
-*.toml
+LutionConfig.toml
