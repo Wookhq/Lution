@@ -1,15 +1,21 @@
 import os
-import shutil
-import toml
-import subprocess
 import platform
+import shutil
+import subprocess
+import tempfile
+import zipfile
+from os import path
+
 import streamlit as st
-from modules.utils.messages import STMessages
-from .messages import STMessages
-from modules.utils.lang import LANG
+import toml
+
 from modules.config.genconfig import Config
-from modules.mod.fontreplacer import Replace
 from modules.mod.clientsettings import ClientSettings
+from modules.mod.fontreplacer import Replace
+from modules.utils.lang import LANG
+from modules.utils.messages import STMessages
+
+from .messages import STMessages
 
 stt = STMessages()
 
@@ -35,7 +41,6 @@ class FilesFunctions:
         stt.success()
 
     def OverwriteFolders(self, dest_dir, src_dirs, no_success=False):
-
         os.makedirs(dest_dir, exist_ok=True)
 
         for src_path in src_dirs:
@@ -122,24 +127,21 @@ class FilesFunctions:
 
     def Fontsetup(self):
         dest_dir = os.path.expanduser(
-            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/"
-        )
-        src_dir = os.path.expanduser(
-            "~/.var/app/org.vinegarhq.Sober/data/sober/assets/content/fonts/"
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/"
         )
 
-        os.makedirs(dest_dir, exist_ok=True)
-
-        if os.path.isdir(src_dir):
-            for item in os.listdir(src_dir):
-                s = os.path.join(src_dir, item)
-                d = os.path.join(dest_dir, item)
-                if os.path.isdir(s):
-                    if os.path.exists(d):
-                        shutil.rmtree(d)
-                    shutil.copytree(s, d)
-                else:
-                    shutil.copy2(s, d)
+        if not os.path.exists(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/ExtraContent"
+        ):
+            apk = zipfile.ZipFile(
+                os.path.expanduser(
+                    "~/.var/app/org.vinegarhq.Sober/data/sober/packages/x86_64/com.roblox.client/base.apk"
+                )
+            )
+            with tempfile.TemporaryDirectory() as tempdir:
+                apk.extractall(tempdir)
+                src = path.join(tempdir, "assets")
+                shutil.copytree(src, dest_dir, dirs_exist_ok=True)
 
     def ApplyMods(self):
         with st.spinner("Applying mods..."):
@@ -255,6 +257,7 @@ class FilesFunctions:
             if st.session_state.customfont:
                 # setup the overlay
                 self.Fontsetup()
+                print("dame tu cosita")
                 font_dir = os.path.expanduser(
                     "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"
                 )
