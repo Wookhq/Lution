@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "black>=25.12.0",
+    "jsonc-parser>=1.1.5",
     "pyinstaller>=6.17.0",
     "pyside6>=6.10.1",
     "requests>=2.32.5",

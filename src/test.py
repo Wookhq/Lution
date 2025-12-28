@@ -1,9 +1,9 @@
-from modules.utils.namegrabber import getCookie, getName
+from modules.config.sober_config import SoberConfig
 
-c = getCookie()
+cfg = SoberConfig()
 
-print(c[".ROBLOSECURITY"])
+pr = cfg.read_key("discord_rpc_show_join_button")
 
-r = getName(c)
+print(pr)
 
-print(r)
+cfg.write_key("are oyu a chip", False)
