@@ -52,4 +52,70 @@ FluentPage {
             }
         }
     }
+
+    ColumnLayout {
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            typography: Typography.BodyStrong
+            text: "Sober"
+        }
+
+        SettingExpander {
+            icon.name : "ic_fluent_plug_disconnected_20_regular"
+            Layout.fillWidth: true
+            title: qsTr("Discord RPC")
+            description: qsTr("Display your roblox game status on Discord via Discord RPC")
+            icon.size: 28
+
+            SettingItem {
+                title: qsTr("Enable?")
+
+                Switch {}
+            }
+
+            SettingItem {
+                title: qsTr("Show join button")
+                description: qsTr("Discord RPC is required in order to enable this feature")
+
+                Switch {
+
+                }
+            }
+        }
+
+        SettingCard {
+            Layout.fillWidth: true
+            title: qsTr("Close on leave")
+            description: qsTr("Close sober on leave")
+            icon.name: "ic_fluent_tab_desktop_arrow_left_20_regular"
+            content:    Switch {}
+        }
+
+        SettingCard {
+            Layout.fillWidth: true
+            title: qsTr("Enable HIDPI")
+            icon.name: "ic_fluent_share_screen_person_20_regular"
+            content:    Switch {}
+        }
+
+        SettingCard {
+            Layout.fillWidth: true
+            title: qsTr("Graphics optimization mode")
+            description: qsTr("Quality : Roblox delivers desktop-level graphics and visual fidelity; this is the default setting. ; Balanced : Roblox maintains a balance between visual quality and performance. ; Performance : Roblox prioritizes performance over graphics quality, resulting in reduced LOD detail and lower texture quality.")
+            icon.name: "ic_fluent_desktop_edit_20_regular"
+            content: ComboBox {
+                model: ListModel {
+                    ListElement { text: qsTr("Quality") }
+                    ListElement { text: qsTr("Balanced") }
+                    ListElement { text: qsTr("Performance") }
+                }
+
+                onCurrentIndexChanged: {
+                    console.log(model.get(currentIndex).text)
+                }
+            }
+        }
+    }
 }
