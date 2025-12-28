@@ -117,5 +117,22 @@ FluentPage {
                 }
             }
         }
+
+        SettingCard {
+            Layout.fillWidth: true
+            title: qsTr("Rendering Technology")
+            description: qsTr("wat is this")
+            icon.name: "ic_fluent_camera_sparkles_20_filled"
+            content: ComboBox {
+                model: ListModel {
+                    ListElement { text: qsTr("OpenGL") }
+                    ListElement { text: qsTr("Vulkan") }
+                }
+
+                onCurrentIndexChanged: {
+                    console.log(model.get(currentIndex).text)
+                }
+            }
+        }
     }
 }
