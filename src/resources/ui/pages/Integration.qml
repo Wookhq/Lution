@@ -10,6 +10,11 @@ FluentPage {
     title: "Integration"
 
     ColumnLayout {
+        Text {
+            typography: Typography.BodyStrong
+            text: "Chroma"
+        }
+
         Layout.fillWidth: true
         spacing: 8
 
@@ -72,7 +77,14 @@ FluentPage {
             SettingItem {
                 title: qsTr("Enable?")
 
-                Switch {}
+                Switch {
+                    id: showDiscordRPCCheck
+                    checked: Backend.getSoberKey("discord_rpc_enabled", false)
+
+                    onCheckedChanged: {
+                        Backend.addSoberKey("discord_rpc_enabled", checked)
+                    }
+                }
             }
 
             SettingItem {
@@ -80,7 +92,10 @@ FluentPage {
                 description: qsTr("Discord RPC is required in order to enable this feature")
 
                 Switch {
+                    id: showJoinCheck
+                    checked: Backend.getSoberKey("discord_rpc_show_join_button", false)
 
+                    onCheckedChanged: Backend.addSoberKey("discord_rpc_show_join_button", showJoinCheck.checked)
                 }
             }
         }
@@ -90,14 +105,24 @@ FluentPage {
             title: qsTr("Close on leave")
             description: qsTr("Close sober on leave")
             icon.name: "ic_fluent_tab_desktop_arrow_left_20_regular"
-            content:    Switch {}
+            content:    Switch {
+                id: closeOnLeaveCheck
+                checked: Backend.getSoberKey("close_on_leave", false)
+
+                onCheckedChanged: Backend.addSoberKey("close_on_leave", closeOnLeaveCheck.checked)
+            }
         }
 
         SettingCard {
             Layout.fillWidth: true
             title: qsTr("Enable HIDPI")
             icon.name: "ic_fluent_share_screen_person_20_regular"
-            content:    Switch {}
+            content: Switch {
+                id: hipiCheck
+                checked: Backend.getSoberKey("enable_hidpi", false)
+
+                onCheckedChanged: Backend.addSoberKey("enable_hidpi", hipiCheck.checked)
+            }
         }
 
         SettingCard {
@@ -106,14 +131,31 @@ FluentPage {
             description: qsTr("Quality : Roblox delivers desktop-level graphics and visual fidelity; this is the default setting. ; Balanced : Roblox maintains a balance between visual quality and performance. ; Performance : Roblox prioritizes performance over graphics quality, resulting in reduced LOD detail and lower texture quality.")
             icon.name: "ic_fluent_desktop_edit_20_regular"
             content: ComboBox {
+                property bool initialized: false
+
                 model: ListModel {
                     ListElement { text: qsTr("Quality") }
                     ListElement { text: qsTr("Balanced") }
                     ListElement { text: qsTr("Performance") }
                 }
 
+                Component.onCompleted: {
+                    const value = Backend.getSoberKey("graphics_optimization_mode", "quality")
+                    for (let i = 0; i < model.count; i++) {
+                        if (model.get(i).text.toLowerCase() === value) {
+                            currentIndex = i
+                            break
+                        }
+                    }
+                    initialized = true
+                }
+
                 onCurrentIndexChanged: {
-                    console.log(model.get(currentIndex).text)
+                    if (!initialized) return
+                    Backend.addSoberKey(
+                        "graphics_optimization_mode",
+                        model.get(currentIndex).text.toLowerCase()
+                    )
                 }
             }
         }
@@ -124,13 +166,22 @@ FluentPage {
             description: qsTr("wat is this")
             icon.name: "ic_fluent_camera_sparkles_20_filled"
             content: ComboBox {
+                property bool initialized: false
+
                 model: ListModel {
                     ListElement { text: qsTr("OpenGL") }
                     ListElement { text: qsTr("Vulkan") }
                 }
 
+                Component.onCompleted: {
+                    const useOpenGL = Backend.getSoberKey("use_opengl", true)
+                    currentIndex = useOpenGL ? 0 : 1
+                    initialized = true
+                }
+
                 onCurrentIndexChanged: {
-                    console.log(model.get(currentIndex).text)
+                    if (!initialized) return
+                    Backend.addSoberKey("use_opengl", currentIndex === 0)
                 }
             }
         }

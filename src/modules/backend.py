@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 import resources_rc
 from modules.config import Config
+from modules.config.sober_config import SoberConfig
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
 from modules.mod.fontreplace import Replace
@@ -19,6 +20,7 @@ from RinUI import RinUITranslator, RinUIWindow
 
 SCRIPT_DIR = Path(__file__).parent.parent
 cfg = Config()
+sbcfg = SoberConfig()
 __version__ = "0.1.0"
 
 
@@ -283,6 +285,14 @@ class Backend(QObject):
     @Slot(str)
     def setSplash(self, name):
         self.splashMan.setSplash(name)
+
+    @Slot(str, "QVariant")
+    def addSoberKey(self, key, value):
+        sbcfg.write_key(key, value)
+
+    @Slot(str, result="QVariant")
+    def getSoberKey(self, key):
+        return sbcfg.read_key(key)
 
     @Slot(list)
     def _onMarketplaceLoaded(self, items):
