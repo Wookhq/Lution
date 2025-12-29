@@ -131,7 +131,9 @@ class FilesFunctions:
         )
 
         if not os.path.exists(
-            "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/ExtraContent"
+            os.path.expanduser(
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/ExtraContent"
+            )
         ):
             apk = zipfile.ZipFile(
                 os.path.expanduser(
