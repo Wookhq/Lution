@@ -1,33 +1,24 @@
-import subprocess
 import sys
-import webbrowser
 from pathlib import Path
-from time import sleep
 from tkinter.constants import NONE
 
-import darkdetect
 from PySide6.QtCore import (
     QLocale,
-    QObject,
-    QThread,
     QTranslator,
-    Signal,
-    Slot,
 )
-from PySide6.QtGui import QAction, QGuiApplication, QIcon
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication
 
-from modules.backend import Backend
 from modules.config import Config
 from modules.config.config_init import initConfig
 from modules.launchmenu import LaunchMenu
 from RinUI import RinUITranslator, RinUIWindow
 
+initConfig()  # this first
+from modules.backend import Backend
+
 SCRIPT_DIR = Path(__file__).parent
 
-
-cfg = Config(Path("LutionConfig.toml"))
-initConfig()
+cfg = Config()
 __version__ = "0.1.0"
 
 print(f"""
