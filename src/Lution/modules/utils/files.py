@@ -132,9 +132,10 @@ class FilesFunctions:
 
         if not os.path.exists(
             os.path.expanduser(
-                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/ExtraContent"
+                "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/ExtraContent"
             )
         ):
+            print("extracting")
             apk = zipfile.ZipFile(
                 os.path.expanduser(
                     "~/.var/app/org.vinegarhq.Sober/data/sober/packages/x86_64/com.roblox.client/base.apk"
