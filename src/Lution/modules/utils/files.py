@@ -259,7 +259,6 @@ class FilesFunctions:
             if st.session_state.customfont:
                 # setup the overlay
                 self.Fontsetup()
-                print("dame tu cosita")
                 font_dir = os.path.expanduser(
                     "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts"
                 )
