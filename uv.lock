@@ -372,8 +372,8 @@ wheels = [
 
 [[package]]
 name = "roblox-mod-genarator"
-version = "0.1.0"
-source = { git = "https://github.com/Wookhq/mod-generator.git#efaa2570a23d4a56e26e49025edc3ede3a1dd3e3" }
+version = "0.1.1"
+source = { git = "https://github.com/Wookhq/mod-generator.git#73b135a0173838f6b898167820bd1a04a73f8a5a" }
 dependencies = [
     { name = "fonttools" },
 ]

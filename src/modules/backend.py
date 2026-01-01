@@ -1,3 +1,4 @@
+import os
 import subprocess
 import webbrowser
 from pathlib import Path
@@ -5,6 +6,7 @@ from time import sleep
 from tkinter.constants import NONE
 
 import darkdetect
+from mod_genarator import hex_to_rgb, recolor_directory
 from PySide6.QtCore import QLocale, QObject, QThread, QTranslator, Signal, Slot
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
@@ -102,6 +104,34 @@ class FontWorker(QThread):
             self.error.emit(str(e))
 
 
+class ModGenWorker(QThread):
+    finished = Signal()
+    error = Signal(str)
+
+    def __init__(self, hex_color):
+        super().__init__()
+        self.rgb_color = hex_to_rgb(hex_color)
+
+    def run(self):
+        try:
+            os.makedirs(
+                os.path.dirname(
+                    os.path.expanduser(cfg.get_row("Sober", "Path")),
+                ),
+                exist_ok=True,
+            )
+            recolor_directory(
+                os.path.expanduser(
+                    f"{cfg.get_row('Sober', 'Path')}/data/sober/assets/ExtraContent/LuaPackages/Packages/_Index/BuilderIcons/BuilderIcons/Font/"
+                ),
+                self.rgb_color,
+                os.path.expanduser(cfg.get_row("Sober", "Path")),
+            )
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
+
+
 class AppInit(RinUIWindow):
     def __init__(self):
         qml_file = SCRIPT_DIR / "resources" / "ui" / "MainWindow.qml"
@@ -156,11 +186,14 @@ class Backend(QObject):
     marketplaceError = Signal(str)
     fontApplied = Signal()
     fontError = Signal(str)
+    modGen = Signal()
+    modGenError = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.worker = None
         self.font_worker = None
+        self.mod_worker = None
         self.ui_translator = None
         self.translator = None
         self.splashMan = SplashMan()
@@ -311,6 +344,39 @@ class Backend(QObject):
         if self.worker:
             self.worker.quit()
             self.worker.wait()
+
+    @Slot(str)
+    def genarateMod(self, hex_color):
+        if self.mod_worker is not None:
+            self.mod_worker.finished.disconnect()
+            self.mod_worker.error.disconnect()
+            self.mod_worker.quit()
+            self.mod_worker.wait()
+
+        print(f"Genarating mod with hex color: {hex_color}")
+
+        self.mod_worker = ModGenWorker(hex_color)
+        self.mod_worker.finished.connect(self._onModGenSucess)
+        self.mod_worker.error.connect(self._onModGenError)
+        self.mod_worker.start()
+
+    @Slot()
+    def _onModGenSucess(self):
+        print("Mod genarated successfully")
+        self.modGen.emit()
+
+        if self.mod_worker:
+            self.mod_worker.quit()
+            self.mod_worker.wait()
+
+    @Slot(str)
+    def _onModGenError(self, error):
+        print(f"Mod genaration error: {error}")
+        self.modGenError.emit(error)
+
+        if self.mod_worker:
+            self.mod_worker.quit()
+            self.mod_worker.wait()
 
     @Slot(result=str)
     def getSystemLanguage(self):
