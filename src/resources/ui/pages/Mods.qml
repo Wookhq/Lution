@@ -14,7 +14,6 @@ FluentPage {
 
     function applyFontChange(filePath) {
         isApplyingFont = true
-        fontProgress = 0
         floatLayer.createInfoBar({
             severity: Severity.Info,
             title: qsTr("Trying to set the font..."),
