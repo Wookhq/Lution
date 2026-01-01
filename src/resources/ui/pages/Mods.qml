@@ -107,6 +107,20 @@ FluentPage {
             }
         }
 
+        SettingCard {
+            Layout.fillWidth: true
+            icon.name: "ic_fluent_box_multiple_20_regular"
+            title: qsTr("Open Mod genarator")
+            description: qsTr("gurt")
+            content: Button {
+                text: "Open"
+                anchors.centerIn: parent
+                onClicked: window.navigationView.push(
+                    Qt.resolvedUrl("ModGenarator.qml")
+                )
+            }
+        }
+
         FileDialog {
             id: fileDialog
             title: qsTr("Select a File")
