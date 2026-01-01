@@ -1,10 +1,18 @@
+import os
 from pathlib import Path
 
 from tomlkit import TOMLDocument, dumps, loads, table
 
+config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+
+config_dir = config_home / "Chroma"
+config_dir.mkdir(parents=True, exist_ok=True)
+
+config_file = config_dir / "LutionConfig.toml"
+
 
 class Config:
-    def __init__(self, config_path="LutionConfig.toml"):
+    def __init__(self, config_path=config_file):
         self.config_path = Path(config_path)
 
         if not self.config_path.exists():
