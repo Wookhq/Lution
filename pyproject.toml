@@ -3,7 +3,7 @@ name = "lution"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "black>=25.12.0",
     "jsonc-parser>=1.1.5",
@@ -11,5 +11,9 @@ dependencies = [
     "pyside6>=6.10.1",
     "requests>=2.32.5",
     "rinui>=0.1.9",
+    "roblox-mod-genarator",
     "tomlkit>=0.13.3",
 ]
+
+[tool.uv.sources]
+roblox-mod-genarator = { git = "https://github.com/Wookhq/mod-generator.git" }
