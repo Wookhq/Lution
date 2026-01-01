@@ -20,6 +20,6 @@ pyside6-rcc src/resources.qrc -o src/resources_rc.py
 
 # Build with PyInstaller
 echo "Building executable..."
-pyinstaller src/main.py --name LutionRT --onefile --windowed --add-data "src/resources:resources"
+pyinstaller src/main.py --name LutionRT --onefile --windowed --noupx --clean --add-data "src/resources:resources" --add-data "RinUI:RinUI"
 
 echo "Build complete! Executable: $(pwd)/dist/LutionRT"

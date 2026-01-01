@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Chroma
+Comment=Configure Chroma and Sober
+Exec=chroma
+Icon=chroma
+Type=Application
+Categories=Utility;
