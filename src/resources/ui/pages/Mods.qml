@@ -11,8 +11,6 @@ FluentPage {
     title: "Mods"
 
     property bool isApplyingFont: false
-    property int fontProgress: 0
-    property string fontProgressMessage: ""
 
     function applyFontChange(filePath) {
         isApplyingFont = true
