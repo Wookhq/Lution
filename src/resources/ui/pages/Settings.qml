@@ -84,7 +84,7 @@ FluentPage {
                 width: 200
                 Layout.fillWidth: true
                 text: Backend.getMarketplaceProvider()
-                onTextChanged: Backend.setMarketplaceProvider(soberPathInput.text)
+                onTextChanged: Backend.setMarketplaceProvider(marketplaceInput.text)
             }
         }
 
@@ -100,7 +100,7 @@ FluentPage {
                 width: 200
                 Layout.fillWidth: true
                 text: Backend.getGithubAPIKey()
-                onTextChanged: Backend.setGithubAPIKey(soberPathInput.text)
+                onTextChanged: Backend.setGithubAPIKey(marketplaceAPIKeyInput.text)
             }
         }
     }
