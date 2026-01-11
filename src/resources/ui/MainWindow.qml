@@ -43,7 +43,8 @@ FluentWindow {
             {
                 icon: "ic_fluent_settings_20_regular",
                 title: qsTr("Settings"),
-                page: settingsPage
+                page: settingsPage,
+                position: Position.Bottom
             }
         ]
 
