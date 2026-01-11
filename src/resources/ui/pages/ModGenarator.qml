@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 import QtQuick.Dialogs
-import "../QuickPromise/promise.js" as Promise
+import "../QuickPromise/promise.js" as Q
 import RinUI
 import "qrc:/resources/ui/components"
 
