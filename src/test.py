@@ -1,9 +1,8 @@
-from modules.config.sober_config import SoberConfig
+from modules.config.config_init import initConfig
+initConfig()
+from modules.marketplace import MarketplaceHelper
+import json
 
-cfg = SoberConfig()
+mk = MarketplaceHelper()
 
-pr = cfg.read_key("discord_rpc_show_join_button")
-
-print(pr)
-
-cfg.write_key("are oyu a chip", False)
+print(json.dumps(mk.list_items(), indent=4))

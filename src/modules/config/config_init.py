@@ -19,6 +19,9 @@ def initConfig():
     if not cfg.get_row("Lution", "FirstTimeLaunch"):
         cfg.add_row("Lution", "language", "en_US")
         cfg.add_row("LutionSplash", "CurrentSplash", "Default")
+        cfg.add_row("Lution", "MarketplaceRepo", "wookhq/Chroma-Marketplace")
+        cfg.add_row("Lution", "GithubKeyAPI", "None")
+
         cfg.add_row(
             "LutionSplash", "Splashs", ["Default", "Calling", "Terminal", "Sober"]
         )  # hard coded for now

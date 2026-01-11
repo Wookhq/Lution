@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 import resources_rc
 from modules.config import Config
+from modules.marketplace import MarketplaceHelper
 from modules.config.sober_config import SoberConfig
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
@@ -23,6 +24,7 @@ from RinUI import RinUITranslator, RinUIWindow
 SCRIPT_DIR = Path(__file__).parent.parent
 cfg = Config()
 sbcfg = SoberConfig()
+mkh = MarketplaceHelper()
 __version__ = "0.1.0"
 
 
@@ -51,34 +53,57 @@ class NameUpdate(QObject):
 
 
 class MarketplaceWorker(QThread):
-    finished = Signal(list)
+    finished = Signal(dict)   # <-- dict, not list
     error = Signal(str)
 
     def run(self):
         try:
-            sleep(4)
-            items = [
-                {
-                    "title": "Marketplace mod 1",
-                    "desc": "seia",
-                    "img": "qrc:/resources/images/mod1.png",
-                },
-                {
-                    "title": "Marketplace mod 2",
-                    "desc": "mika",
-                    "img": "qrc:/resources/images/mod2.png",
-                },
-                {
-                    "title": "Marketplace mod 3",
-                    "desc": "nagisa",
-                    "img": "qrc:/resources/images/mod3.png",
-                },
-            ]
+            items = {
+                "Mods": [
+                    {
+                        "title": "Better Default",
+                        "body": "It's your default roblox icons, website with a sort of metallic look and an editor in a grey dunes landscape.",
+                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/better-default.jpg",
+                        "creator": "thefrenchguy4 on Gamebanana",
+                        "status": "unstable",
+                        "featured": False,
+                        "id": "c9007043-ca0b-4e7e-8874-2ea7a3187416"
+                    },
+                    {
+                        "title": "Content Deleted",
+                        "body": "###########? #####.",
+                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/content-deleted.jpg",
+                        "creator": "MistressDooM on Gamebanana",
+                        "status": "stable",
+                        "featured": True,
+                        "id": "c977ae7a-c426-4134-928d-91642ed4aa3d"
+                    },
+                    {
+                        "title": "Blue star theme",
+                        "body": "A blue star themed mod for Roblox, featuring a blue star background and blue icons.",
+                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/blue-star-theme.png",
+                        "creator": "thefrenchguy4 on Gamebanana",
+                        "status": "unstable",
+                        "featured": False,
+                        "id": "04523508-84a2-4e7c-8fb6-7a7afcaa62a7"
+                    },
+                    {
+                        "title": "L337",
+                        "body": "Experience Roblox like a true haxx0r! Converts all text into basic leet.",
+                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/L337.png",
+                        "creator": "MistressDooM on Gamebanana",
+                        "status": "stable",
+                        "featured": True,
+                        "id": "cecfac23-d791-496f-9222-f696386ed9fb"
+                    }
+                ],
+                "Theme": "None"
+            }
 
             self.finished.emit(items)
+
         except Exception as e:
             self.error.emit(str(e))
-
 
 class FontWorker(QThread):
     finished = Signal()
@@ -182,7 +207,7 @@ class AppInit(RinUIWindow):
 
 
 class Backend(QObject):
-    marketplaceReady = Signal(list)
+    marketplaceReady = Signal(dict)
     marketplaceError = Signal(str)
     fontApplied = Signal()
     fontError = Signal(str)
@@ -327,9 +352,9 @@ class Backend(QObject):
     def getSoberKey(self, key):
         return sbcfg.read_key(key)
 
-    @Slot(list)
+    @Slot(dict)
     def _onMarketplaceLoaded(self, items):
-        print(f"Marketplace loaded: {len(items)} items")
+        print(f"Marketplace loaded: {len(items.get('Mods', []))} mods")
         self.marketplaceReady.emit(items)
 
         if self.worker:
