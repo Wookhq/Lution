@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "qrc:/resources/QuickPromise/promise.js" as Q
+import "../QuickPromise/promise.js" as Promise
 import RinUI
 import "qrc:/resources/ui/components/marketplace/"
 

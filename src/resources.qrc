@@ -14,8 +14,8 @@
         <file>resources/ui/components/marketplace/ItemCard.qml</file>
         <file>resources/i18n/vi_VN.qm</file>
         <file>resources/i18n/en_US.qm</file>
-        <file>resources/QuickPromise/PromiseTimer.qml</file>
-        <file>resources/QuickPromise/promise.js</file>
+        <file>resources/ui/QuickPromise/PromiseTimer.qml</file>
+        <file>resources/ui/QuickPromise/promise.js</file>
         <file alias="sober">resources/softber.svg</file>
         <file alias="logo">resources/logo.svg</file>
         <file alias="logopng">resources/logo.png</file>
