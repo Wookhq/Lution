@@ -58,47 +58,7 @@ class MarketplaceWorker(QThread):
 
     def run(self):
         try:
-            items = {
-                "Mods": [
-                    {
-                        "title": "Better Default",
-                        "body": "It's your default roblox icons, website with a sort of metallic look and an editor in a grey dunes landscape.",
-                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/better-default.jpg",
-                        "creator": "thefrenchguy4 on Gamebanana",
-                        "status": "unstable",
-                        "featured": False,
-                        "id": "c9007043-ca0b-4e7e-8874-2ea7a3187416"
-                    },
-                    {
-                        "title": "Content Deleted",
-                        "body": "###########? #####.",
-                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/content-deleted.jpg",
-                        "creator": "MistressDooM on Gamebanana",
-                        "status": "stable",
-                        "featured": True,
-                        "id": "c977ae7a-c426-4134-928d-91642ed4aa3d"
-                    },
-                    {
-                        "title": "Blue star theme",
-                        "body": "A blue star themed mod for Roblox, featuring a blue star background and blue icons.",
-                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/blue-star-theme.png",
-                        "creator": "thefrenchguy4 on Gamebanana",
-                        "status": "unstable",
-                        "featured": False,
-                        "id": "04523508-84a2-4e7c-8fb6-7a7afcaa62a7"
-                    },
-                    {
-                        "title": "L337",
-                        "body": "Experience Roblox like a true haxx0r! Converts all text into basic leet.",
-                        "image": "https://raw.githubusercontent.com/wookhq/Lution-marketplace/refs/heads/main/Assets/thumbnails/L337.png",
-                        "creator": "MistressDooM on Gamebanana",
-                        "status": "stable",
-                        "featured": True,
-                        "id": "cecfac23-d791-496f-9222-f696386ed9fb"
-                    }
-                ],
-                "Theme": "None"
-            }
+            items = mkh.list_items()
 
             self.finished.emit(items)
 
