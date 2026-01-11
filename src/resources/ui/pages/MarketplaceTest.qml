@@ -1,29 +1,29 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../QuickPromise/promise.js" as Promise
+import "../QuickPromise/promise.js" as Q
 import RinUI
 import "qrc:/resources/ui/components/marketplace/"
 
 FluentPage {
     id: root
     title: "Marketplace"
+
     property bool isLoading: true
     property string errorMessage: ""
 
-    Component.onCompleted: {
-        loadMarketplaceItems()
-    }
+    Component.onCompleted: loadMarketplaceItems()
 
     function loadMarketplaceItems() {
         isLoading = true
         errorMessage = ""
 
-        Q.promise(function(resolve, reject) {
-            function onSuccess(list) {
+        Q.promise(function (resolve, reject) {
+
+            function onSuccess(data) {
                 Backend.marketplaceReady.disconnect(onSuccess)
                 Backend.marketplaceError.disconnect(onError)
-                resolve(list)
+                resolve(data)
             }
 
             function onError(error) {
@@ -34,19 +34,24 @@ FluentPage {
 
             Backend.marketplaceReady.connect(onSuccess)
             Backend.marketplaceError.connect(onError)
-
             Backend.getMarketplaceItems()
 
-        }).then(function(list) {
+        }).then(function (data) {
             clipModel.clear()
-            for (var i = 0; i < list.length; i++) {
-                clipModel.append(list[i])
-            }
-            isLoading = false
-            console.log("Marketplace loaded successfully:", list.length, "items")
 
-        }).catch(function(error) {
-            // Error handling
+            if (data.Mods && data.Mods.length !== undefined) {
+                for (var i = 0; i < data.Mods.length; i++) {
+                    clipModel.append(data.Mods[i])
+                }
+                console.log("Marketplace loaded successfully:", data.Mods.length, "mods")
+            } else {
+                console.error("Invalid marketplace data:", data)
+                errorMessage = "Invalid marketplace data"
+            }
+
+            isLoading = false
+
+        }).catch(function (error) {
             console.error("Failed to load marketplace:", error)
             errorMessage = error || "Unknown error"
             isLoading = false
@@ -57,27 +62,29 @@ FluentPage {
         id: clipModel
     }
 
+
     Component {
         id: marketplacePage
+
         ScrollView {
-            width: parent.width
-            height: parent.height
-            contentWidth: availableWidth
+            anchors.fill: parent
             clip: true
 
             GridView {
-                width: parent.width
+                anchors.fill: parent
                 model: clipModel
-                cellWidth: 260
-                cellHeight: 200
+                cellWidth: 410
+                cellHeight: 240
 
-                delegate: ItemCard {
-                    width: 240
-                    height: 180
+               delegate: ItemCard {
+                    width: 400
+                    height: 230
+
                     title: model.title
-                    desc: model.desc
-                    img: model.img
+                    desc: model.body
+                    img: model.image
                 }
+
             }
         }
     }
@@ -132,6 +139,7 @@ FluentPage {
                     Layout.alignment: Qt.AlignHCenter
                     text: errorMessage
                     typography: Typography.Body
+                    wrapMode: Text.WordWrap
                 }
 
                 Button {
@@ -143,9 +151,9 @@ FluentPage {
         }
     }
 
+
     ColumnLayout {
-        width: parent.width
-        height: parent.height
+        anchors.fill: parent
         spacing: 0
 
         SelectorBar {
@@ -158,7 +166,7 @@ FluentPage {
                 id: rep
                 model: [
                     { text: qsTr("Store"), page: marketplacePage },
-                    { text: qsTr("Downloaded"), page: downloadedPage },
+                    { text: qsTr("Downloaded"), page: downloadedPage }
                 ]
 
                 SelectorBarItem {

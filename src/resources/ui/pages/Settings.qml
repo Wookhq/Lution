@@ -13,6 +13,10 @@ FluentPage {
             typography: Typography.BodyStrong
             text: qsTr("Appearance")
         }
+        Label {
+            text: qsTr("Leave labels empty if you mess up something, its will set to default value")
+            color: Theme.currentTheme.colors.textSecondaryColor
+        }
 
         SettingCard {
             width: parent.width
@@ -57,7 +61,47 @@ FluentPage {
                 text: Backend.getSoberPath()
                 onTextChanged: Backend.setSoberPath(soberPathInput.text)
             }
+        }
+    }
 
+    Column {
+        Layout.fillWidth: true
+        spacing: 3
+        Text {
+            typography: Typography.BodyStrong
+            text: qsTr("Marketplace")
+        }
+
+        SettingCard {
+            width: parent.width
+            title: qsTr("Github Repo")
+            description: qsTr("The marketplace Chroma will fetch.")
+            icon.name: "ic_fluent_app_generic_20_regular"
+
+            TextArea {
+                id: marketplaceInput
+                placeholderText: qsTr("Wookhq/Chroma-Marketplace")
+                width: 200
+                Layout.fillWidth: true
+                text: Backend.getSoberPath()
+                onTextChanged: Backend.setSoberPath(soberPathInput.text)
+            }
+        }
+
+        SettingCard {
+            width: parent.width
+            title: qsTr("Github API Key")
+            description: qsTr("API key for preventing rate limiting. Please keep this safe")
+            icon.name: "ic_fluent_key_20_regular"
+
+            TextArea {
+                id: marketplaceAPIKeyInput
+                placeholderText: qsTr("AIsdvnziDjal....")
+                width: 200
+                Layout.fillWidth: true
+                text: Backend.getSoberPath()
+                onTextChanged: Backend.setSoberPath(soberPathInput.text)
+            }
         }
     }
 
