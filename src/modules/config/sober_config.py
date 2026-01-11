@@ -12,7 +12,12 @@ class SoberConfig:
         self.configpath = os.path.expanduser(
             f"{self.cfg.get_row('Sober', 'Path')}/config/sober/config.json"
         )
-        self.data = JsoncParser.parse_file(self.configpath)
+        try:
+            self.data = JsoncParser.parse_file(self.configpath)
+        except Exception:
+            print("bruh 😭😭😭😭😭😭😭")
+            self.data = JsoncParser.parse_str('{"balls" : "ball"}')
+
 
     def read_key(self, key):
         return self.data[key]

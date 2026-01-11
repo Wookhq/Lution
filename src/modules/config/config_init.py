@@ -7,7 +7,11 @@ cfg = Config()
 
 
 def reloadName():
-    cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+    try:
+        cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+    except Exception:
+        print("not logged in")
+        cfg.add_row("Misc", "UserDisplayName", "User")
     cfg.add_row("Misc", "LastUpdated", datetime.datetime.now())
 
 
@@ -21,7 +25,12 @@ def initConfig():
         cfg.add_row("Lution", "FirstTimeLaunch", "False")
         cfg.add_row("Sober", "Path", "~/.var/app/org.vinegarhq.Sober")
         cfg.save()
-        cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+        try:
+            cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+        except Exception:
+            print("not logged in")
+            cfg.add_row("Misc", "UserDisplayName", "User")
+
         cfg.add_row("Misc", "LastUpdated", datetime.datetime.now())
         cfg.save()
     else:
