@@ -83,8 +83,8 @@ FluentPage {
                 placeholderText: qsTr("Wookhq/Chroma-Marketplace")
                 width: 200
                 Layout.fillWidth: true
-                text: Backend.getSoberPath()
-                onTextChanged: Backend.setSoberPath(soberPathInput.text)
+                text: Backend.getMarketplaceProvider()
+                onTextChanged: Backend.setMarketplaceProvider(soberPathInput.text)
             }
         }
 
@@ -96,11 +96,11 @@ FluentPage {
 
             TextArea {
                 id: marketplaceAPIKeyInput
-                placeholderText: qsTr("AIsdvnziDjal....")
+                placeholderText: qsTr("ghp_AjL3KWoiqj1....")
                 width: 200
                 Layout.fillWidth: true
-                text: Backend.getSoberPath()
-                onTextChanged: Backend.setSoberPath(soberPathInput.text)
+                text: Backend.getGithubAPIKey()
+                onTextChanged: Backend.setGithubAPIKey(soberPathInput.text)
             }
         }
     }

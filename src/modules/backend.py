@@ -271,6 +271,25 @@ class Backend(QObject):
         ).expanduser()
         subprocess.Popen(["xdg-open", str(modpath)])
 
+
+    @Slot(result=str)
+    def getMarketplaceProvider(self):
+        return cfg.get_row("Lution", "MarketplaceRepo")
+    
+    @Slot(result=str)
+    def getGithubAPIKey(self):
+        return cfg.get_row("Lution", "GithubKeyAPI")
+    
+    @Slot(str)
+    def setMarketplaceProvider(self, provider):
+        cfg.get_row("Lution", "MarketplaceRepo", provider)
+        cfg.save()
+    
+    @Slot(str)
+    def setGithubAPIKey(self, key):
+        cfg.add_row("Lution", "GithubKeyAPI", key)
+        cfg.save()
+
     @Slot()
     def getMarketplaceItems(self):
         if self.worker is not None:

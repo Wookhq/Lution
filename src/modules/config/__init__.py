@@ -8,8 +8,9 @@ config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 config_dir = config_home / "Chroma"
 config_dir.mkdir(parents=True, exist_ok=True)
 
-config_file = config_dir / "LutionConfig.toml"
+# config_file = config_dir / "LutionConfig.toml"
 
+config_file = "LutionConfig.toml"
 
 class Config:
     def __init__(self, config_path=config_file):
