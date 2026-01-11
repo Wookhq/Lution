@@ -1,14 +1,14 @@
 import datetime
 
 from modules.config import Config
-from modules.utils.namegrabber import getCookie, getName
+from modules.utils.namegrabber import getUserIdFromLogs, getName
 
 cfg = Config()
 
 
 def reloadName():
     try:
-        cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+        cfg.add_row("Misc", "UserDisplayName", getName(getUserIdFromLogs()))
     except Exception:
         print("not logged in")
         cfg.add_row("Misc", "UserDisplayName", "User")
@@ -29,7 +29,7 @@ def initConfig():
         cfg.add_row("Sober", "Path", "~/.var/app/org.vinegarhq.Sober")
         cfg.save()
         try:
-            cfg.add_row("Misc", "UserDisplayName", getName(getCookie()))
+            cfg.add_row("Misc", "UserDisplayName", getName(getUserIdFromLogs()))
         except Exception:
             print("not logged in")
             cfg.add_row("Misc", "UserDisplayName", "User")
