@@ -253,7 +253,7 @@ requires-dist = [
     { name = "pyinstaller", specifier = ">=6.17.0" },
     { name = "pyside6", specifier = ">=6.10.1" },
     { name = "requests", specifier = ">=2.32.5" },
-    { name = "rinui", specifier = ">=0.1.9" },
+    { name = "rinui", git = "https://github.com/RinLit-233-shiroko/Rin-UI.git" },
     { name = "roblox-mod-genarator", git = "https://github.com/Wookhq/mod-generator.git" },
     { name = "tomlkit", specifier = ">=0.13.3" },
 ]
@@ -523,16 +523,12 @@ wheels = [
 
 [[package]]
 name = "rinui"
-version = "0.1.9"
-source = { registry = "https://pypi.org/simple" }
+version = "0.1.9.1"
+source = { git = "https://github.com/RinLit-233-shiroko/Rin-UI.git#1655c8563b4136530110db06db1f10c50aa3a880" }
 dependencies = [
     { name = "darkdetect" },
     { name = "pyside6" },
     { name = "pywin32", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/70/e1276667788616df81da3bdcfe324fc5dc65dd8c8fdb4de0a9aa4e5be5f3/rinui-0.1.9.tar.gz", hash = "sha256:c7a1a88e77902ed054d5aa8e6dc6eacaff72f6aaba7a78e9b35149ed57d6a8a6", size = 897241, upload-time = "2025-10-26T05:52:38.46Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/96/32/93efe771ced24aaf52eae583d702501236666f572b8c46777ae0d505e865/rinui-0.1.9-py3-none-any.whl", hash = "sha256:e88fcf26151accdb34c911fbca42a24cfbe7ac7f2870369f00d3fc0661e5a874", size = 948638, upload-time = "2025-10-26T05:52:36.354Z" },
 ]
 
 [[package]]

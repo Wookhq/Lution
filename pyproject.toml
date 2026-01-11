@@ -18,3 +18,4 @@ dependencies = [
 
 [tool.uv.sources]
 roblox-mod-genarator = { git = "https://github.com/Wookhq/mod-generator.git" }
+rinui = { git = "https://github.com/RinLit-233-shiroko/Rin-UI.git" }
