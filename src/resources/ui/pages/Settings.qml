@@ -198,3 +198,4 @@ FluentPage {
         color: Theme.currentTheme.colors.textSecondaryColor
     }
 }
+
