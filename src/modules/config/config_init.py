@@ -1,7 +1,7 @@
 import datetime
 
 from modules.config import Config
-from modules.utils.namegrabber import getUserIdFromLogs, getName
+from modules.utils.namegrabber import getName, getUserIdFromLogs
 
 cfg = Config()
 
@@ -21,6 +21,7 @@ def initConfig():
         cfg.add_row("LutionSplash", "CurrentSplash", "Default")
         cfg.add_row("Lution", "MarketplaceRepo", "wookhq/Chroma-Marketplace")
         cfg.add_row("Lution", "GithubKeyAPI", "None")
+        cfg.save()
 
         cfg.add_row(
             "LutionSplash", "Splashs", ["Default", "Calling", "Terminal", "Sober"]
