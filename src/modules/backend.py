@@ -13,10 +13,10 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 import resources_rc
 from modules.config import Config
-from modules.marketplace import MarketplaceHelper
 from modules.config.sober_config import SoberConfig
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
+from modules.marketplace import MarketplaceHelper
 from modules.mod.fontreplace import Replace
 from modules.mod.patch import Patcher
 from RinUI import RinUITranslator, RinUIWindow
@@ -24,7 +24,6 @@ from RinUI import RinUITranslator, RinUIWindow
 SCRIPT_DIR = Path(__file__).parent.parent
 cfg = Config()
 sbcfg = SoberConfig()
-mkh = MarketplaceHelper()
 __version__ = "0.1.0"
 
 
@@ -53,17 +52,22 @@ class NameUpdate(QObject):
 
 
 class MarketplaceWorker(QThread):
-    finished = Signal(dict)   # <-- dict, not list
+    finished = Signal(dict)  # <-- dict, not list
     error = Signal(str)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.mkh = MarketplaceHelper()
 
     def run(self):
         try:
-            items = mkh.list_items()
+            items = self.mkh.list_items()
 
             self.finished.emit(items)
 
         except Exception as e:
             self.error.emit(str(e))
+
 
 class FontWorker(QThread):
     finished = Signal()
@@ -231,20 +235,19 @@ class Backend(QObject):
         ).expanduser()
         subprocess.Popen(["xdg-open", str(modpath)])
 
-
     @Slot(result=str)
     def getMarketplaceProvider(self):
         return cfg.get_row("Lution", "MarketplaceRepo")
-    
+
     @Slot(result=str)
     def getGithubAPIKey(self):
         return cfg.get_row("Lution", "GithubKeyAPI")
-    
+
     @Slot(str)
     def setMarketplaceProvider(self, provider):
         cfg.get_row("Lution", "MarketplaceRepo", provider)
         cfg.save()
-    
+
     @Slot(str)
     def setGithubAPIKey(self, key):
         cfg.add_row("Lution", "GithubKeyAPI", key)
