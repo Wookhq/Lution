@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 import resources_rc
 from modules.config import Config
+from modules.config.config_init import reloadName
 from modules.config.sober_config import SoberConfig
 from modules.launchmenu import LaunchMenu
 from modules.launchmenu.splashMan import SplashMan
@@ -37,7 +38,7 @@ class NameUpdate(QObject):
     def run(self):
         while self.running:
             try:
-                self.cfg.reloadName()
+                reloadName()
                 self.cfg.save()
             except Exception as e:
                 print("cfg reload error:", e)
@@ -245,7 +246,7 @@ class Backend(QObject):
 
     @Slot(str)
     def setMarketplaceProvider(self, provider):
-        cfg.get_row("Lution", "MarketplaceRepo", provider)
+        cfg.add_row("Lution", "MarketplaceRepo", provider)
         cfg.save()
 
     @Slot(str)
@@ -391,7 +392,7 @@ class Backend(QObject):
 
     @Slot(result=str)
     def getLanguage(self):
-        return cfg.get_row("Lutionconfig", "language")
+        return cfg.get_row("Lution", "language")
 
     @Slot(str)
     def setLanguage(self, lang: str):
