@@ -83,7 +83,9 @@ class FontWorker(QThread):
 
             Replace(
                 clean_path,
-                os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/)",
+                os.path.expanduser(
+                    "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts/)"
+                ),
             )
 
             self.finished.emit()
