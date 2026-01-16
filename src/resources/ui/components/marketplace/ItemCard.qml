@@ -3,8 +3,55 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import RinUI
+import "../../QuickPromise/promise.js" as Q
+
 
 Frame {
+    property bool isDownloading: false
+
+    function downloadAMod(modId) {
+        isDownloading = true
+        Q.promise(function (resolve, reject) {
+            function onSuccess(data) {
+                floatLayer.createInfoBar({
+                    severity: Severity.Success,
+                    title: qsTr("Download complete!"),
+                    text: qsTr("Successfully downloaded mod!"),
+                    position: Position.BottomRight
+                })
+                Backend.mod_downloaded.disconnect(onSuccess)
+                Backend.mod_download_failed.disconnect(onError)
+                resolve(data)
+            }
+
+            function onError(error) {
+                floatLayer.createInfoBar({
+                    severity: Severity.Error,
+                    title: qsTr("Something went wrong when trying to download the mod."),
+                    text: qsTr("Check the logs for more info."),
+                    position: Position.BottomRight
+                })
+                Backend.mod_downloaded.disconnect(onSuccess)
+                Backend.mod_download_failed.disconnect(onError)
+                reject(error)
+            }
+
+            Backend.mod_downloaded.connect(onSuccess)
+            Backend.mod_download_failed.connect(onError)
+            floatLayer.createInfoBar({
+                severity: Severity.Info,
+                title: qsTr("Hang on, downloading the mod..."),
+                position: Position.BottomRight
+            })
+            Backend.downloadMarketplaceItems(modId)
+
+        }).then(function (data) {
+            isDownloading = false
+        }).catch(function (error) {
+            isDownloading = true
+        })
+    }
+
     id: root
     width: 500
     height: 200
@@ -99,7 +146,7 @@ Frame {
         Button {
             text: "Download"
             highlighted: true
-            onClicked: Backend.downloadMarketplaceItems(root.modId)
+            onClicked: downloadAMod(root.modId)
         }
 
         Button {
