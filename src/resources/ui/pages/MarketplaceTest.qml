@@ -83,6 +83,7 @@ FluentPage {
                     title: model.title
                     desc: model.body
                     img: model.image
+                    creator: model.creator
                 }
 
             }
