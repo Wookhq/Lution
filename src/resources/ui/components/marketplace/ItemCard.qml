@@ -14,7 +14,7 @@ Frame {
     property string desc: qsTr("Placeholder text")
     property string creator: qsTr("Unknown")
     property string img: "qrc:/placeholder"
-    
+
     function truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + "...";
@@ -26,8 +26,22 @@ Frame {
         border.color: Theme.currentTheme.colors.controlBorderColor
         color: "transparent"
         clip: true
-    }
 
+        Image {
+            anchors.fill: parent
+            source: root.img
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            cache: true
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: Theme.getTheme() === "Light"
+                ? "#80ffffff"
+                : "#80000000"
+        }
+    }
 
     ColumnLayout {
         anchors {
@@ -42,7 +56,7 @@ Frame {
         spacing: 6
 
         Text {
-            text: root.truncateText(root.title, 50)
+            text: root.truncateText(root.title, 200)
             font.pixelSize: 18
             font.weight: Font.Medium
             color: Theme.getTheme() === "Light" ? "black" : "white"
@@ -61,7 +75,7 @@ Frame {
             opacity: 0.75
             color: Theme.getTheme() === "Light" ? "#444" : "#ccc"
 
-            wrapMode: Text.WordWrap 
+            wrapMode: Text.WordWrap
 
             Layout.fillWidth: true
             Layout.preferredHeight: font.pixelSize * 2.6
