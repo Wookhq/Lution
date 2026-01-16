@@ -4,7 +4,7 @@ from pathlib import Path
 from tomlkit import TOMLDocument, dumps, loads, table
 
 CONFIG_APP_NAME = "Chroma"
-CONFIG_FILE_NAME = "LutionConfig.toml"
+CONFIG_FILE_NAME = "ChromaConfig.toml"
 
 config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 config_dir = config_home / CONFIG_APP_NAME
