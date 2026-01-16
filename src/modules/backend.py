@@ -62,9 +62,7 @@ class MarketplaceWorker(QThread):
     def run(self):
         try:
             items = self.mkh.list_items()
-
             self.finished.emit(items)
-
         except Exception as e:
             self.error.emit(str(e))
 
