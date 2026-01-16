@@ -53,7 +53,7 @@ class NameUpdate(QObject):
 
 
 class MarketplaceWorker(QThread):
-    finished = Signal(dict)  # <-- dict, not list
+    finished = Signal(dict)
     error = Signal(str)
 
     def __init__(self) -> None:
@@ -64,6 +64,23 @@ class MarketplaceWorker(QThread):
         try:
             items = self.mkh.list_items()
             self.finished.emit(items)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
+class MarketplaceModDownloadWorker(QThread):
+    finished = Signal()
+    error = Signal(str)
+
+    def __init__(self, mod_id) -> None:
+        super().__init__()
+        self.mkh = MarketplaceHelper()
+        self.id = mod_id
+
+    def run(self):
+        try:
+            self.mkh.download_item(self.id)
+            self.finished.emit()
         except Exception as e:
             self.error.emit(str(e))
 
@@ -172,6 +189,8 @@ class AppInit(RinUIWindow):
 
 
 class Backend(QObject):
+    mod_downloaded = Signal()
+    mod_download_failed = Signal(str)
     marketplaceReady = Signal(dict)
     marketplaceError = Signal(str)
     fontApplied = Signal()
@@ -182,6 +201,7 @@ class Backend(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.worker = None
+        self.download_worker = None
         self.font_worker = None
         self.mod_worker = None
         self.ui_translator = None
@@ -266,6 +286,38 @@ class Backend(QObject):
         self.worker.finished.connect(self._onMarketplaceLoaded)
         self.worker.error.connect(self._onMarketplaceError)
         self.worker.start()
+
+    @Slot(str)
+    def downloadMarketplaceItems(self, mod_id):
+        print(mod_id)
+        if self.download_worker is not None:
+            self.download_worker.finished.disconnect()
+            self.download_worker.error.disconnect()
+            self.download_worker.quit()
+            self.download_worker.wait()
+
+        self.download_worker = MarketplaceModDownloadWorker(mod_id)
+        self.download_worker.finished.connect(self._onMarketplaceModDownloaded)
+        self.download_worker.error.connect(self._onMarketplaceModFailed)
+        self.download_worker.start()
+
+    @Slot()
+    def _onMarketplaceModDownloaded(self):
+        print("Mod on the marketplace downloaded successfully")
+        self.mod_downloaded.emit()
+
+        if self.download_worker:
+            self.download_worker.quit()
+            self.download_worker.wait()
+
+    @Slot(str)
+    def _onMarketplaceModFailed(self, error):
+        print(f"Download mod error: {error}")
+        self.mod_download_failed.emit(error)
+
+        if self.download_worker:
+            self.download_worker.quit()
+            self.download_worker.wait()
 
     @Slot(result="QVariant")
     def getSplash(self):

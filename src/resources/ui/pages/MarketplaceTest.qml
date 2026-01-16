@@ -84,6 +84,7 @@ FluentPage {
                     desc: model.body
                     img: model.image
                     creator: model.creator
+                    modId: model.id
                 }
 
             }

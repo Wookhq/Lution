@@ -14,6 +14,7 @@ Frame {
     property string desc: qsTr("Placeholder text")
     property string creator: qsTr("Unknown")
     property string img: "qrc:/placeholder"
+    property string modId: "Unknown"
 
     function truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
@@ -98,6 +99,7 @@ Frame {
         Button {
             text: "Download"
             highlighted: true
+            onClicked: Backend.downloadMarketplaceItems(root.modId)
         }
 
         Button {
