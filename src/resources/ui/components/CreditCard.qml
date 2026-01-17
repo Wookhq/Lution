@@ -8,22 +8,17 @@ Clip {
     width: 520
     height: 200
 
-    // Clip / Frame styling
     radius: 15
     borderWidth: 1
     borderColor: Theme.currentTheme.colors.controlBorderColor
     color: Theme.getTheme() === "Light" ? "#f6f6f6" : "#1e1e1e"
     highlighted: hovered
 
-    // Data
-    property string title: qsTr("Example Mod")
-    property string desc: qsTr("Placeholder description text goes here.")
-    property string creator: qsTr("Unknown")
+    property string title: qsTr("A contributor")
+    property string desc: qsTr("Place holder text that just works")
     property string img: "qrc:/placeholder"
-    property string modId: "Unknown"
 
     onClicked: {
-        // Card click behavior
         console.log("Open mod:", modId)
     }
 
@@ -32,7 +27,6 @@ Clip {
         anchors.margins: 14
         spacing: 14
 
-        // ───────── LEFT (TEXT) ─────────
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -60,7 +54,6 @@ Clip {
             Item { Layout.fillHeight: true }
         }
 
-        // ───────── RIGHT (IMAGE) ─────────
         Item {
             Layout.preferredWidth: 160
             Layout.fillHeight: true
@@ -81,7 +74,6 @@ Clip {
         }
     }
 
-    // Optional hover affordance
     HoverHandler {
         cursorShape: Qt.PointingHandCursor
     }
