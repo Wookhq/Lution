@@ -28,5 +28,6 @@
     <file>resources/ui/components/CreditCard.qml</file>
     <file alias="DIM">resources/credits/DIM.png</file>
     <file alias="Froststrap">resources/credits/froststrap.png</file>
+    <file alias="Dreak">resources/credits/Dreak.gif</file>
   </qresource>
 </RCC>

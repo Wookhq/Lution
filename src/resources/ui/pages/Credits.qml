@@ -13,13 +13,13 @@ FluentPage {
         clip: true
 
         ColumnLayout {
-            width: scroll.availableWidth   // 🔑 THIS
+            width: scroll.availableWidth   
             spacing: 16
 
             GridView {
                 id: creditsGrid
 
-                width: scroll.availableWidth   // 🔑 THIS
+                width: scroll.availableWidth   
                 implicitHeight: cellHeight * 2
                 clip: true
 
@@ -42,7 +42,7 @@ FluentPage {
                     ListElement {
                         title: "Dreak"
                         desc: qsTr("Username detection rely on logs")
-                        img: "qrc:/placeholder"
+                        img: "qrc:/Dreak"
                     }
                     ListElement {
                         title: "Foststrap Team"
