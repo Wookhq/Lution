@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Play Roblox
+Comment=Quick launch roblox with Chroma
+Exec=chroma --quick-launch
+Icon=chroma
+Type=Application
+Categories=Utility;

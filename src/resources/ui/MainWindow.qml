@@ -5,7 +5,6 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 import RinUI
 import "pages"
-import "pages/playerlog"
 
 FluentWindow {
     id: window
@@ -34,17 +33,18 @@ FluentWindow {
             },
             {
                 icon : "ic_fluent_flag_20_regular",
-                title: qsTr("Feature flag")
+                title: qsTr("Fast flags")
             },
             {
                 icon : "ic_fluent_sparkle_20_regular",
-                title: qsTr("Intergation"),
-                // page : intergation
+                title: qsTr("Integration"),
+                page : integration
             },
             {
                 icon: "ic_fluent_settings_20_regular",
                 title: qsTr("Settings"),
-                // page: settingsPage
+                page: settingsPage,
+                position: Position.Bottom
             }
         ]
 
@@ -55,7 +55,8 @@ FluentWindow {
 
     Component { id: homePage; Home {} }
     Component { id: modPage; Mods {} }
-//    Component { id: intergation; PlayerLog {} }
+    Component { id: integration; Integration {} }
+    Component { id : settingsPage; Settings {} }
     Component { id: marketplace; MarketplaceTest {} }
 
 }

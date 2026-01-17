@@ -13,5 +13,21 @@
     <file>resources/ui/components/BigClip.qml</file>
     <file alias="placeholder">resources/placeholders/wallpaper-3.png</file>
     <file>resources/ui/components/marketplace/ItemCard.qml</file>
+    <file>resources/i18n/vi_VN.qm</file>
+    <file>resources/i18n/en_US.qm</file>
+    <file>resources/ui/QuickPromise/PromiseTimer.qml</file>
+    <file>resources/ui/QuickPromise/promise.js</file>
+    <file alias="sober">resources/softber.svg</file>
+    <file alias="logo">resources/logo.svg</file>
+    <file alias="logopng">resources/logo.png</file>
+    <file alias="imcalling">resources/placeholders/imcalling.png</file>
+    <file>resources/ui/DefaultSplash/Default.qml</file>
+    <file>resources/ui/DefaultSplash/Calling.qml</file>
+    <file>resources/ui/DefaultSplash/Terminal.qml</file>
+    <file>resources/ui/DefaultSplash/Sober.qml</file>
+    <file>resources/ui/components/CreditCard.qml</file>
+    <file alias="DIM">resources/credits/DIM.png</file>
+    <file alias="Froststrap">resources/credits/froststrap.png</file>
+    <file alias="Dreak">resources/credits/Dreak.gif</file>
   </qresource>
 </RCC>

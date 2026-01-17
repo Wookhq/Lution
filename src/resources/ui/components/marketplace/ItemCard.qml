@@ -3,21 +3,72 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import RinUI
+import "../../QuickPromise/promise.js" as Q
+
 
 Frame {
+    property bool isDownloading: false
+
+    function downloadAMod(modId) {
+        isDownloading = true
+        Q.promise(function (resolve, reject) {
+            function onSuccess(data) {
+                floatLayer.createInfoBar({
+                    severity: Severity.Success,
+                    title: qsTr("Download complete!"),
+                    text: qsTr("Successfully downloaded mod!"),
+                    position: Position.BottomRight
+                })
+                Backend.mod_downloaded.disconnect(onSuccess)
+                Backend.mod_download_failed.disconnect(onError)
+                resolve(data)
+            }
+
+            function onError(error) {
+                floatLayer.createInfoBar({
+                    severity: Severity.Error,
+                    title: qsTr("Something went wrong when trying to download the mod."),
+                    text: qsTr("Check the logs for more info."),
+                    position: Position.BottomRight
+                })
+                Backend.mod_downloaded.disconnect(onSuccess)
+                Backend.mod_download_failed.disconnect(onError)
+                reject(error)
+            }
+
+            Backend.mod_downloaded.connect(onSuccess)
+            Backend.mod_download_failed.connect(onError)
+            floatLayer.createInfoBar({
+                severity: Severity.Info,
+                title: qsTr("Hang on, downloading the mod..."),
+                position: Position.BottomRight
+            })
+            Backend.downloadMarketplaceItems(modId)
+
+        }).then(function (data) {
+            isDownloading = false
+        }).catch(function (error) {
+            isDownloading = true
+        })
+    }
+
     id: root
-    width: 340
-    height: 220
+    width: 500
+    height: 200
     padding: 0
 
     property string title: qsTr("Example Mod")
     property string desc: qsTr("Placeholder text")
-    property string sb: qsTr("Unkown")
-    property string creator: qsTr("Unkown")
+    property string creator: qsTr("Unknown")
     property string img: "qrc:/placeholder"
+    property string modId: "Unknown"
+
+    function truncateText(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + "...";
+    }
 
     background: Rectangle {
-        id: bg
         radius: 15
         border.width: 1
         border.color: Theme.currentTheme.colors.controlBorderColor
@@ -25,99 +76,91 @@ Frame {
         clip: true
 
         Image {
-            id: bgImage
             anchors.fill: parent
             source: root.img
             fillMode: Image.PreserveAspectCrop
             smooth: true
-            visible: false
+            cache: true
         }
 
         Rectangle {
-            id: mask
             anchors.fill: parent
-            radius: bg.radius
-            color: "black"
-            visible: false
-        }
-
-        OpacityMask {
-            anchors.fill: parent
-            source: bgImage
-            maskSource: mask
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 110
-            radius: bg.radius
-            color: "transparent"
-
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#00000000" }
-                GradientStop { position: 0.4; color: "#80000000" } 
-                GradientStop {
-                    position: 1.0
-                    color: "#cc000000" 
-                }
-            }
+            color: Theme.getTheme() === "Light"
+                ? "#80ffffff"
+                : "#80000000"
         }
     }
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 14
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            margins: 14
+        }
+
+        Layout.bottomMargin: 52
+
         spacing: 6
 
-        Item { Layout.fillHeight: true } 
+        Text {
+            text: root.truncateText(root.title, 200)
+            font.pixelSize: 18
+            font.weight: Font.Medium
+            color: Theme.getTheme() === "Light" ? "black" : "white"
 
-        ColumnLayout {
+            maximumLineCount: 1
+            wrapMode: Text.NoWrap
+
             Layout.fillWidth: true
-            spacing: 4
-
-            Label {
-                text: root.title
-                font.pixelSize: 16
-                font.weight: Font.Medium
-                color: Theme.getTheme() === "Light" ? "black" : "white"
-                elide: Text.ElideRight
-            }
-
-            Label {
-                text: root.desc
-                font.pixelSize: 12
-                opacity: 0.75
-                color: Theme.getTheme() === "Light" ? "#444" : "#ccc"
-                elide: Text.ElideRight
-            }
+            Layout.maximumHeight: font.pixelSize * 1.4
+            clip: true
         }
 
-        RowLayout {
+        Text {
+            text: root.truncateText(root.desc, 10)
+            font.pixelSize: 14
+            opacity: 0.75
+            color: Theme.getTheme() === "Light" ? "#444" : "#ccc"
+
+            wrapMode: Text.WordWrap
+
             Layout.fillWidth: true
-            spacing: 8
+            Layout.preferredHeight: font.pixelSize * 2.6
+            Layout.maximumHeight: Layout.preferredHeight
+            clip: true
+        }
+    }
 
-            Item { Layout.fillWidth: true }
 
-            Button {
-                text: "Download"
-                highlighted: true
-            }
+    Row {
+        id: buttonBar
+        spacing: 8
 
-            Button {
-                id: descbutton
-                icon.name: "ic_fluent_line_horizontal_3_20_regular"
-                highlighted: true
-                onClicked: desc.open()
-            }
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            margins: 14
         }
 
-        Flyout {
-            id: desc
-            text: qsTr(
-                "Description: %1\nCreator: %2\n%3"
-            ).arg(root.desc).arg(root.creator).arg(root.sb)
+        Button {
+            text: "Download"
+            highlighted: true
+            onClicked: downloadAMod(root.modId)
         }
+
+        Button {
+            icon.name: "ic_fluent_line_horizontal_3_20_regular"
+            highlighted: true
+            onClicked: desc.open()
+        }
+    }
+
+
+    Flyout {
+        id: desc
+        text: qsTr(
+            "Description: %1\nCreator: %2"
+        ).arg(root.desc).arg(root.creator)
     }
 }

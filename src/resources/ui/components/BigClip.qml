@@ -10,13 +10,13 @@ Clip {
     property string description: ""
     property string iconName: ""
 
-    signal activated()
+    signal activated
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 100
+    Layout.preferredHeight: 120
 
     backgroundColor: Theme.currentTheme.colors.controlColor
-    radius: 5
+    radius: 8
     borderColor: Theme.currentTheme.colors.controlBorderColor
     borderWidth: 1
 
@@ -25,29 +25,32 @@ Clip {
     RowLayout {
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 12
+        spacing: 16
 
         Icon {
             name: root.iconName
-            width: 50
-            height: 50
+            width: 72
+            height: 72
+            Layout.alignment: Qt.AlignVCenter
         }
 
         ColumnLayout {
-            spacing: 4
+            spacing: 6
             Layout.fillWidth: true
 
             Text {
                 text: root.title
                 font.pixelSize: 16
                 font.weight: Font.Medium
+                Layout.fillWidth: true
                 elide: Text.ElideRight
             }
 
             Text {
                 text: root.description
-                font.pixelSize: 12
-                opacity: 0.7
+                font.pixelSize: 13
+                opacity: 0.75
+                Layout.fillWidth: true
                 wrapMode: Text.WordWrap
             }
         }

@@ -1,0 +1,14 @@
+[Lution]
+language = "en_US"
+FirstTimeLaunch = "False"
+
+[LutionSplash]
+Splashs = ["Default", "Calling", "Terminal", "Sober"]
+CurrentSplash = "Sober"
+
+[Sober]
+Path = "~/.var/app/org.vinegarhq.Sober"
+
+[Misc]
+UserDisplayName = "chip"
+LastUpdated = 2025-12-29T13:26:48.056456
