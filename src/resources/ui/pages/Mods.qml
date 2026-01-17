@@ -76,7 +76,7 @@ FluentPage {
             BigClip {
                 title: qsTr("See how to use mods")
                 description: qsTr("Open the bloxstrap's document.")
-                onActivated: Backend.openInBroswer("https://bloxstraplabs.com/wiki/features/modding/")
+                onActivated: Backend.openInBrowser("https://bloxstraplabs.com/wiki/features/modding/")
                 iconName: "ic_fluent_book_information_20_regular"
             }
         }

@@ -20,7 +20,7 @@ Clip {
     property string url: "https://github.com"
 
     onClicked: {
-        Backend.openInBroswer(url)
+        Backend.openInBrowser(url)
     }
 
     RowLayout {

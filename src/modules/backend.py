@@ -241,7 +241,7 @@ class Backend(QObject):
         return t == "Dark"
 
     @Slot(str)
-    def openInBroswer(self, url):
+    def openInBrowser(self, url):
         webbrowser.open(url=url)
 
     @Slot(result=str)
