@@ -1,28 +1,32 @@
+<!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="/">
-        <file>resources/playerlogs.ui</file>
-        <file>resources/RobloxEmoji.ttf</file>
-        <file>resources/spooky.svg</file>
-        <file>resources/spookylogo.svg</file>
-        <file>resources/sounds/action_footsteps_plastic.mp3</file>
-        <file>resources/sounds/action_get_up.mp3</file>
-        <file>resources/sounds/action_jump.mp3</file>
-        <file>resources/sounds/ouch.ogg</file>
-        <file>resources/ui/MainWindow.qml</file>
-        <file>resources/ui/components/BigClip.qml</file>
-        <file alias="placeholder">resources/placeholders/wallpaper-3.png</file>
-        <file>resources/ui/components/marketplace/ItemCard.qml</file>
-        <file>resources/i18n/vi_VN.qm</file>
-        <file>resources/i18n/en_US.qm</file>
-        <file>resources/ui/QuickPromise/PromiseTimer.qml</file>
-        <file>resources/ui/QuickPromise/promise.js</file>
-        <file alias="sober">resources/softber.svg</file>
-        <file alias="logo">resources/logo.svg</file>
-        <file alias="logopng">resources/logo.png</file>
-        <file alias="imcalling">resources/placeholders/imcalling.png</file>
-        <file>resources/ui/DefaultSplash/Default.qml</file>
-        <file>resources/ui/DefaultSplash/Calling.qml</file>
-        <file>resources/ui/DefaultSplash/Terminal.qml</file>
-        <file>resources/ui/DefaultSplash/Sober.qml</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>resources/playerlogs.ui</file>
+    <file>resources/RobloxEmoji.ttf</file>
+    <file>resources/spooky.svg</file>
+    <file>resources/spookylogo.svg</file>
+    <file>resources/sounds/action_footsteps_plastic.mp3</file>
+    <file>resources/sounds/action_get_up.mp3</file>
+    <file>resources/sounds/action_jump.mp3</file>
+    <file>resources/sounds/ouch.ogg</file>
+    <file>resources/ui/MainWindow.qml</file>
+    <file>resources/ui/components/BigClip.qml</file>
+    <file alias="placeholder">resources/placeholders/wallpaper-3.png</file>
+    <file>resources/ui/components/marketplace/ItemCard.qml</file>
+    <file>resources/i18n/vi_VN.qm</file>
+    <file>resources/i18n/en_US.qm</file>
+    <file>resources/ui/QuickPromise/PromiseTimer.qml</file>
+    <file>resources/ui/QuickPromise/promise.js</file>
+    <file alias="sober">resources/softber.svg</file>
+    <file alias="logo">resources/logo.svg</file>
+    <file alias="logopng">resources/logo.png</file>
+    <file alias="imcalling">resources/placeholders/imcalling.png</file>
+    <file>resources/ui/DefaultSplash/Default.qml</file>
+    <file>resources/ui/DefaultSplash/Calling.qml</file>
+    <file>resources/ui/DefaultSplash/Terminal.qml</file>
+    <file>resources/ui/DefaultSplash/Sober.qml</file>
+    <file>resources/ui/components/CreditCard.qml</file>
+    <file alias="DIM">resources/credits/DIM.png</file>
+    <file alias="Froststrap">resources/credits/froststrap.png</file>
+  </qresource>
 </RCC>
