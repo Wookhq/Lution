@@ -3,7 +3,7 @@ from pathlib import Path
 
 from modules.config import Config
 
-cfg = Config(Path("LutionConfig.toml"))
+cfg = Config()
 
 
 class SplashMan:
