@@ -4,6 +4,7 @@ from pathlib import Path
 
 import requests
 from github import Auth, Github
+from urllib.parse import unquote, urlparse
 
 from modules.config import Config
 
@@ -44,7 +45,8 @@ class MarketplaceHelper:
         location = Path(location)
         location.mkdir(parents=True, exist_ok=True)
 
-        filename = Path(url).name
+        parsed_url = urlparse(url)
+        filename = Path(unquote(parsed_url.path)).name
         file_path = location / filename
 
         with requests.get(url, stream=True) as r:
