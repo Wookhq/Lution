@@ -11,10 +11,10 @@ FluentPage {
 
     property string name: Backend.getName()
     property var titles: [
-        qsTr("%1 muah").arg(name),
+        qsTr("%1").arg(name),
         qsTr("yo %1").arg(name),
-        qsTr("%1, dont ask why we know your name, cuz we're in your walls").arg(name),
-        qsTr("%1, right?").arg(name), qsTr("♥️♥️ %1 ♥️♥️").arg(name),
+        qsTr("never kill your self"),
+        qsTr("%1, right?").arg(name), qsTr("is %1 your name").arg(name),
         qsTr("%1 returns!").arg(name),
         qsTr("must have been the wind"),
         "👋",
