@@ -190,6 +190,17 @@ FluentPage {
                     openUrl: "https://github.com/Wookhq/Lution/blob/main/LICENSE"
                 }
             }
+            SettingItem {
+                title: qsTr("Credit")
+                description: qsTr("See the people behind this project")
+
+                Button {
+                    text: qsTr("Pop open")
+                    onClicked: window.navigationView.push(
+                        Qt.resolvedUrl("Credits.qml") 
+                    )
+                }
+            }
         }
     }
 
