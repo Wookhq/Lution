@@ -17,9 +17,10 @@ Clip {
     property string title: qsTr("A contributor")
     property string desc: qsTr("Place holder text that just works")
     property string img: "qrc:/placeholder"
+    property string url: "https://github.com"
 
     onClicked: {
-        console.log("Open mod:", modId)
+        Backend.openInBroswer(url)
     }
 
     RowLayout {

@@ -33,21 +33,31 @@ FluentPage {
                         title: "Chip"
                         desc: qsTr("Lead developer")
                         img: "qrc:/placeholder"
+                        url: "https://github.com/whoschip"
                     }
                     ListElement {
                         title: "DIM"
                         desc: qsTr("Build script")
                         img: "qrc:/DIM"
+                        url: "https://github.com/dim-ghub"
                     }
                     ListElement {
                         title: "Dreak"
                         desc: qsTr("Username detection rely on logs")
                         img: "qrc:/Dreak"
+                        url: "https://github.com/helloplauz10"
+                    }
+                    ListElement {
+                        title: "TripleAn"
+                        desc: qsTr("Made the base.apk extract thinggy")
+                        img: "qrc:/Placeholder"
+                        url: "https://github.com/triplean"
                     }
                     ListElement {
                         title: "Foststrap Team"
                         desc: qsTr("Mod generator, forked and made sober-only")
                         img: "qrc:/Froststrap"
+                        url: "https://github.com/RealMeddsam/Froststrap"
                     }
                 }
 
@@ -58,6 +68,7 @@ FluentPage {
                     title: model.title
                     desc: model.desc
                     img: model.img
+                    url: model.url
                 }
             }
 
