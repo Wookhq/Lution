@@ -135,7 +135,6 @@ class FilesFunctions:
                 "~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/ExtraContent"
             )
         ):
-            print("extracting")
             apk = zipfile.ZipFile(
                 os.path.expanduser(
                     "~/.var/app/org.vinegarhq.Sober/data/sober/packages/x86_64/com.roblox.client/base.apk"
@@ -254,6 +253,22 @@ class FilesFunctions:
         os.makedirs(dest_dir, exist_ok=True)
         dest_file = os.path.join(dest_dir, os.path.basename(src_file))
         shutil.copy2(src_file, dest_file)
+
+    def RemoveCustomFont(self):
+        with st.spinner(LANG["lution.spinner.applyfont"]):
+            fonts_dir = os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/asset_overlay/content/fonts")
+            if not os.path.exists(fonts_dir):
+                return
+
+            apk = zipfile.ZipFile(os.path.expanduser("~/.var/app/org.vinegarhq.Sober/data/sober/packages/x86_64/com.roblox.client/base.apk"))
+
+            with tempfile.TemporaryDirectory() as tmpdir:
+                apk.extractall(tmpdir)
+                shutil.rmtree(fonts_dir)
+                fonts = path.join(tmpdir, "assets", "content", "fonts")
+                os.makedirs(fonts_dir, exist_ok=True)
+                shutil.copytree(fonts, fonts_dir, dirs_exist_ok=True)
+                stt.success(LANG["lution.message.success.fontremoved"])
 
     def ApplyFont(self):
         with st.spinner(LANG["lution.spinner.applyfont"]):

@@ -34,6 +34,7 @@ st.session_state.customfont = st.file_uploader(
     key="custom_font_uploader",
 )
 st.button(LANG["lution.appearance.button.applyfont"], on_click=lambda: ff.ApplyFont())
+st.button(LANG["lution.appearance.button.removefonts"], on_click=lambda: ff.RemoveCustomFont())
 st.session_state.cursor = st.selectbox(
     LANG["lution.appearance.mutichoices.cursor"],
     ["Default", "Old 2007 Cursor", "Old 2013 Cursor"],
