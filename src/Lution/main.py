@@ -7,6 +7,7 @@ from modules.utils.sidebar import InitSidebar
 from modules.utils.logging import log
 from modules.config.applyfun import ApplyFunctions
 from modules.mod.clientsettings import ClientSettings
+import xml.etree.ElementTree as ET
 
 InitSidebar()
 
@@ -23,9 +24,22 @@ client_settings = ClientSettings()
 
 # Set default values so they're always defined
 if "fpslimit" not in st.session_state:
-    log.info("Reading fpslimit")
-    fpslimit = cg.ReadFflagsConfig("DFIntTaskSchedulerTargetFps")
-    st.session_state.fpslimit = fpslimit
+    xml_path = os.path.expanduser(
+        "~/.var/app/org.vinegarhq.Sober/data/sober/appData/GlobalBasicSettings_13.xml"
+    )
+    fps = 60
+    try:
+        root = ET.parse(xml_path).getroot()
+        elem = next(
+            (e for e in root.iter("int") if e.get("name") == "FramerateCap"),
+            None
+        )
+        if elem is not None:
+            fps = int(elem.text)
+    except Exception as e:
+        log.error(f"failed to read fps limit {e}")
+    st.session_state.fpslimit = fps
+
 if "lightingtech" not in st.session_state:
     log.info("Reading Lighting technology")
     tech = af.LoadLightTechConfig()
@@ -83,7 +97,6 @@ if "useoldrobloxsounds" not in st.session_state:
     if a is None:
         a = False
     st.session_state.useoldrobloxsounds = a
-
 
 @st.dialog("Hey there!")
 def notice():
