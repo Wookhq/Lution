@@ -9,14 +9,14 @@ def InitSidebar():
     lutiontext = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         "files",
-        "spooky.svg",
+        "lutiontext.svg",
     )
     # with open(lutiontext, "r") as f:
     #     lutionlogo = f.read()
 
     # st.logo(lutionlogo, size="large")
     st.sidebar.image(lutiontext, width=200)  # Adjust width as needed
-    st.logo(image="files/spookylogo.svg", icon_image="files/spookylogo.svg")
+    st.logo(image="files/lution1.svg", icon_image="files/lution1.svg")
     st.sidebar.markdown("<h2>Lution</h2>", unsafe_allow_html=True)
     st.sidebar.badge("Stable", icon=":material/check:", color="green")
     st.sidebar.caption("Version 0.3.0r")
