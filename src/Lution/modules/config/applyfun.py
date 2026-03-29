@@ -4,6 +4,7 @@ from modules.mod.fontreplacer import *
 from modules.utils.files import FilesFunctions
 from modules.utils.messages import STMessages
 import os
+import xml.etree.ElementTree as ET
 
 genconfig = Config()
 ff = FilesFunctions()
@@ -81,9 +82,20 @@ class ApplyFunctions:
 
         msaaapply(msaa)
         # FPS limit
-        genconfig.UpdateFflags("DFIntTaskSchedulerTargetFps", fpslimit)
-        genconfig.UpdateFflags("FFlagGameBasicSettingsFramerateCap5", True)
-        genconfig.UpdateFflags("FFlagTaskSchedulerLimitTargetFpsTo2402", False)
+        xml_path = os.path.expanduser(
+            "~/.var/app/org.vinegarhq.Sober/data/sober/appData/GlobalBasicSettings_13.xml"
+        )
+        try:
+            tree = ET.parse(xml_path)
+            root = tree.getroot()
+            for elem in root.iter("int"):
+                if elem.get("name") == "FramerateCap":
+                    elem.text = str(fpslimit)
+                    tree.write(xml_path, encoding="unicode", xml_declaration=False)
+                break
+        except Exception as e:
+            log.error(f"failed to change framerate cap: {e}")
+
         # Disnabel Discord RPC
         genconfig.UpdateSoberConfig("discord_rpc_enabled", rpc1)
         # Disable Player shadows
@@ -188,7 +200,7 @@ class ApplyFunctions:
         elif Phase3:
             return "Future Lighting (Phase 3)"
         else:
-            return "Voxel Lighting (Phase 1)"  # Default fallback
+            return "Voxel Lighting (Phase 1)"
 
     def LoadMSAA(self):
         flag = genconfig.ReadFflagsConfig("FFlagDebugDisableMSAA")
@@ -222,13 +234,11 @@ class ApplyFunctions:
             case _:
                 return "Off"
 
-    def UsingOpenGl(self):
-        """Load Render Tech from Sober config."""
+    def UsingOpenGl(self): # chip code is very good, this literally makes it always default to opengl on relaunch
         Open_gl = genconfig.ReadSoberConfig("use_opengl")
-        if Open_gl:
-            return True
-        else:
-            return False
+        if Open_gl is None:
+            return "OpenGL"
+        return "OpenGL" if Open_gl else "Vulkan"
 
     def UpdateCursor(self, cursortype):
         base_dir = os.path.abspath(
