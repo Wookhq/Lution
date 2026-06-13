@@ -23,6 +23,8 @@ if "cursor" not in st.session_state:
 if curcf == "Old 2007 Cursor":
     st.session_state.cursor = "Old 2007 Cursor"
 elif curcf == "Old 2013 Cursor":
+elif curcf == "Catppuccin Mocha":
+    st.session_state.cursor = "Catppuccin Mocha"
     st.session_state.cursor = "Old 2013 Cursor"
 
 st.header(LANG["lution.tab.appearance"])
@@ -37,8 +39,8 @@ st.button(LANG["lution.appearance.button.applyfont"], on_click=lambda: ff.ApplyF
 st.button(LANG["lution.appearance.button.removefonts"], on_click=lambda: ff.RemoveCustomFont())
 st.session_state.cursor = st.selectbox(
     LANG["lution.appearance.mutichoices.cursor"],
-    ["Default", "Old 2007 Cursor", "Old 2013 Cursor"],
-    index=["Default", "Old 2007 Cursor", "Old 2013 Cursor"].index(
+    ["Default", "Old 2007 Cursor", "Old 2013 Cursor", "Catppuccin Mocha"],
+    index=["Default", "Old 2007 Cursor", "Old 2013 Cursor", "Catppuccin Mocha"].index(
         st.session_state.cursor
     ),
 )

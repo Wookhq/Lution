@@ -281,6 +281,16 @@ class ApplyFunctions:
                 ],
             )
             genconfig.Update("lution", "CursorType", "Old 2013 Cursor")
+        elif cursortype == "Catppuccin Mocha":
+            ff.OverwriteFiles(
+                CursorFolder,
+                [
+                    cursor_file("customcursor", "catppuccin-mocha", "ArrowCursor.png"),
+                    cursor_file("customcursor", "catppuccin-mocha", "ArrowFarCursor.png"),
+                    cursor_file("customcursor", "catppuccin-mocha", "IBeamCursor.png"),
+                ],
+            )
+            genconfig.Update("lution", "CursorType", "Catppuccin Mocha")
         else:
             st.error("Invalid cursor type selected.")
 
