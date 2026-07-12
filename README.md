@@ -13,7 +13,7 @@
 
 # What is Lution?
 
-Lution is a linux bootstrapper for Sober which is roblox but for linux
+Lution is a linux bootstrapper for Sober (sober is roblox for linux made by vinegarhq.org)
 
 <img src="https://raw.githubusercontent.com/Wookhq/Lution-old/refs/heads/latest/md/bar.png" style="width: 100%;">
 
