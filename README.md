@@ -1,9 +1,6 @@
-<img src="https://raw.githubusercontent.com/Wookhq/Lution-old/refs/heads/latest/md/bar.png" style="width: 100%;">
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/Wookhq/Lution-old/refs/heads/latest/md/lution.svg" width="1000">
 </p>
-
 
 <div align="center">
 
