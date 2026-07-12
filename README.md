@@ -17,7 +17,11 @@ Lution is a linux bootstrapper for Sober (sober is roblox for linux made by vine
 
 <img src="https://raw.githubusercontent.com/Wookhq/Lution-old/refs/heads/latest/md/bar.png" style="width: 100%;">
 
-# installation
+# how to download lution
+just go into the releases lol
+
+
+# how to run source code
 
 1. download source code and unzip
 2. install python and tk using your native package manager (or also called python-tkinter or tkinter)
