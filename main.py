@@ -6,6 +6,11 @@ import subprocess
 import json
 import fflags
 import fps
+import sys
+
+BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+
+CONFIG_FILE = BASE / "ui.md"
 
 BG = "#1e1e1e"
 BG_SIDEBAR = "#161616"
@@ -15,8 +20,6 @@ FG_DIM = "#888888"
 ACCENT = "#8D7EDC"
 ERROR = "#e06c75"
 BODY_FONT = ("TkDefaultFont", 13)
-
-CONFIG_FILE = "ui.md"
 
 def darken(hex_color, amount=0.18):
     hex_color = hex_color.lstrip("#")
@@ -92,7 +95,8 @@ def parse_config(path):
 
 def run_script(script, args=None):
     args = args or []
-    path = Path(script)
+    path = BASE / script
+
     if path.suffix == ".py":
         subprocess.Popen(["python3", str(path), *args])
     else:
@@ -154,7 +158,7 @@ class Lution(tk.Tk):
         sidebar.grid(row=0, column=0, sticky="ns")
         sidebar.grid_propagate(False)
 
-        logo_path = Path("lution.png")
+        logo_path = BASE / "lution.png"
         if logo_path.exists():
             raw_logo = tk.PhotoImage(file=str(logo_path))
             max_size = 128
