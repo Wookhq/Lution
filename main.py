@@ -1,11 +1,13 @@
-# hello
+# lution developed by wookhq uhh hello
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 from pathlib import Path
 import subprocess
 import json
 import fflags
 import fps
+import fonts
+import mods
 import sys
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
@@ -28,8 +30,6 @@ def darken(hex_color, amount=0.18):
     g = max(0, int(g * (1 - amount)))
     b = max(0, int(b * (1 - amount)))
     return f"#{r:02x}{g:02x}{b:02x}"
-
-# i did this so it's easier to add new settings
 
 def parse_config(path):
     pages = {}
@@ -89,6 +89,23 @@ def parse_config(path):
         elif line == "FPSInput":
             if current is not None:
                 pages[current].append(("fpsinput",))
+
+        elif line == "FontPicker":
+            if current is not None:
+                pages[current].append(("fontpicker",))
+
+        elif line == "ModManager":
+            if current is not None:
+                pages[current].append(("modmanager",))
+
+        elif line.startswith("Image = "):
+            rest = line[len("Image = "):].strip()
+            if "|" in rest:
+                filename, caption = rest.split("|", 1)
+            else:
+                filename, caption = rest, ""
+            if current is not None:
+                pages[current].append(("image", filename.strip(), caption.strip()))
 
     return pages
 
@@ -204,7 +221,40 @@ class Lution(tk.Tk):
             self.show_page(next(iter(self.pages_config)))
 
     def build_page(self, name, widgets):
-        page = tk.Frame(self.container, bg=BG)
+        wrapper = tk.Frame(self.container, bg=BG)
+
+        canvas = tk.Canvas(wrapper, bg=BG, highlightthickness=0)
+        scrollbar = tk.Scrollbar(wrapper, orient="vertical",
+                                  command=canvas.yview,
+                                  bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
+                                  activebackground=FG_DIM, width=10)
+        page = tk.Frame(canvas, bg=BG)
+        page_window = canvas.create_window((0, 0), window=page, anchor="nw")
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        def on_page_configure(e):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        page.bind("<Configure>", on_page_configure)
+
+        def on_canvas_configure(e):
+            canvas.itemconfigure(page_window, width=e.width)
+        canvas.bind("<Configure>", on_canvas_configure)
+
+        def on_mousewheel(e):
+            canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+        def on_linux_scroll_up(e):
+            canvas.yview_scroll(-1, "units")
+        def on_linux_scroll_down(e):
+            canvas.yview_scroll(1, "units")
+
+        canvas.bind_all("<MouseWheel>", on_mousewheel)
+        canvas.bind_all("<Button-4>", on_linux_scroll_up)
+        canvas.bind_all("<Button-5>", on_linux_scroll_down)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
         tk.Label(page, text=name, bg=BG, fg=FG,
                  font=("TkDefaultFont", 18, "bold"),
                  anchor="w").pack(anchor="w", pady=(0, 18))
@@ -283,7 +333,35 @@ class Lution(tk.Tk):
                 pad = 14 if group is not None else 0
                 self.build_fpsinput(target, pad)
 
-        return page
+            elif kind == "fontpicker":
+                target = group if group is not None else page
+                pad = 14 if group is not None else 0
+                self.build_fontpicker(target, pad)
+
+            elif kind == "modmanager":
+                target = group if group is not None else page
+                pad = 14 if group is not None else 0
+                self.build_modmanager(target, pad)
+
+            elif kind == "image":
+                _, filename, caption = widget
+                target = group if group is not None else page
+                pad = 14 if group is not None else 0
+                img_path = BASE / filename
+                if img_path.exists():
+                    raw = tk.PhotoImage(file=str(img_path))
+                    max_w = 400
+                    factor = max(1, raw.width() // max_w)
+                    img = raw.subsample(factor, factor)
+                    setattr(self, f"_img_{filename}", img)
+                    tk.Label(target, image=img, bg=target["bg"]
+                             ).pack(anchor="w", padx=pad, pady=(6, 4))
+                if caption:
+                    tk.Label(target, text=caption, bg=target["bg"], fg=FG_DIM,
+                             font=("TkDefaultFont", 12),
+                             anchor="w").pack(anchor="w", padx=pad, pady=(0, 10))
+
+        return wrapper
 
 # fflags list
 
@@ -413,9 +491,9 @@ class Lution(tk.Tk):
         entry.pack(anchor="w", fill="x", padx=pad, pady=(0, 6), ipady=8)
 
         tk.Label(parent,
-                 text=("Only applies after: open Roblox, set in-game cap to "
+                 text=("Only applies after you open Roblox, set in-game cap to "
                        "default (60), close Roblox, then set it here and "
-                       "relaunch."),
+                       "relaunch. and yes this is true, Roblox is probably gonna be patching this so don't be surprised when this doesn't work anymore"),
                  bg=parent["bg"], fg=FG_DIM, font=("TkDefaultFont", 10),
                  anchor="w", wraplength=500, justify="left"
                  ).pack(anchor="w", padx=pad, pady=(0, 6))
@@ -424,6 +502,171 @@ class Lution(tk.Tk):
                                  if entry.get().strip() else None)
         self.make_button(parent, "Save FPS Limit", command=save_command
                           ).pack(anchor="w", padx=pad, pady=(0, 14))
+
+# fonts
+
+    def build_fontpicker(self, parent, pad):
+        tk.Label(parent, text="Font file (.ttf / .otf)", bg=parent["bg"],
+                 fg=FG, font=BODY_FONT).pack(anchor="w", padx=pad, pady=(0, 2))
+
+        row = tk.Frame(parent, bg=parent["bg"])
+        row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+        path_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+                               font=BODY_FONT, relief="flat",
+                               highlightthickness=1,
+                               highlightbackground=BG_SIDEBAR,
+                               highlightcolor=ACCENT)
+        path_entry.pack(side="left", fill="x", expand=True, ipady=8,
+                          padx=(0, 6))
+
+        def browse():
+            chosen = filedialog.askopenfilename(
+                title="Choose a font file",
+                filetypes=[("Font files", "*.ttf *.otf"), ("All files", "*.*")]
+            )
+            if chosen:
+                path_entry.delete(0, "end")
+                path_entry.insert(0, chosen)
+
+        self.make_button(row, "Browse", command=browse, padx=14, pady=8
+                          ).pack(side="left")
+
+        status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                           font=("TkDefaultFont", 10), anchor="w",
+                           wraplength=500, justify="left")
+        status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+        def apply_font():
+            source = path_entry.get().strip()
+            if not source:
+                status.configure(text="Pick a font file first.", fg=ERROR)
+                return
+            try:
+                replaced = fonts.apply_font(source)
+            except FileNotFoundError as e:
+                status.configure(text=str(e), fg=ERROR)
+                return
+            if not replaced:
+                status.configure(
+                    text="No font files found to replace yet",
+                    fg=ERROR)
+                return
+            status.configure(
+                text=f"Replaced {len(replaced)} font file(s).", fg=FG_DIM)
+
+        self.make_button(parent, "Apply Font", command=apply_font
+                          ).pack(anchor="w", padx=pad, pady=(0, 6))
+
+        def restore_default():
+            removed = fonts.restore_fonts()
+            if removed:
+                status.configure(text="Default fonts restored.", fg=FG_DIM)
+            else:
+                status.configure(text="No custom font to restore.", fg=ERROR)
+
+        self.make_button(parent, "Restore Default Fonts", command=restore_default,
+                          bg=ERROR, fg="#0a0a0a"
+                          ).pack(anchor="w", padx=pad, pady=(0, 6))
+
+        tk.Label(parent,
+                 text=("NOTE: You have to reapply the font when you update Sober"),
+                 bg=parent["bg"], fg=FG_DIM, font=("TkDefaultFont", 10),
+                 anchor="w", wraplength=500, justify="left"
+                 ).pack(anchor="w", padx=pad, pady=(0, 14))
+
+# mods
+
+    def build_modmanager(self, parent, pad):
+        mods.ensure_dirs()
+
+        list_frame = tk.Frame(parent, bg=parent["bg"])
+        list_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+        btn_row = tk.Frame(parent, bg=parent["bg"])
+        btn_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+        status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                           font=("TkDefaultFont", 10), anchor="w",
+                           wraplength=500, justify="left")
+        status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+        mod_listbox = tk.Listbox(list_frame, bg=BG, fg=FG,
+                                  selectbackground=ACCENT, selectforeground="#0a0a0a",
+                                  font=BODY_FONT, relief="flat", height=8,
+                                  highlightthickness=1,
+                                  highlightbackground=BG_SIDEBAR,
+                                  highlightcolor=ACCENT)
+        mod_listbox.pack(fill="x", ipady=4)
+
+        def refresh_list():
+            mod_listbox.delete(0, tk.END)
+            for mod in mods.list_mods():
+                mod_listbox.insert(tk.END, mod.stem)
+
+        def import_mod():
+            chosen = filedialog.askopenfilename(
+                title="Select Mod Archive",
+                filetypes=[("ZIP Archives", "*.zip"), ("All Files", "*.*")]
+            )
+            if chosen:
+                try:
+                    dest = mods.import_mod(chosen)
+                    status.configure(text=f"Imported: {dest.name}. Click install to make it work in Sober", fg=FG_DIM)
+                    refresh_list()
+                except Exception as e:
+                    status.configure(text=str(e), fg=ERROR)
+
+        def install_selected():
+            sel = mod_listbox.curselection()
+            if not sel:
+                status.configure(text="Select a mod first by clicking on the mod's name or import one", fg=ERROR)
+                return
+            name = mod_listbox.get(sel[0])
+            mod_path = mods.MODS_DIR / f"{name}.zip"
+            ok, msg = mods.install_mod(mod_path)
+            status.configure(text=msg, fg=FG_DIM if ok else ERROR)
+
+        def remove_selected():
+            sel = mod_listbox.curselection()
+            if not sel:
+                status.configure(text="Select a mod first by clicking on it (THIS WON'T REMOVE THE MOD DIRECTLY FROM SOBER, CLICK Delete all mods TO DO SO.)", fg=ERROR)
+                return
+            name = mod_listbox.get(sel[0])
+            mod_path = mods.MODS_DIR / f"{name}.zip"
+            mods.delete_mod(mod_path)
+            status.configure(text=f"Deleted: {name} from mod manager. click delete all mods to fully remove the mod.", fg=FG_DIM)
+            refresh_list()
+
+        def cleanup_all():
+            removed = mods.remove_mod_content()
+            if removed:
+                status.configure(
+                    text=f"Removed: {', '.join(removed)} from overlay.", fg=FG_DIM)
+            else:
+                status.configure(text="Nothing to clean up vro", fg=ERROR)
+
+        self.make_button(btn_row, "Import Mod", command=import_mod
+                          ).pack(side="left", padx=(0, 6))
+        self.make_button(btn_row, "Install mod", command=install_selected
+                          ).pack(side="left", padx=(0, 6))
+        self.make_button(btn_row, "Delete mod", command=remove_selected,
+                          bg=ERROR, fg="#0a0a0a"
+                          ).pack(side="left", padx=(0, 6))
+        self.make_button(btn_row, "Delete all mods from Sober", command=cleanup_all,
+                          bg=BG_SIDEBAR, fg=FG_DIM
+                          ).pack(side="left")
+
+        tk.Label(parent,
+                 text=("Import mod .zip files, then install them. "
+                       "and the zip file has to contain content/ and ExtraContent/ for the mod to work. "
+                       "and it's okay if content/ and ExtraContent/ are inside another folder (only one layer deep)"
+                       ". oh also, if you're wondering why is there no option to change cursors in lution, well mods can just do that too."),
+                 bg=parent["bg"], fg=FG_DIM, font=("TkDefaultFont", 10),
+                 anchor="w", wraplength=500, justify="left"
+                 ).pack(anchor="w", padx=pad, pady=(0, 14))
+
+        refresh_list()
 
     def show_page(self, name):
         self.current_page = name

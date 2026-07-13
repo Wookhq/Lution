@@ -13,5 +13,13 @@ FlagList
 Subtitle = FPS Limit
 FPSInput
 
+Subtitle = Custom Font
+FontPicker
+
+# Mods
+Subtitle = Mod Manager
+ModManager
+
 # About
 Subtitle = Lution developed by WookHQ (https://github.com/wookhq)
+Image = cat.png | look at this cat bro
