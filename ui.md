@@ -23,6 +23,3 @@ ModManager
 # About
 Subtitle = Lution developed by WookHQ (https://github.com/wookhq)
 Image = cat.png | look at this cat bro
-
-# Fonts
-LastAPKChecksum = 88e538e7d7de282b7a20c910ede753be5d55e56df3d5230f61f1e8b41fc46361
