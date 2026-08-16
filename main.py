@@ -506,6 +506,8 @@ class Lution(tk.Tk):
 # fonts
 
     def build_fontpicker(self, parent, pad):
+        fonts.apply_font_updates()
+
         tk.Label(parent, text="Font file (.ttf / .otf)", bg=parent["bg"],
                  fg=FG, font=BODY_FONT).pack(anchor="w", padx=pad, pady=(0, 2))
 
@@ -544,6 +546,7 @@ class Lution(tk.Tk):
                 return
             try:
                 replaced = fonts.apply_font(source)
+                fonts.save_installed_font(source)
             except FileNotFoundError as e:
                 status.configure(text=str(e), fg=ERROR)
                 return
@@ -570,7 +573,7 @@ class Lution(tk.Tk):
                           ).pack(anchor="w", padx=pad, pady=(0, 6))
 
         tk.Label(parent,
-                 text=("NOTE: You have to reapply the font when you update Sober"),
+                 text=("NOTE: If Sober updates and removes your font, reopen Lution and we'll reapply it automatically"),
                  bg=parent["bg"], fg=FG_DIM, font=("TkDefaultFont", 10),
                  anchor="w", wraplength=500, justify="left"
                  ).pack(anchor="w", padx=pad, pady=(0, 14))
