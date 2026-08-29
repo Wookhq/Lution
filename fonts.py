@@ -1,79 +1,21 @@
 # fonts are complicated as shit bro
 # fr
-
+# yes bro
 from genericpath import exists
 from pathlib import Path
 import shutil
 import zipfile
 import sys
-import hashlib
+
+import emoji
+import log
 
 SOBER_APP_ID = "org.vinegarhq.Sober"
 SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
 APK_DIR = SOBER_BASE / "packages/x86_64/com.roblox.client"
 OVERLAY_FONT_DIR = SOBER_BASE / "asset_overlay/content/fonts"
 
-CONFIG_BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
-CONFIG_FILE = CONFIG_BASE / "ui.md"
-
 INSTALLED_FONTS_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_font"
-
-def _calculate_sha256_checksum(apk_path: Path):
-    with open(apk_path, "rb") as f:
-        return hashlib.file_digest(f, "sha256").hexdigest()
-
-
-def _needs_update() -> bool:
-    apk_path = _find_apk()
-
-    if apk_path == None: return False
-
-    last_sober_apk_checksum = ""
-
-    for raw_line in Path(CONFIG_FILE).read_text().splitlines():
-        line = raw_line.strip()
-
-        if not line.startswith("LastAPKChecksum = "): continue
-
-        last_sober_apk_checksum = line[len("LastAPKChecksum = "):].strip()
-
-    if last_sober_apk_checksum == "":
-        return False
-    else:
-        hash = hashlib.sha256()
-
-        with open(apk_path, "rb"):
-            hash = _calculate_sha256_checksum(apk_path)
-
-            return hash != last_sober_apk_checksum
-
-
-def _update_apk_checksum():
-    apk_path = _find_apk()
-
-    if apk_path == None: return
-
-    hash = _calculate_sha256_checksum(apk_path)
-
-    checksum_location = None
-    whole_config = Path(CONFIG_FILE).read_text().splitlines()
-
-    for i, raw_line in enumerate(whole_config):
-        line = raw_line.strip()
-
-        if not line.startswith("LastAPKChecksum = "): continue
-
-        checksum_location = i
-
-    if checksum_location != None:
-        with open(CONFIG_FILE, "w") as f:
-            whole_config[checksum_location] = f"LastAPKChecksum = {hash}"
-            _ = f.write("\n".join(whole_config))
-
-        return
-
-    with open(CONFIG_FILE, "a") as f:
-        _ = f.write(f"\n# Fonts\nLastAPKChecksum = {hash}")
 
 def save_installed_font(font_path: Path | str) -> None:
     if isinstance(font_path, str):
@@ -88,11 +30,7 @@ def save_installed_font(font_path: Path | str) -> None:
     except shutil.SameFileError:
         return
 
-    _update_apk_checksum()
-
-def apply_font_updates():
-    if not _needs_update(): return
-
+def reapply_fonts():
     if not INSTALLED_FONTS_DIR.exists(): return
 
     candidates = sorted(INSTALLED_FONTS_DIR.glob("*"), key=lambda p: p.stat().st_ctime)
@@ -101,10 +39,9 @@ def apply_font_updates():
 
     try:
         apply_font(str(target_font))
-        _update_apk_checksum()
-        print("Succesfully updated fonts!")
+        log.info("Fonts updated after Sober APK change")
     except FileNotFoundError:
-        print("Could not update fonts :(")
+        log.error("Could not update fonts, font file is missing")
         return
 
 
@@ -121,12 +58,13 @@ def _apk_font_names():
     apk = _find_apk()
     if apk is None:
         return []
+    emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
     names = []
     with zipfile.ZipFile(apk) as zf:
         for entry in zf.namelist():
             if entry.startswith("assets/content/fonts/") and not entry.startswith("assets/content/fonts/families/"):
                 name = Path(entry).name
-                if name and Path(name).suffix.lower() in {".ttf", ".otf"}:
+                if name and Path(name).suffix.lower() in {".ttf", ".otf"} and name.lower() not in emoji_names:
                     names.append(name)
     return names
 
@@ -155,5 +93,14 @@ def apply_font(source_path):
 def restore_fonts():
     if not OVERLAY_FONT_DIR.exists():
         return False
-    shutil.rmtree(OVERLAY_FONT_DIR)
-    return True
+    emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
+    removed = False
+    for path in OVERLAY_FONT_DIR.iterdir():
+        if path.name.lower() in emoji_names:
+            continue
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+        removed = True
+    return removed

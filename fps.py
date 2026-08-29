@@ -1,4 +1,4 @@
-# this for changing fps cap
+# this for changing fps cap simple enough
 
 from pathlib import Path
 import xml.etree.ElementTree as ET

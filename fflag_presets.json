@@ -1,0 +1,27 @@
+{
+  "Performance": {
+    "description": "max FPS with lowest quality",
+    "flags": {
+      "DFFlagTextureQualityOverrideEnabled": true,
+      "DFIntTextureQualityOverride": 0,
+      "DFIntCSGLevelOfDetailSwitchingDistance": 0,
+      "DFIntCSGLevelOfDetailSwitchingDistanceL12": 0,
+      "DFIntCSGLevelOfDetailSwitchingDistanceL23": 0,
+      "DFIntCSGLevelOfDetailSwitchingDistanceL34": 0,
+      "FIntFRMMaxGrassDistance": 0,
+      "DFFlagDebugPauseVoxelizer": true,
+      "FFlagDebugSkyGray": true
+    }
+  },
+  "Max Graphics": {
+    "description": "max detail for high end GPUs",
+    "flags": {
+      "DFFlagTextureQualityOverrideEnabled": true,
+      "DFIntTextureQualityOverride": 3,
+      "DFIntCSGLevelOfDetailSwitchingDistance": 1000,
+      "DFIntCSGLevelOfDetailSwitchingDistanceL34": 1000,
+      "FIntDebugForceMSAASamples": 4,
+      "DFIntDebugFRMQualityLevelOverride": 21
+    }
+  }
+}
