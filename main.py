@@ -317,16 +317,18 @@ class Lution(tk.Tk):
 
         self.page_shown_listeners = []
         if os.environ.get("LUTION_QUIET_FONTCONFIG"):
-            saved = os.dup(2)
-            devnull = os.open(os.devnull, os.O_WRONLY)
-            os.dup2(devnull, 2)
-            os.close(devnull)
+            saved = None
             try:
+                saved = os.dup(2)
+                devnull = os.open(os.devnull, os.O_WRONLY)
+                os.dup2(devnull, 2)
+                os.close(devnull)
                 self.build_sidebar()
                 self.build_content()
             finally:
-                os.dup2(saved, 2)
-                os.close(saved)
+                if saved is not None:
+                    os.dup2(saved, 2)
+                    os.close(saved)
         else:
             self.build_sidebar()
             self.build_content()
@@ -388,7 +390,9 @@ class Lution(tk.Tk):
 
     def refresh_button(self, btn):
         active = getattr(self, "current_page", None)
-        name = [n for n, b in self.nav_buttons.items() if b is btn][0]
+        name = next((n for n, b in self.nav_buttons.items() if b is btn), None)
+        if name is None:
+            return
         if name == active:
             btn.configure(bg=BG_ACTIVE, fg=FG)
         else:

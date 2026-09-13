@@ -52,7 +52,9 @@ def import_backup(backup_path):
         for member in zf.namelist():
             if member.startswith("asset_overlay/"):
                 rel = member[len("asset_overlay/"):]
-                dest = OVERLAY_DIR / rel
+                dest = (OVERLAY_DIR / rel).resolve()
+                if not str(dest).startswith(str(OVERLAY_DIR.resolve())):
+                    continue
                 if member.endswith("/"):
                     dest.mkdir(parents=True, exist_ok=True)
                 else:
@@ -70,7 +72,9 @@ def import_backup(backup_path):
 
             elif member.startswith("lution/"):
                 rel = member[len("lution/"):]
-                dest = LUTION_DIR / rel
+                dest = (LUTION_DIR / rel).resolve()
+                if not str(dest).startswith(str(LUTION_DIR.resolve())):
+                    continue
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 with zf.open(member) as src, open(dest, "wb") as dst:
                     dst.write(src.read())
@@ -78,7 +82,9 @@ def import_backup(backup_path):
 
             elif member.startswith("mods/"):
                 rel = member[len("mods/"):]
-                dest = MODS_DIR / rel
+                dest = (MODS_DIR / rel).resolve()
+                if not str(dest).startswith(str(MODS_DIR.resolve())):
+                    continue
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 with zf.open(member) as src, open(dest, "wb") as dst:
                     dst.write(src.read())

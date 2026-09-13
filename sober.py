@@ -113,11 +113,6 @@ def remote_commit():
         return ""
     return _commit_from_output(result.stdout)
 
-def remote_commit():
-    result = _run(["flatpak", "remote-info", REMOTE, SOBER_APP_ID])
-    if result.returncode != 0:
-        return ""
-    return _commit_from_output(result.stdout)
 
 def install(output_cb=None):
     return _stream(["flatpak", "install", "-y", REMOTE, SOBER_APP_ID], output_cb)

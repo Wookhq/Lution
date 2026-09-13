@@ -19,7 +19,7 @@ INSTALLED_FONTS_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_f
 
 def save_installed_font(font_path: Path | str) -> None:
     if isinstance(font_path, str):
-        font_path = Path.from_uri("file:"+font_path)
+        font_path = Path(font_path)
 
     if not INSTALLED_FONTS_DIR.exists():
         INSTALLED_FONTS_DIR.mkdir(exist_ok=True, parents=True)

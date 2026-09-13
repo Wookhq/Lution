@@ -599,48 +599,61 @@ def run_launch(cfg, ui, root, url=None):
                + [SOBER_APP_ID]
         if url:
             args.append(url)
+
         LAUNCH_LOG.parent.mkdir(parents=True, exist_ok=True)
-        with open(LAUNCH_LOG, "w") as logfile:
-            proc = subprocess.Popen(args, stdout=logfile,
-                                    stderr=subprocess.STDOUT,
-                                    env=sober.clean_env())
+        logfile = open(LAUNCH_LOG, "w")
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                env=sober.clean_env())
+
+        import queue as _queue
+        line_queue = _queue.Queue()
+
+        def _reader():
+            try:
+                for raw in proc.stdout:
+                    line = raw.decode(errors="replace").rstrip("\r\n")
+                    try:
+                        logfile.write(line + "\n")
+                        logfile.flush()
+                    except Exception:
+                        pass
+                    line_queue.put(line)
+            finally:
+                try:
+                    logfile.close()
+                except Exception:
+                    pass
+
+        threading.Thread(target=_reader, daemon=True).start()
 
         base = UPDATE_SCALE if cfg.get("check_updates", True) else 0.02
         span = 1.0 - base
-        offset = 0
-        pending = ""
         reached = {}
         ready = False
         while True:
-            try:
-                with open(LAUNCH_LOG) as f:
-                    f.seek(offset)
-                    chunk = f.read()
-                    offset += len(chunk)
-            except OSError:
-                chunk = ""
-            if chunk:
-                parts = (pending + chunk).replace("\r", "\n").split("\n")
-                pending = parts.pop()
-                for line in parts:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    frac = _milestone_progress(line)
-                    if frac is not None and frac > reached.get("max", 0):
-                        reached["max"] = frac
-                        ui.progress(base + span * frac)
-                    s = _short_status(line)
-                    if s and "json" not in s:
-                        ui.status(s)
-                    if not ready and any(
-                            m in line for m in READY_MARKERS):
-                        ready = True
-                        log.info("Bootstrapper: Sober is running")
-                        ui.detach = True
-                        T(ui.done)
-                        T(lambda: ui.status("Sober is running"))
-                        root.after(1500, ui.close)
+            while True:
+                try:
+                    line = line_queue.get_nowait()
+                except _queue.Empty:
+                    break
+                line = line.strip()
+                if not line:
+                    continue
+                frac = _milestone_progress(line)
+                if frac is not None and frac > reached.get("max", 0):
+                    reached["max"] = frac
+                    ui.progress(base + span * frac)
+                s = _short_status(line)
+                if s and "json" not in s:
+                    ui.status(s)
+                if not ready and any(m in line for m in READY_MARKERS):
+                    ready = True
+                    log.info("Bootstrapper: Sober is running")
+                    ui.detach = True
+                    T(ui.done)
+                    T(lambda: ui.status("Sober is running"))
+                    root.after(1500, ui.close)
 
             rc = proc.poll()
 

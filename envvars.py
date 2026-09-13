@@ -22,12 +22,16 @@ def valid_key(key):
     return True
 
 
+def valid_value(value):
+    return "\n" not in value and "\r" not in value and "\0" not in value
+
+
 def save_vars(vars_dict):
     clean = {}
     for key, value in vars_dict.items():
         key = str(key).strip()
         value = str(value).strip()
-        if valid_key(key):
+        if valid_key(key) and valid_value(value):
             clean[key] = value
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     ENV_FILE.write_text(json.dumps(clean, indent=2) + "\n")
@@ -37,4 +41,5 @@ def save_vars(vars_dict):
 def env_flatpak_args(env_vars=None):
     if env_vars is None:
         env_vars = load_vars()
-    return [f"--env={key}={value}" for key, value in env_vars.items()]
+    return [f"--env={key}={value}" for key, value in env_vars.items()
+            if valid_key(key) and valid_value(value)]
