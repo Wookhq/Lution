@@ -97,16 +97,7 @@ def install_mod(mod_path):
     temp_dir = Path(tempfile.mkdtemp(prefix="lution_mod_"))
     try:
         with zipfile.ZipFile(mod_path, "r") as zf:
-            for member in zf.infolist():
-                dest = (temp_dir / member.filename).resolve()
-                if not str(dest).startswith(str(temp_dir.resolve())):
-                    continue
-                if member.is_dir():
-                    dest.mkdir(parents=True, exist_ok=True)
-                else:
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    with zf.open(member) as src, open(dest, "wb") as dst:
-                        dst.write(src.read())
+            zf.extractall(temp_dir)
 
         content_dir = _find_content_dir(temp_dir)
         if content_dir is None:

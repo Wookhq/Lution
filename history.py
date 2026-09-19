@@ -47,6 +47,8 @@ def get_history():
     return ranked[:HISTORY_LIMIT]
 
 def _fetch_json(url, timeout=5):
+    import net
+    net.ensure_ca_certs()
     req = urllib.request.Request(url, headers={"User-Agent": "Lution"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read())

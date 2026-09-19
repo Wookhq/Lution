@@ -34,10 +34,28 @@ BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 
 USER_PRESETS_FILE = Path.home() / ".local/Lution/fflag_user_presets.json"
 
+def _auto_resize(win):
+    try:
+        win.update_idletasks()
+        rw, rh = win.winfo_reqwidth(), win.winfo_reqheight()
+        win.minsize(min(rw, 380), min(rh, 320))
+        win.resizable(True, True)
+    except tk.TclError:
+        pass
+
+def _fit(win, w, h, ratio=0.85):
+    sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+    w = max(260, min(w, sw))
+    h = max(120, min(h, int(sh * ratio)))
+    x = max(0, (sw - w) // 2)
+    y = max(0, (sh - h) // 3)
+    win.geometry(f"{w}x{h}+{x}+{y}")
+    win.after(20, lambda: _auto_resize(win))
+
 def _clear_all_fflags(app, reload_fn, status):
     win = tk.Toplevel(app, bg=BG)
     win.title("Clear All FFlags")
-    win.geometry("400x120")
+    _fit(win, 400, 120)
     win.configure(bg=BG)
     win.resizable(False, False)
 
@@ -178,7 +196,7 @@ def build_flaglist(app, parent, pad):
     def open_add_flag():
         win = tk.Toplevel(app, bg=BG)
         win.title("Add FFlag")
-        win.geometry("500x300")
+        _fit(win, 500, 300)
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -272,7 +290,7 @@ def build_flaglist(app, parent, pad):
 def _open_presets_window(app, reload_fn, status):
     win = tk.Toplevel(app, bg=BG)
     win.title("FFlag Presets")
-    win.geometry("600x500")
+    _fit(win, 600, 500)
     win.configure(bg=BG)
     win.resizable(True, True)
 
@@ -395,7 +413,7 @@ def _open_presets_window(app, reload_fn, status):
     def save_as_preset():
         save_win = tk.Toplevel(app, bg=BG)
         save_win.title("Save Preset")
-        save_win.geometry("400x160")
+        _fit(save_win, 400, 160)
         save_win.configure(bg=BG)
         save_win.resizable(False, False)
 
@@ -441,33 +459,8 @@ def _open_paste_json(app):
     win = tk.Toplevel(app, bg=BG)
     win.title("Paste FFlags JSON")
     win.configure(bg=BG)
-    win.resizable(False, False)
 
-    sw = win.winfo_screenwidth()
-    sh = win.winfo_screenheight()
-    win.geometry(f"600x{min(820, int(sh * 0.85))}")
-
-    tk.Label(win, text="Paste FFlags JSON", bg=BG, fg=FG,
-             font=("TkDefaultFont", 14, "bold"), anchor="w"
-             ).pack(anchor="w", padx=16, pady=(16, 8))
-
-    text_frame = tk.Frame(win, bg=BG_ACTIVE)
-    text_frame.pack(fill="both", expand=True, padx=16, pady=(0, 8))
-
-    text = tk.Text(text_frame, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
-                    font=BODY_FONT, relief="flat", wrap="word",
-                    highlightthickness=1, highlightbackground=BG_SIDEBAR)
-    text_scroll = tk.Scrollbar(text_frame, orient="vertical",
-                                command=text.yview,
-                                bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
-                                activebackground=FG_DIM, width=10)
-    text.configure(yscrollcommand=text_scroll.set)
-    text_scroll.pack(side="right", fill="y")
-    text.pack(side="left", fill="both", expand=True)
-
-    status = tk.Label(win, text="", bg=BG, fg=FG_DIM,
-                       font=("TkDefaultFont", 10), anchor="w")
-    status.pack(anchor="w", padx=16, pady=(0, 8))
+    _fit(win, 600, 820)
 
     def apply_json():
         raw = text.get("1.0", "end").strip()
@@ -487,8 +480,35 @@ def _open_paste_json(app):
         win.destroy()
 
     btn_row = tk.Frame(win, bg=BG)
-    btn_row.pack(anchor="w", padx=16, pady=(0, 16))
+    btn_row.pack(side="bottom", fill="x", anchor="w", padx=16, pady=(0, 16))
     app.make_button(btn_row, "Apply", command=apply_json).pack(side="left")
+
+    status = tk.Label(win, text="", bg=BG, fg=FG_DIM,
+                       font=("TkDefaultFont", 10), anchor="w")
+    status.pack(side="bottom", anchor="w", fill="x", padx=16, pady=(0, 8))
+
+    tk.Label(win, text="Paste FFlags JSON", bg=BG, fg=FG,
+             font=("TkDefaultFont", 14, "bold"), anchor="w"
+             ).pack(anchor="w", padx=16, pady=(16, 8))
+
+    text_frame = tk.Frame(win, bg=BG_ACTIVE)
+    text_frame.pack(fill="both", expand=True, padx=16, pady=(0, 8))
+
+    text = tk.Text(text_frame, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+                    font=BODY_FONT, relief="flat", wrap="word",
+                    highlightthickness=1, highlightbackground=BG_SIDEBAR,
+                    height=12)
+    text_scroll = tk.Scrollbar(text_frame, orient="vertical",
+                                command=text.yview,
+                                bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
+                                activebackground=FG_DIM, width=10)
+    text.configure(yscrollcommand=text_scroll.set)
+    text_scroll.pack(side="right", fill="y")
+    text.pack(side="left", fill="both", expand=True)
+    text.focus_set()
+
+    text.bind("<Return>", lambda e: apply_json())
+    text.bind("<KP_Enter>", lambda e: apply_json())
 
 def build_fpsinput(app, parent, pad):
     tk.Label(parent, text="Framerate cap", bg=parent["bg"], fg=FG,
@@ -642,7 +662,7 @@ def build_envvars(app, parent, pad):
     def open_add_var():
         win = tk.Toplevel(app, bg=BG)
         win.title("Add Environment Variable")
-        win.geometry("500x300")
+        _fit(win, 500, 300)
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -1072,7 +1092,7 @@ def build_modmanager(app, parent, pad):
     def cleanup_all():
         win = tk.Toplevel(app, bg=BG)
         win.title("Delete All Mods")
-        win.geometry("440x220")
+        _fit(win, 440, 220)
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -1136,7 +1156,7 @@ def build_modmanager(app, parent, pad):
     def open_guide():
         win = tk.Toplevel(app, bg=BG)
         win.title("How mods work")
-        win.geometry("560x460")
+        _fit(win, 560, 460)
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -1475,8 +1495,7 @@ def build_marketplace(app, parent, pad):
                  font=("TkDefaultFont", 10), anchor="w", justify="left",
                  wraplength=430).pack(anchor="w", padx=16, pady=(0, 12))
 
-        sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
-        win.geometry(f"480x170+{(sw - 480) // 2}+{(sh - 170) // 2 - 100}")
+        _fit(win, 480, 170)
         app.make_button(win, "OK", command=win.destroy,
                          padx=14, pady=6).pack(anchor="e", padx=16,
                                                 pady=(0, 14))
@@ -1643,7 +1662,7 @@ def build_marketplace(app, parent, pad):
             ev = getattr(app, "mainloop_started", None)
             if ev is not None:
                 ev.wait(timeout=10)
-            items = mkt.fetch_store()
+            items, from_cache = mkt.fetch_store()
             icons = {}
             for item in items:
                 if item.get("type") == "mod" and item.get("icon"):
@@ -1651,6 +1670,9 @@ def build_marketplace(app, parent, pad):
                                            item["icon"])
                     if path:
                         icons[item["name"]] = str(path)
+            if from_cache:
+                set_status("can't fetch marketplace, using cached copy",
+                           error=True)
             app.after(0, lambda: render(items, icons))
         threading.Thread(target=worker, daemon=True).start()
 
@@ -1944,7 +1966,8 @@ def build_bootstrapper(app, parent, pad):
         c = collect()
         win = tk.Toplevel(app, bg=c.get("bg_color", "#232527"))
         win.title("Launcher Preview")
-        win.resizable(False, False)
+        _fit(win, 680, 520)
+        win.configure(bg=c.get("bg_color", "#232527"))
 
         import threading
         import time
@@ -2008,7 +2031,7 @@ def build_soberguide(app, parent, pad):
     def open_guide():
         win = tk.Toplevel(app, bg=BG)
         win.title("Sober Guide")
-        win.geometry("520x440")
+        _fit(win, 520, 440)
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -2033,7 +2056,7 @@ def build_resetall(app, parent, pad):
     def do_reset():
         win = tk.Toplevel(app, bg=BG)
         win.title("Confirm Reset")
-        win.geometry("400x160")
+        _fit(win, 400, 160)
         win.configure(bg=BG)
         win.resizable(False, False)
 

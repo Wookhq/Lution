@@ -4,6 +4,8 @@ import json
 import urllib.request
 from pathlib import Path
 
+import net
+
 CACHE_DIR = Path.home() / ".local/Lution"
 
 STORE_URL = ("https://raw.githubusercontent.com/wookhq/Lution-Store/"
@@ -15,6 +17,7 @@ INSTALLED_FILE = CACHE_DIR / "marketplace_installed.json"
 ICONS_CACHE = CACHE_DIR / "store_icons"
 
 def _fetch(url, timeout=15):
+    net.ensure_ca_certs()
     req = urllib.request.Request(url, headers={"User-Agent": "Lution"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return resp.read()
@@ -25,26 +28,26 @@ def _parse_items(data):
     return items if isinstance(items, list) else []
 
 def fetch_store():
-    
-    if LOCAL_STORE.exists():
-        try:
-            return _parse_items(LOCAL_STORE.read_text())
-        except Exception as e:
-            import log
-            log.warning(f"Local store.json invalid ({e}), falling back")
+    import log
     try:
         data = _fetch(STORE_URL)
         items = _parse_items(data)
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         STORE_CACHE.write_text(json.dumps(items, indent=2) + "\n")
-        return items
-    except Exception:
-        pass
+        return items, False
+    except Exception as e:
+        log.warning(f"Store fetch failed ({e.__class__.__name__}: {e}), "
+                    "using cached copy")
+    if LOCAL_STORE.exists():
+        try:
+            return _parse_items(LOCAL_STORE.read_text()), True
+        except Exception as e:
+            log.warning(f"Local store.json invalid ({e}), falling back")
     try:
         cached = json.loads(STORE_CACHE.read_text())
-        return cached if isinstance(cached, list) else []
+        return (cached if isinstance(cached, list) else []), True
     except Exception:
-        return []
+        return [], True
 
 def load_installed():
     try:

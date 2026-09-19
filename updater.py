@@ -1,6 +1,9 @@
 # i hope this works correctly
+# omg it did
 import urllib.request
 import json
+
+import net
 
 VERSION = "0.4.6"
 REPO = "wookhq/Lution"
@@ -9,6 +12,7 @@ API_URL = f"https://api.github.com/repos/{REPO}/releases/latest"
 
 def check_for_update():
     try:
+        net.ensure_ca_certs()
         req = urllib.request.Request(API_URL, headers={"User-Agent": "Lution"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read())

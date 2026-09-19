@@ -10,6 +10,9 @@ import threading
 import os
 
 import themes
+import net
+
+net.ensure_ca_certs()
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 CONFIG_FILE = BASE / "ui.md"
@@ -317,18 +320,16 @@ class Lution(tk.Tk):
 
         self.page_shown_listeners = []
         if os.environ.get("LUTION_QUIET_FONTCONFIG"):
-            saved = None
+            saved = os.dup(2)
+            devnull = os.open(os.devnull, os.O_WRONLY)
+            os.dup2(devnull, 2)
+            os.close(devnull)
             try:
-                saved = os.dup(2)
-                devnull = os.open(os.devnull, os.O_WRONLY)
-                os.dup2(devnull, 2)
-                os.close(devnull)
                 self.build_sidebar()
                 self.build_content()
             finally:
-                if saved is not None:
-                    os.dup2(saved, 2)
-                    os.close(saved)
+                os.dup2(saved, 2)
+                os.close(saved)
         else:
             self.build_sidebar()
             self.build_content()
@@ -390,9 +391,7 @@ class Lution(tk.Tk):
 
     def refresh_button(self, btn):
         active = getattr(self, "current_page", None)
-        name = next((n for n, b in self.nav_buttons.items() if b is btn), None)
-        if name is None:
-            return
+        name = [n for n, b in self.nav_buttons.items() if b is btn][0]
         if name == active:
             btn.configure(bg=BG_ACTIVE, fg=FG)
         else:
