@@ -4,16 +4,16 @@ from pathlib import Path
 import shutil
 import sys
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-APK_DIR = SOBER_BASE / "packages/x86_64/com.roblox.client"
-OVERLAY_FONT_DIR = SOBER_BASE / "asset_overlay/content/fonts"
+import paths
+
+APK_DIR = paths.SOBER_APK_DIR
+OVERLAY_FONT_DIR = paths.LUTION_OVERLAY / "content/fonts"
 
 EMOJI_FONT_NAMES = ["RobloxEmoji.ttf", "TwemojiMozilla.ttf"]
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 PRESETS_DIR = BASE / "emoji_presets"
-INSTALLED_EMOJI_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_emoji"
+INSTALLED_EMOJI_DIR = paths.LUTION_ROOT / "installed_emoji"
 
 
 def list_presets():

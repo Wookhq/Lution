@@ -1,25 +1,32 @@
 # fonts are complicated as shit bro
 # fr
 # yes bro
-from genericpath import exists
 from pathlib import Path
 import shutil
 import zipfile
 import sys
+from urllib.parse import unquote, urlparse
 
 import emoji
 import log
+import paths
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-APK_DIR = SOBER_BASE / "packages/x86_64/com.roblox.client"
-OVERLAY_FONT_DIR = SOBER_BASE / "asset_overlay/content/fonts"
+APK_DIR = paths.SOBER_APK_DIR
+OVERLAY_FONT_DIR = paths.LUTION_OVERLAY / "content/fonts"
 
-INSTALLED_FONTS_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_font"
+INSTALLED_FONTS_DIR = paths.LUTION_ROOT / "installed_font"
+
+def _as_path(font_path):
+    if isinstance(font_path, Path):
+        return font_path
+    text = str(font_path)
+    if text.startswith("file:"):
+        parsed = urlparse(text)
+        return Path(unquote(parsed.path))
+    return Path(text)
 
 def save_installed_font(font_path: Path | str) -> None:
-    if isinstance(font_path, str):
-        font_path = Path.from_uri("file:"+font_path)
+    font_path = _as_path(font_path)
 
     if not INSTALLED_FONTS_DIR.exists():
         INSTALLED_FONTS_DIR.mkdir(exist_ok=True, parents=True)
@@ -48,10 +55,7 @@ def reapply_fonts():
 
 
 def _find_apk():
-    if not APK_DIR.exists():
-        return None
-    candidates = sorted(APK_DIR.glob("*.apk"), key=lambda p: p.stat().st_size, reverse=True)
-    return candidates[0] if candidates else None
+    return paths.find_base_apk()
 
 
 def _apk_font_names():

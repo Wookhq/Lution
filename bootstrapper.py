@@ -11,11 +11,13 @@ import zlib
 from pathlib import Path
 
 import envvars
+import launcher
 import log
+import paths
 import sober
 import themes
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
+SOBER_APP_ID = paths.SOBER_APP_ID
 
 CONFIG_DIR = Path.home() / ".local/Lution"
 CONFIG_FILE = CONFIG_DIR / "launcher_config.json"
@@ -595,15 +597,16 @@ def run_launch(cfg, ui, root, url=None):
         ui.progress(UPDATE_SCALE if cfg.get("check_updates", True) else 0.02)
         log.info("Bootstrapper: launching Sober")
 
-        args = ["flatpak", "run"] + envvars.env_flatpak_args() \
-               + [SOBER_APP_ID]
-        if url:
-            args.append(url)
         LAUNCH_LOG.parent.mkdir(parents=True, exist_ok=True)
         with open(LAUNCH_LOG, "w") as logfile:
-            proc = subprocess.Popen(args, stdout=logfile,
-                                    stderr=subprocess.STDOUT,
-                                    env=sober.clean_env())
+            try:
+                proc = launcher.launch(stdout=logfile,
+                                       stderr=subprocess.STDOUT,
+                                       env=sober.clean_env(), url=url)
+            except launcher.LaunchError as e:
+                log.error(f"Bootstrapper: launch refused: {e}")
+                ui.fail(str(e))
+                return
 
         base = UPDATE_SCALE if cfg.get("check_updates", True) else 0.02
         span = 1.0 - base
@@ -653,7 +656,7 @@ def run_launch(cfg, ui, root, url=None):
                         proc.kill()
                     log.info("Launcher closed, Sober stopped")
                 elif rc is None:
-                    log.info("Launcher closed, Sober keeps running")
+                    log.info("launcher closed")
                 return
 
             if rc is not None:
@@ -717,21 +720,24 @@ def _launch_full_lution(root):
         return
     root.after(300, root.destroy)
 
-def run_standalone():
+def run_standalone(url=None, autostart=False):
     root = _make_root()
     cfg = get_config()
     _ensure_default_logo(cfg)
     win = _standalone_window(root, cfg)
-    ui = BootstrapperWindow(root, win, cfg, menu=True)
+    ui = BootstrapperWindow(root, win, cfg, menu=not autostart)
     ui.pack(fill="both", expand=True)
 
-    def play():
+    def play(target=None):
         ui.start_progress()
-        threading.Thread(target=run_launch, args=(cfg, ui, win),
+        threading.Thread(target=run_launch, args=(cfg, ui, win, target),
                          daemon=True).start()
 
-    ui.on_play = play
+    ui.on_play = lambda: play(url)
     ui.on_configure = lambda: _launch_full_lution(root)
+    if autostart:
+        log.info(f"Bootstrapper: standalone start for {url or 'roblox'}")
+        play(url)
     root.mainloop()
 
 def _make_root():

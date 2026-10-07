@@ -11,6 +11,7 @@ import os
 
 import themes
 import net
+import paths
 
 net.ensure_ca_certs()
 
@@ -33,6 +34,7 @@ import cursors
 import mods
 import sound_mods
 import log
+import fflags
 
 APK_CHECKSUM_FILE = Path.home() / ".local" / "Lution" / "apk_checksum.txt"
 LEGACY_CHECKSUM_FILES = [
@@ -43,12 +45,7 @@ LEGACY_CHECKSUM_FILES = [
 ]
 
 def _find_apk():
-    apk_dir = fonts.APK_DIR
-    if not apk_dir.exists():
-        return None
-    candidates = sorted(apk_dir.glob("*.apk"),
-                         key=lambda p: p.stat().st_size, reverse=True)
-    return candidates[0] if candidates else None
+    return paths.find_base_apk()
 
 def _calculate_sha256_checksum(apk_path):
     import hashlib
@@ -64,9 +61,11 @@ def reapply_customizations():
         except OSError:
             pass
 
+    paths.migrate_legacy_overlay()
+
     apk_path = _find_apk()
     if apk_path is None:
-        log.debug("Sober APK not found, skipping reapply check")
+        log.debug("Sober apk not found")
         return
 
     current = _calculate_sha256_checksum(apk_path)
@@ -75,10 +74,10 @@ def reapply_customizations():
         last = APK_CHECKSUM_FILE.read_text().strip()
 
     if current == last:
-        log.debug("Sober APK unchanged, customizations intact")
+        log.debug("Sober apk unchanged")
         return
 
-    log.info("Sober APK changed, reapplying all customizations")
+    log.info("Sober apk changed we reapplying all customizations")
     for name, fn in (("fonts", fonts.reapply_fonts),
                      ("emoji", emoji.reapply_emoji),
                      ("cursors", cursors.reapply_cursors),
@@ -126,6 +125,9 @@ WIDGET_BUILDERS = {
     "modconflicts": widgets.build_modconflicts,
     "modmanager": widgets.build_modmanager,
     "soundmods": widgets.build_soundmods,
+    "serverselector": widgets.build_serversel,
+    "shortcutmanager": widgets.build_shortcuts,
+    "account": widgets.build_account,
 }
 
 def darken(hex_color, amount=0.18):
@@ -267,6 +269,18 @@ def parse_config(path):
             if current is not None:
                 pages[current].append(("soundmods",))
 
+        elif line == "ServerSelector":
+            if current is not None:
+                pages[current].append(("serverselector",))
+
+        elif line == "ShortcutManager":
+            if current is not None:
+                pages[current].append(("shortcutmanager",))
+
+        elif line == "Account":
+            if current is not None:
+                pages[current].append(("account",))
+
         elif line.startswith("Image = "):
             rest = line[len("Image = "):].strip()
             if "|" in rest:
@@ -289,7 +303,6 @@ def run_script(script, args=None):
         subprocess.Popen([str(path), *args],
                          env=sober.clean_env())
 
-# the gui yay
 class Lution(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -469,7 +482,7 @@ class Lution(tk.Tk):
 
         tk.Label(page, text=name, bg=BG, fg=FG,
                  font=("TkDefaultFont", 18, "bold"),
-                 anchor="w").pack(anchor="w", pady=(0, 18))
+                 anchor="w").pack(anchor="w", pady=(0, 8))
 
         group = None
         group_inputs = []
@@ -580,11 +593,22 @@ if __name__ == "__main__":
     if "--launcher" in sys.argv:
         import bootstrapper
         bootstrapper.run_standalone()
+    elif "--play" in sys.argv:
+        import bootstrapper
+        pos = sys.argv.index("--play")
+        place = sys.argv[pos + 1] if pos + 1 < len(sys.argv) else ""
+        url = None
+        if str(place).isdigit():
+            url = f"roblox://experiences/start?placeId={place}"
+        else:
+            log.error(f"--play needs a place id, got: {place!r}")
+        bootstrapper.run_standalone(url=url, autostart=url is not None)
     else:
         try:
             import bootstrapper
             bootstrapper.refresh_shortcut()
         except Exception:
             pass
+        fflags.refresh_allowlist_if_stale()
         app = Lution()
         app.mainloop()

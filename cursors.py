@@ -4,16 +4,16 @@ from pathlib import Path
 import shutil
 import sys
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-OVERLAY_TEXTURE_DIR = SOBER_BASE / "asset_overlay/content/textures/Cursors/KeyboardMouse"
+import paths
+
+OVERLAY_TEXTURE_DIR = paths.LUTION_OVERLAY / "content/textures/Cursors/KeyboardMouse"
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 PRESETS_DIR = BASE / "cursor_presets"
 
 CURSOR_STATES = ["ArrowCursor", "ArrowFarCursor", "IBeamCursor"]
 
-INSTALLED_CURSORS_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_cursors"
+INSTALLED_CURSORS_DIR = paths.LUTION_ROOT / "installed_cursors"
 
 
 def list_presets():

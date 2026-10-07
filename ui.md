@@ -6,6 +6,9 @@ SoberGuide
 Subtitle = Play History
 PlayHistory
 
+Subtitle = Game Shortcuts
+ShortcutManager
+
 # Launcher
 Subtitle = Environment Variables
 EnvVars
@@ -13,8 +16,15 @@ EnvVars
 Subtitle = Launch Screen
 Bootstrapper
 
+# Account
+Account
+
 # Marketplace
 Marketplace
+
+# Servers
+Subtitle = Region & Server Selector
+ServerSelector
 
 # FastFlags
 Subtitle = Active FFlags

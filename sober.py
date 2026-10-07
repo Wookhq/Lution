@@ -142,7 +142,7 @@ def ensure_sober(output_cb=None):
 
     remote = remote_commit()
     if not remote:
-        log.warning("Flathub unreachable, skipping update check")
+        log.warning("flathub is unreachable sorry bro we are skipping the update check")
         if output_cb:
             output_cb("Can't reach Flathub — launching installed Sober")
         return True, "offline"

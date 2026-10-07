@@ -4,9 +4,9 @@ from pathlib import Path
 import shutil
 import sys
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-OVERLAY_SOUNDS_DIR = SOBER_BASE / "asset_overlay/content/sounds"
+import paths
+
+OVERLAY_SOUNDS_DIR = paths.LUTION_OVERLAY / "content/sounds"
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 
@@ -23,7 +23,7 @@ SOUND_STATES = [
     "volume_slider.ogg",
 ]
 
-INSTALLED_SOUNDS_DIR = Path.home() / ".local" / "share" / "Lution" / "installed_sounds"
+INSTALLED_SOUNDS_DIR = paths.LUTION_ROOT / "installed_sounds"
 
 
 def apply_sounds(sounds_dict):

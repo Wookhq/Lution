@@ -7,9 +7,9 @@ import json
 import tempfile
 import os
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_DATA = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-OVERLAY_DIR = SOBER_DATA / "asset_overlay"
+import paths
+
+OVERLAY_DIR = paths.LUTION_OVERLAY
 MODS_DIR = Path.home() / ".local/Lution/Mods"
 
 MANIFEST_FILE = Path.home() / ".local/Lution/mods_manifest.json"
@@ -57,18 +57,25 @@ def _mod_file_list(mod_path):
         pass
     return files
 
-# this is very useful so two mods don't literally replace ur cursor or any asset at the same time
 def check_mod_conflicts(mod_path):
+    mod_path = Path(mod_path)
     mod_files = _mod_file_list(mod_path)
     if not mod_files:
         return []
 
-    conflicts = []
-    for rel in mod_files:
-        target = OVERLAY_DIR / rel
-        if target.exists():
-            conflicts.append(rel)
-    return conflicts
+    conflicts = {}
+    for other_name in _load_manifest():
+        other = MODS_DIR / other_name
+        if not other.exists() or other.stem == mod_path.stem:
+            continue
+        overlap = mod_files & _mod_file_list(other)
+        if overlap:
+            conflicts[other.stem] = sorted(overlap)
+
+    flat = []
+    for other_stem, files in conflicts.items():
+        flat.extend(f"{f}  (also in {other_stem})" for f in files)
+    return flat
 
 def scan_all_conflicts():
     mods = list_mods()

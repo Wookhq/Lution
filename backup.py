@@ -2,15 +2,31 @@
 from pathlib import Path
 import shutil
 import zipfile
-import json
-import os
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-SOBER_BASE = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober"
-OVERLAY_DIR = SOBER_BASE / "asset_overlay"
-SOBER_CONFIG = SOBER_BASE.parent.parent / "config/sober/config.json"
-LUTION_DIR = Path.home() / ".local/Lution"
-MODS_DIR = Path.home() / ".local/Lution/Mods"
+import paths
+
+OVERLAY_DIR = paths.LUTION_OVERLAY
+LUTION_CONFIG = paths.LUTION_CONFIG
+STATE_DIR = paths.STATE_DIR
+MODS_DIR = paths.STATE_DIR / "Mods"
+
+INSTALLED_DIRS = {
+    name: paths.LUTION_ROOT / name
+    for name in ("installed_font", "installed_emoji",
+                 "installed_cursors", "installed_sounds")
+}
+
+
+def _add_tree(zf, src, arc_root):
+    for fp in src.rglob("*"):
+        if fp.is_file():
+            zf.write(fp, arc_root + "/" + str(fp.relative_to(src)))
+
+
+def _extract(zf, member, dest):
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with zf.open(member) as src, open(dest, "wb") as dst:
+        dst.write(src.read())
 
 
 def export_backup(backup_path):
@@ -20,20 +36,17 @@ def export_backup(backup_path):
 
     with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zf:
         if OVERLAY_DIR.exists():
-            for root, dirs, files in os.walk(OVERLAY_DIR):
-                for f in files:
-                    fp = Path(root) / f
-                    arcname = "asset_overlay/" + str(fp.relative_to(OVERLAY_DIR))
-                    zf.write(fp, arcname)
+            _add_tree(zf, OVERLAY_DIR, "asset_overlay")
 
-        if SOBER_CONFIG.exists():
-            zf.write(SOBER_CONFIG, "config.json")
+        for arc_root, src in INSTALLED_DIRS.items():
+            if src.exists():
+                _add_tree(zf, src, "installed/" + arc_root)
 
-        if LUTION_DIR.exists():
-            for fp in LUTION_DIR.rglob("*"):
-                if fp.is_file():
-                    arcname = "lution/" + str(fp.relative_to(LUTION_DIR))
-                    zf.write(fp, arcname)
+        if LUTION_CONFIG.exists():
+            zf.write(LUTION_CONFIG, "config.json")
+
+        if STATE_DIR.exists():
+            _add_tree(zf, STATE_DIR, "lution")
 
         if MODS_DIR.exists():
             for fp in MODS_DIR.glob("*.zip"):
@@ -47,42 +60,27 @@ def import_backup(backup_path):
     if not backup_path.exists():
         raise FileNotFoundError(f"Backup not found: {backup_path}")
 
+    roots = [("asset_overlay/", OVERLAY_DIR),
+             ("installed/", paths.LUTION_ROOT),
+             ("lution/", STATE_DIR),
+             ("mods/", MODS_DIR)]
+
     restored = []
     with zipfile.ZipFile(backup_path, "r") as zf:
         for member in zf.namelist():
-            if member.startswith("asset_overlay/"):
-                rel = member[len("asset_overlay/"):]
-                dest = OVERLAY_DIR / rel
-                if member.endswith("/"):
-                    dest.mkdir(parents=True, exist_ok=True)
-                else:
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    with zf.open(member) as src, open(dest, "wb") as dst:
-                        dst.write(src.read())
-                restored.append(member)
+            if member.endswith("/"):
+                continue
 
-            elif member == "config.json":
-                dest = SOBER_CONFIG
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                with zf.open(member) as src, open(dest, "wb") as dst:
-                    dst.write(src.read())
+            if member == "config.json":
+                _extract(zf, member, LUTION_CONFIG)
                 restored.append(member)
+                continue
 
-            elif member.startswith("lution/"):
-                rel = member[len("lution/"):]
-                dest = LUTION_DIR / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                with zf.open(member) as src, open(dest, "wb") as dst:
-                    dst.write(src.read())
-                restored.append(member)
-
-            elif member.startswith("mods/"):
-                rel = member[len("mods/"):]
-                dest = MODS_DIR / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                with zf.open(member) as src, open(dest, "wb") as dst:
-                    dst.write(src.read())
-                restored.append(member)
+            for prefix, dest_root in roots:
+                if member.startswith(prefix):
+                    _extract(zf, member, dest_root / member[len(prefix):])
+                    restored.append(member)
+                    break
 
     return restored
 
@@ -91,8 +89,20 @@ def reset_all():
     removed = []
     if OVERLAY_DIR.exists():
         shutil.rmtree(OVERLAY_DIR)
-        removed.append("asset_overlay")
-    if LUTION_DIR.exists():
-        shutil.rmtree(LUTION_DIR)
-        removed.append("lution config")
+        removed.append("overlay")
+
+    for name, src in INSTALLED_DIRS.items():
+        if src.exists():
+            shutil.rmtree(src)
+            removed.append(name)
+
+    if LUTION_CONFIG.exists():
+        LUTION_CONFIG.unlink()
+        removed.append("config")
+
+    if STATE_DIR.exists():
+        shutil.rmtree(STATE_DIR)
+        removed.append("lution state")
+
+    paths.ensure_lution_dirs()
     return removed

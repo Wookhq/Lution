@@ -1,6 +1,6 @@
 # yep it's literally all the widgets every textbox, menu, window, dropdown menu, everything bro
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 import json
 import subprocess
 import webbrowser
@@ -54,12 +54,12 @@ def _fit(win, w, h, ratio=0.85):
 
 def _clear_all_fflags(app, reload_fn, status):
     win = tk.Toplevel(app, bg=BG)
-    win.title("Clear All FFlags")
+    win.title("Delete all FFlags")
     _fit(win, 400, 120)
     win.configure(bg=BG)
     win.resizable(False, False)
 
-    tk.Label(win, text="Remove all FFlags?", bg=BG, fg=FG,
+    tk.Label(win, text="remove all your fflags?", bg=BG, fg=FG,
              font=BODY_FONT).pack(pady=(20, 14))
 
     btn_row = tk.Frame(win, bg=BG)
@@ -68,7 +68,7 @@ def _clear_all_fflags(app, reload_fn, status):
     def confirm():
         fflags.save_fflags({})
         reload_fn()
-        status.configure(text="All FFlags cleared.", fg=FG_DIM)
+        status.configure(text="All fflags deleted", fg=FG_DIM)
         win.destroy()
 
     app.make_button(btn_row, "yes clear all", command=confirm,
@@ -91,6 +91,63 @@ def _export_fflags_json(app, status):
             status.configure(text=f"Exported to {Path(path).name}", fg=FG_DIM)
         except Exception as e:
             status.configure(text=str(e), fg=ERROR)
+
+def _clean_disallowed(app, reload_fn, status):
+    _ok, bad = fflags.validate(fflags.get_fflags())
+    if not bad:
+        status.configure(text="every fflag is on the allowlist :D", fg=FG_DIM)
+        return
+
+    win = tk.Toplevel(app, bg=BG)
+    win.title("Remove non-working fflags")
+    _fit(win, 500, 240)
+    win.configure(bg=BG)
+    win.resizable(False, False)
+
+    shown = ", ".join(bad[:8])
+    more = f"\nand {len(bad) - 8} more" if len(bad) > 8 else ""
+    tk.Label(win,
+             text=(f"Remove {len(bad)} flag(s) that are not on Roblox's "
+                   f"allowlist?\n\n{shown}{more}"),
+             bg=BG, fg=FG, font=BODY_FONT, justify="left",
+             wraplength=460).pack(anchor="w", padx=16, pady=(16, 14))
+
+    btn_row2 = tk.Frame(win, bg=BG)
+    btn_row2.pack(pady=(0, 16))
+
+    def confirm():
+        kept, removed = fflags.clean(fflags.get_fflags())
+        fflags.save_fflags(kept)
+        win.destroy()
+        reload_fn()
+        status.configure(text=f"Removed {len(removed)} flag(s) not on the "
+                              f"allowlist.", fg=FG_DIM)
+
+    app.make_button(btn_row2, "remove them", command=confirm,
+                    bg=ERROR, fg="#0a0a0a", padx=12, pady=6
+                    ).pack(side="left", padx=(0, 8))
+    app.make_button(btn_row2, "cancel", command=win.destroy,
+                    padx=12, pady=6).pack(side="left")
+
+def _update_allowlist(app, reload_fn, status):
+    import threading
+
+    status.configure(text="Updating fflag allowlist...", fg=FG_DIM)
+
+    def worker():
+        ok, msg = fflags.refresh_allowlist()
+
+        def done():
+            if ok:
+                status.configure(text=f"Allowlist updated: {msg}.", fg=FG_DIM)
+            else:
+                status.configure(text=f"Allowlist update failed: {msg}",
+                                 fg=ERROR)
+            reload_fn()
+
+        app.after(0, done)
+
+    threading.Thread(target=worker, daemon=True).start()
 
 def _load_fflag_presets():
     builtins = {}
@@ -143,8 +200,15 @@ def build_flaglist(app, parent, pad):
                        wraplength=500, justify="left")
     status.pack(anchor="w", padx=pad, pady=(0, 6))
 
+    allow_label = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                           font=("TkDefaultFont", 10), anchor="w",
+                           wraplength=500, justify="left")
+    allow_label.pack(anchor="w", padx=pad, pady=(0, 6))
+
     btn_row = tk.Frame(parent, bg=parent["bg"])
-    btn_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 14))
+    btn_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+    allow_row = tk.Frame(parent, bg=parent["bg"])
+    allow_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 14))
 
     def apply_filter():
         query = search_var.get().strip().lower()
@@ -161,6 +225,42 @@ def build_flaglist(app, parent, pad):
             text=f"{shown}/{total} flags" if query else f"{total} flags")
 
     search_var.trace_add("write", lambda *_: apply_filter())
+
+    def _update_warning(key_entry):
+        warn = getattr(key_entry, "_warn_lbl", None)
+        if warn is None:
+            return
+        name = key_entry.get().strip()
+        denied = bool(name) and name not in fflags.allowlist()
+        if denied:
+            warn.pack(side="left", padx=(0, 6))
+        else:
+            warn.pack_forget()
+
+    def refresh_warnings():
+        denied = []
+        for key_entry, _, _row in app.fflag_rows:
+            name = key_entry.get().strip()
+            if name and name not in fflags.allowlist():
+                denied.append(name)
+            _update_warning(key_entry)
+
+        if not app.fflag_rows:
+            allow_label.configure(text="", fg=FG_DIM)
+        elif denied:
+            shown = ", ".join(denied[:3])
+            more = f" (+{len(denied) - 3} more)" if len(denied) > 3 else ""
+            allow_label.configure(
+                text=f"{len(denied)} flag(s) not on Roblox's allowlist and will "
+                     f"be ignored: {shown}{more}",
+                fg=ERROR)
+        else:
+            data = fflags.allowlist_file()
+            updated = data.get("updated") or "bundled copy"
+            allow_label.configure(
+                text=f"All flags are on Roblox's allowlist "
+                     f"({len(fflags.allowlist())} allowed, updated {updated}).",
+                fg=FG_DIM)
 
     def add_row(key="", value=""):
         list_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 6),
@@ -185,9 +285,16 @@ def build_flaglist(app, parent, pad):
         value_entry.insert(0, value)
         value_entry.pack(side="left", padx=(0, 6), ipady=6)
 
+        warn_lbl = tk.Label(row, text="not on allowlist", bg=parent["bg"],
+                            fg=ERROR, font=("TkDefaultFont", 9))
+        key_entry._warn_lbl = warn_lbl
+        key_entry.bind("<KeyRelease>",
+                       lambda e, ke=key_entry: _update_warning(ke))
+
         remove_btn = app.make_button(row, "x", command=lambda: remove_row(row),
                                       bg=BG_SIDEBAR, fg=FG_DIM,
                                       padx=10, pady=4)
+        warn_lbl.pack(side="left", padx=(0, 6))
         remove_btn.pack(side="left")
 
         app.fflag_rows.append((key_entry, value_entry, row))
@@ -254,7 +361,46 @@ def build_flaglist(app, parent, pad):
         else:
             list_frame.pack_forget()
         apply_filter()
+        refresh_warnings()
         parent.event_generate("<Configure>")
+
+    def _confirm_disallowed(new_fflags, proceed):
+        _ok, bad = fflags.validate(new_fflags)
+        if not bad:
+            proceed(list(bad))
+            return
+
+        win = tk.Toplevel(app, bg=BG)
+        win.title("Flags not on the allowlist")
+        _fit(win, 500, 240)
+        win.configure(bg=BG)
+        win.resizable(False, False)
+
+        shown = ", ".join(bad[:8])
+        more = f"\nand {len(bad) - 8} more" if len(bad) > 8 else ""
+        tk.Label(
+            win,
+            text=(f"{len(bad)} of these flags are not on Roblox's allowlist "
+                  f"and will be ignored by the client:\n\n{shown}{more}"),
+            bg=BG, fg=FG, font=BODY_FONT, justify="left",
+            wraplength=460).pack(anchor="w", padx=16, pady=(16, 14))
+
+        btn_row2 = tk.Frame(win, bg=BG)
+        btn_row2.pack(pady=(0, 16))
+
+        def save_without_bad():
+            kept, _removed = fflags.clean(new_fflags)
+            win.destroy()
+            proceed(list(_removed), saved=kept)
+
+        app.make_button(btn_row2, "remove them & save",
+                        command=save_without_bad, padx=12, pady=6
+                        ).pack(side="left", padx=(0, 8))
+        app.make_button(btn_row2, "save anyway",
+                        command=lambda: (win.destroy(), proceed(list(bad))),
+                        padx=12, pady=6).pack(side="left", padx=(0, 8))
+        app.make_button(btn_row2, "cancel", command=win.destroy,
+                        padx=12, pady=6).pack(side="left")
 
     def save_rows():
         new_fflags = {}
@@ -263,8 +409,23 @@ def build_flaglist(app, parent, pad):
             if not key:
                 continue
             new_fflags[key] = fflags.parse_value(value_entry.get())
-        fflags.save_fflags(new_fflags)
-        status.configure(text="Flags saved.", fg=FG_DIM)
+
+        def proceed(bad, saved=None):
+            to_save = saved if saved is not None else new_fflags
+            fflags.save_fflags(to_save)
+            reload_rows()
+            if saved is not None and bad:
+                status.configure(
+                    text=f"Flags saved — dropped {len(bad)} not on the "
+                         f"allowlist.", fg=FG_DIM)
+            elif bad:
+                status.configure(
+                    text=f"Flags saved — {len(bad)} of them will be ignored "
+                         f"by roblox.", fg=ERROR)
+            else:
+                status.configure(text="Flags saved.", fg=FG_DIM)
+
+        _confirm_disallowed(new_fflags, proceed)
 
     app.reload_fflags_ui = reload_rows
 
@@ -282,8 +443,16 @@ def build_flaglist(app, parent, pad):
                      command=lambda: _open_presets_window(app, reload_rows, status)
                      ).pack(side="left", padx=(0, 6))
     app.make_button(btn_row, "Clear All", command=lambda: _clear_all_fflags(app, reload_rows, status),
-                     bg=ERROR, fg="#0a0a0a", padx=12
-                     ).pack(side="left")
+                      bg=ERROR, fg="#0a0a0a", padx=12
+                      ).pack(side="left")
+
+    app.make_button(allow_row, "Remove non-working fflags",
+                     command=lambda: _clean_disallowed(app, reload_rows, status)
+                     ).pack(side="left", padx=(0, 6))
+    app.make_button(allow_row, "Update fflag allowlist",
+                     command=lambda: _update_allowlist(app, reload_rows, status)
+                     ).pack(side="left", padx=(0, 6))
+
 
     reload_rows()
 
@@ -296,12 +465,16 @@ def _open_presets_window(app, reload_fn, status):
 
     builtins, user_presets = _load_fflag_presets()
 
-    def apply_preset(name, flags):
-        current = fflags.get_fflags()
+    def apply_preset(name, flags, replace=False):
+        current = {} if replace else fflags.get_fflags()
         current.update(flags)
         fflags.save_fflags(current)
         reload_fn()
-        status.configure(text=f"Applied preset: {name}", fg=FG_DIM)
+        _ok, bad = fflags.validate(flags)
+        note = (f" ({len(bad)} not on the allowlist)" if bad else "")
+        verb = "Loaded profile" if replace else "Applied preset"
+        status.configure(text=f"{verb}: {name}{note}",
+                         fg=ERROR if bad else FG_DIM)
 
     canvas = tk.Canvas(win, bg=BG, highlightthickness=0)
     scrollbar = tk.Scrollbar(win, orient="vertical",
@@ -363,11 +536,15 @@ def _open_presets_window(app, reload_fn, status):
                          font=("TkDefaultFont", 9),
                          anchor="w").pack(anchor="w")
 
+            app.make_button(row, "Replace",
+                             command=lambda n=name, f=data["flags"]: apply_preset(n, f, replace=True),
+                             padx=10, pady=4
+                             ).pack(side="right")
             app.make_button(row, "Apply", command=lambda n=name, f=data["flags"]: apply_preset(n, f),
                              padx=10, pady=4
                              ).pack(side="right")
 
-    tk.Label(body, text="Your Presets", bg=BG, fg=FG,
+    tk.Label(body, text="Your fflag presets", bg=BG, fg=FG,
              font=("TkDefaultFont", 13, "bold"),
              anchor="w").pack(anchor="w", padx=16, pady=(6, 6))
 
@@ -380,7 +557,7 @@ def _open_presets_window(app, reload_fn, status):
             w.destroy()
         _, up = _load_fflag_presets()
         if not up:
-            tk.Label(user_frame, text="No custom presets yet", bg=BG_ACTIVE, fg=FG_DIM,
+            tk.Label(user_frame, text="no custom presets", bg=BG_ACTIVE, fg=FG_DIM,
                      font=("TkDefaultFont", 10)).pack(anchor="w", padx=8, pady=8)
             return
         for name, data in up.items():
@@ -391,6 +568,11 @@ def _open_presets_window(app, reload_fn, status):
                              command=lambda n=name, f=data["flags"]: apply_preset(n, f),
                              padx=10, pady=4
                              ).pack(side="left")
+
+            app.make_button(row, "Replace",
+                             command=lambda n=name, f=data["flags"]: apply_preset(n, f, replace=True),
+                             padx=10, pady=4
+                             ).pack(side="left", padx=(6, 0))
 
             def delete_preset(n=name):
                 d = {}
@@ -451,7 +633,7 @@ def _open_presets_window(app, reload_fn, status):
         app.make_button(save_win, "Save", command=save, padx=12, pady=6
                          ).pack(anchor="w", padx=16, pady=(0, 16))
 
-    app.make_button(body, "Save Current as Preset", command=save_as_preset,
+    app.make_button(body, "save current as a preset", command=save_as_preset,
                      padx=12, pady=6
                      ).pack(anchor="w", padx=16, pady=(0, 16))
 
@@ -563,7 +745,7 @@ def build_fontpicker(app, parent, pad):
             path_entry.delete(0, "end")
             path_entry.insert(0, chosen)
 
-    app.make_button(row, "Browse", command=browse, padx=14, pady=8
+    app.make_button(row, "browse", command=browse, padx=14, pady=8
                      ).pack(side="left")
 
     status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
@@ -574,7 +756,7 @@ def build_fontpicker(app, parent, pad):
     def apply_font():
         source = path_entry.get().strip()
         if not source:
-            status.configure(text="Pick a font file first.", fg=ERROR)
+            status.configure(text="js pick a font file first", fg=ERROR)
             return
         try:
             replaced = fonts.apply_font(source)
@@ -584,23 +766,23 @@ def build_fontpicker(app, parent, pad):
             return
         if not replaced:
             status.configure(
-                text="No font files found to replace yet",
+                text="no font files to replace",
                 fg=ERROR)
             return
         status.configure(
             text=f"Replaced {len(replaced)} font file(s).", fg=FG_DIM)
 
-    app.make_button(parent, "Apply Font", command=apply_font
+    app.make_button(parent, "Apply font", command=apply_font
                      ).pack(anchor="w", padx=pad, pady=(0, 6))
 
     def restore_default():
         removed = fonts.restore_fonts()
         if removed:
-            status.configure(text="Default fonts restored.", fg=FG_DIM)
+            status.configure(text="default fonts restored", fg=FG_DIM)
         else:
-            status.configure(text="No custom font to restore.", fg=ERROR)
+            status.configure(text="no custom font to restore", fg=ERROR)
 
-    app.make_button(parent, "Restore Default Fonts", command=restore_default,
+    app.make_button(parent, "Restore default fonts", command=restore_default,
                      bg=ERROR, fg="#0a0a0a"
                      ).pack(anchor="w", padx=pad, pady=(0, 6))
 
@@ -661,7 +843,7 @@ def build_envvars(app, parent, pad):
 
     def open_add_var():
         win = tk.Toplevel(app, bg=BG)
-        win.title("Add Environment Variable")
+        win.title("Add environment variable")
         _fit(win, 500, 300)
         win.configure(bg=BG)
         win.resizable(False, False)
@@ -693,7 +875,7 @@ def build_envvars(app, parent, pad):
             key = key_entry.get().strip()
             if not envvars.valid_key(key):
                 hint.configure(
-                    text="Name can't be empty or contain spaces / '='.")
+                    text="name cannot be empty or have spaces / '='.")
                 return
             add_row(key, val_entry.get().strip())
             win.destroy()
@@ -725,9 +907,9 @@ def build_envvars(app, parent, pad):
     for key, value in envvars.load_vars().items():
         add_row(str(key), str(value))
 
-    app.make_button(btn_row, "Add Variable", command=open_add_var
+    app.make_button(btn_row, "Add variable", command=open_add_var
                      ).pack(side="left", padx=(0, 6))
-    app.make_button(btn_row, "Save Variables", command=save_vars_action
+    app.make_button(btn_row, "Save variable", command=save_vars_action
                      ).pack(side="left")
 
 def build_cursorpicker(app, parent, pad):
@@ -787,7 +969,7 @@ def build_cursorpicker(app, parent, pad):
                 if preset_combo.get() != "Custom":
                     preset_combo.set("Custom")
 
-        app.make_button(row, "Browse", command=browse_cursor,
+        app.make_button(row, "browse", command=browse_cursor,
                           padx=14, pady=8).pack(side="left")
 
     def apply_cursors_action():
@@ -797,23 +979,23 @@ def build_cursorpicker(app, parent, pad):
             if path:
                 cursors_dict[name] = path
         if not cursors_dict:
-            status.configure(text="Select at least one cursor file first.", fg=ERROR)
+            status.configure(text="select atleast one cursor file first", fg=ERROR)
             return
         applied = cursors.apply_cursors(cursors_dict)
         cursors.save_installed_cursors(cursors_dict)
         status.configure(text=f"Applied {len(applied)} cursor file(s).", fg=FG_DIM)
 
-    app.make_button(parent, "Apply Cursors", command=apply_cursors_action
+    app.make_button(parent, "Apply cursors", command=apply_cursors_action
                       ).pack(anchor="w", padx=pad, pady=(0, 6))
 
     def restore_default():
         removed = cursors.restore_cursors()
         if removed:
-            status.configure(text="Default cursors restored.", fg=FG_DIM)
+            status.configure(text="default cursors are restored", fg=FG_DIM)
         else:
-            status.configure(text="No custom cursors to restore.", fg=ERROR)
+            status.configure(text="no custom cursors to restore", fg=ERROR)
 
-    app.make_button(parent, "Restore Default Cursors", command=restore_default,
+    app.make_button(parent, "Restore default cursors", command=restore_default,
                       bg=ERROR, fg="#0a0a0a"
                       ).pack(anchor="w", padx=pad, pady=(0, 14))
 
@@ -882,9 +1064,9 @@ def build_themepicker(app, parent, pad):
                 status.configure(text=f"Invalid hex color for {color_labels[key]}.", fg=ERROR)
                 return
         themes.save_theme(colors)
-        status.configure(text="Theme saved. Restart Lution to apply.", fg=FG_DIM)
+        status.configure(text="theme saved. restart lution to apply", fg=FG_DIM)
 
-    app.make_button(parent, "Save Theme", command=apply_theme
+    app.make_button(parent, "Save theme", command=apply_theme
                      ).pack(anchor="w", padx=pad, pady=(0, 6))
 
     def restore_default():
@@ -892,9 +1074,9 @@ def build_themepicker(app, parent, pad):
         for key in themes.COLOR_KEYS:
             entries[key].delete(0, "end")
             entries[key].insert(0, themes.DEFAULTS[key])
-        status.configure(text="Default theme restored. Restart Lution to apply.", fg=FG_DIM)
+        status.configure(text="default theme restored. restart lution to apply", fg=FG_DIM)
 
-    app.make_button(parent, "Restore Default Theme", command=restore_default,
+    app.make_button(parent, "Restore default theme", command=restore_default,
                      bg=ERROR, fg="#0a0a0a"
                      ).pack(anchor="w", padx=pad, pady=(0, 14))
 
@@ -957,7 +1139,7 @@ def build_emojipicker(app, parent, pad):
             custom_entry.insert(0, chosen)
             select_font("", chosen)
 
-    browse_btn = tk.Label(custom_row, text="Browse", bg=ACCENT, fg="#0a0a0a",
+    browse_btn = tk.Label(custom_row, text="browse", bg=ACCENT, fg="#0a0a0a",
                            font=("TkDefaultFont", 11), cursor="hand2",
                            padx=8, pady=2)
     browse_btn.pack(side="left")
@@ -990,7 +1172,7 @@ def build_emojipicker(app, parent, pad):
         if not path:
             path = custom_entry.get().strip()
         if not path:
-            status.configure(text="Select or browse for an emoji font first.", fg=ERROR)
+            status.configure(text="select an emoji font first", fg=ERROR)
             return
         try:
             replaced = emoji.apply_emoji(path)
@@ -998,22 +1180,22 @@ def build_emojipicker(app, parent, pad):
             status.configure(text=str(e), fg=ERROR)
             return
         if not replaced:
-            status.configure(text="No emoji font files found to replace.", fg=ERROR)
+            status.configure(text="no emoji font found to replace", fg=ERROR)
             return
         emoji.save_installed_emoji(path)
         status.configure(text=f"Replaced {len(replaced)} emoji file(s).", fg=FG_DIM)
 
-    app.make_button(parent, "Apply Emoji Font", command=apply_emoji_font
+    app.make_button(parent, "Apply emoji font", command=apply_emoji_font
                      ).pack(anchor="w", padx=pad, pady=(0, 6))
 
     def restore_default():
         removed = emoji.restore_emoji()
         if removed:
-            status.configure(text="Default emoji fonts restored.", fg=FG_DIM)
+            status.configure(text="default emoji fonts are restored", fg=FG_DIM)
         else:
-            status.configure(text="No custom emoji font to restore.", fg=ERROR)
+            status.configure(text="no custom emoji font to restore", fg=ERROR)
 
-    app.make_button(parent, "Restore Default Emoji", command=restore_default,
+    app.make_button(parent, "Restore default emoji", command=restore_default,
                      bg=ERROR, fg="#0a0a0a"
                      ).pack(anchor="w", padx=pad, pady=(0, 6))
 
@@ -1066,14 +1248,15 @@ def build_modmanager(app, parent, pad):
     def install_selected():
         sel = mod_listbox.curselection()
         if not sel:
-            status.configure(text="Select a mod first by clicking on the mod's name or import one", fg=ERROR)
+            status.configure(text="select a mod by clicking on the mod's name or import one", fg=ERROR)
             return
         name = mod_listbox.get(sel[0])
         mod_path = mods.MODS_DIR / f"{name}.zip"
         conflicts = mods.check_mod_conflicts(mod_path)
         if conflicts:
+            first = conflicts[0]
             status.configure(
-                text=f"Warning: {len(conflicts)} file(s) will be overwritten. Install anyway to proceed.",
+                text=f"Overlaps another mod on {len(conflicts)} file(s), e.g. {first}. Installing anyway.",
                 fg="#e0c252")
         ok, msg = mods.install_mod(mod_path)
         status.configure(text=msg, fg=FG_DIM if ok else ERROR)
@@ -1081,7 +1264,7 @@ def build_modmanager(app, parent, pad):
     def remove_selected():
         sel = mod_listbox.curselection()
         if not sel:
-            status.configure(text="Select a mod first by clicking on it (THIS WON'T REMOVE THE MOD DIRECTLY FROM SOBER, CLICK Delete all mods TO DO SO.)", fg=ERROR)
+            status.configure(text="select a mod first by clicking on it (delete all mods clears the entire overlay)", fg=ERROR)
             return
         name = mod_listbox.get(sel[0])
         mod_path = mods.MODS_DIR / f"{name}.zip"
@@ -1091,7 +1274,7 @@ def build_modmanager(app, parent, pad):
 
     def cleanup_all():
         win = tk.Toplevel(app, bg=BG)
-        win.title("Delete All Mods")
+        win.title("Delete all mods")
         _fit(win, 440, 220)
         win.configure(bg=BG)
         win.resizable(False, False)
@@ -1100,12 +1283,12 @@ def build_modmanager(app, parent, pad):
                  bg=BG, fg=FG, font=BODY_FONT,
                  anchor="w").pack(anchor="w", padx=16, pady=(16, 8))
 
-        tk.Label(win, text="This removes mod files from the overlay.\nYour custom cursors, fonts, and emoji fonts will be kept.",
+        tk.Label(win, text="this removes mod files from the overlay.\nyour custom cursors, fonts and emoji fonts won't be deleted",
                  bg=BG, fg=FG_DIM, font=("TkDefaultFont", 10),
                  anchor="w", justify="left", wraplength=380).pack(anchor="w", padx=16, pady=(0, 10))
 
         also_var = tk.BooleanVar(value=False)
-        cb = tk.Checkbutton(win, text="Also delete cursors, fonts, and emoji fonts",
+        cb = tk.Checkbutton(win, text="also delete cursors, fonts and emoji fonts",
                              variable=also_var, bg=BG, fg=FG,
                              font=("TkDefaultFont", 10),
                              selectcolor=BG_ACTIVE, activebackground=BG,
@@ -1131,7 +1314,7 @@ def build_modmanager(app, parent, pad):
         app.make_button(btn_row, "Cancel", command=win.destroy,
                           padx=12, pady=6).pack(side="left")
 
-    app.make_button(btn_row, "Import Mod", command=import_mod
+    app.make_button(btn_row, "Import mod", command=import_mod
                      ).pack(side="left", padx=(0, 6))
     app.make_button(btn_row, "Install mod", command=install_selected
                      ).pack(side="left", padx=(0, 6))
@@ -1155,7 +1338,7 @@ def build_modmanager(app, parent, pad):
 
     def open_guide():
         win = tk.Toplevel(app, bg=BG)
-        win.title("How mods work")
+        win.title("mods")
         _fit(win, 560, 460)
         win.configure(bg=BG)
         win.resizable(False, False)
@@ -1236,7 +1419,7 @@ def build_modconflicts(app, parent, pad):
         conflicts = mods.scan_all_conflicts()
 
         if not conflicts:
-            tk.Label(conflict_list, text="No conflicts found",
+            tk.Label(conflict_list, text="no conflicts found",
                      bg=parent["bg"], fg=FG_DIM,
                      font=("TkDefaultFont", 10)).pack(anchor="w")
             status.configure(text="", fg=FG_DIM)
@@ -1268,7 +1451,7 @@ def build_modconflicts(app, parent, pad):
                          font=("TkDefaultFont", 9),
                          anchor="w").pack(anchor="w", padx=8, pady=(0, 4))
 
-    app.make_button(parent, "Scan for Conflicts", command=scan
+    app.make_button(parent, "Scan for conflicts", command=scan
                      ).pack(anchor="w", padx=pad, pady=(0, 14))
 
 def build_soundmods(app, parent, pad):
@@ -1305,7 +1488,7 @@ def build_soundmods(app, parent, pad):
                 e.delete(0, "end")
                 e.insert(0, chosen)
 
-        app.make_button(row, "Browse", command=browse_sound,
+        app.make_button(row, "browse", command=browse_sound,
                           padx=14, pady=8).pack(side="left")
 
     def apply_sounds_action():
@@ -1315,24 +1498,24 @@ def build_soundmods(app, parent, pad):
             if path:
                 sounds_dict[name] = path
         if not sounds_dict:
-            status.configure(text="Pick at least one sound file first.", fg=ERROR)
+            status.configure(text="pick atleast one sound file first", fg=ERROR)
             return
         applied = sound_mods.apply_sounds(sounds_dict)
         sound_mods.save_installed_sounds(sounds_dict)
         status.configure(text=f"Applied {len(applied)} sound file(s).",
                          fg=FG_DIM)
 
-    app.make_button(parent, "Apply Sounds", command=apply_sounds_action
+    app.make_button(parent, "Apply sounds", command=apply_sounds_action
                       ).pack(anchor="w", padx=pad, pady=(0, 6))
 
     def restore_default():
         removed = sound_mods.restore_sounds()
         if removed:
-            status.configure(text="Default sounds restored.", fg=FG_DIM)
+            status.configure(text="default sounds restored", fg=FG_DIM)
         else:
-            status.configure(text="No custom sounds to restore.", fg=ERROR)
+            status.configure(text="no custom sounds to restore", fg=ERROR)
 
-    app.make_button(parent, "Restore Default Sounds", command=restore_default,
+    app.make_button(parent, "Restore default sounds", command=restore_default,
                       bg=ERROR, fg="#0a0a0a"
                       ).pack(anchor="w", padx=pad, pady=(0, 14))
 
@@ -1341,22 +1524,36 @@ def build_playhistory(app, parent, pad):
 
     import history
     import log
+    import playtime
 
     status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
                        font=("TkDefaultFont", 10), anchor="w",
                        wraplength=500, justify="left")
     status.pack(anchor="w", padx=pad, pady=(0, 6))
 
+    summary = tk.Label(parent, text="Counting playtime...", bg=parent["bg"],
+                       fg=FG_DIM, font=("TkDefaultFont", 11, "bold"),
+                       anchor="w")
+    summary.pack(anchor="w", padx=pad, pady=(0, 6))
+
     list_frame = tk.Frame(parent, bg=parent["bg"])
     list_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-    def render(entries, names):
+    def render(entries, names, times=None, total=None):
+        times = times or {}
         for w in list_frame.winfo_children():
             w.destroy()
 
+        if total:
+            summary.configure(
+                text=f"Total {playtime.format_duration(total[1])} in "
+                     f"{total[2]} sessions", fg=FG_DIM)
+        elif total is None:
+            summary.configure(text="i can't see playtime from sober's logs :(", fg=ERROR)
+
         if not entries:
             tk.Label(list_frame,
-                     text="No games played yet. Play something and it'll show up here.",
+                     text="no games played",
                      bg=parent["bg"], fg=FG_DIM,
                      font=("TkDefaultFont", 10)).pack(anchor="w", padx=4,
                                                        pady=8)
@@ -1373,19 +1570,29 @@ def build_playhistory(app, parent, pad):
                                  anchor="w", padx=12)
             name_lbl.pack(side="left", fill="x", expand=True, ipady=6)
 
-            time_lbl = tk.Label(row, text=history.rel_time(ts),
-                                 bg=BG_ACTIVE, fg=FG_DIM,
-                                 font=("TkDefaultFont", 10), padx=10)
-            time_lbl.pack(side="right")
-
+            played = times.get(place_id)
+            
             def play(p=place_id, n=name_text):
-                log.info(f"Play History: launching place {p} via bootstrapper")
+                log.info(f"play history: launching place {p}")
                 bootstrapper.open_in(app,
                                       url=f"roblox://experiences/start?placeId={p}")
 
             app.make_button(row, "Play", command=play,
                               padx=16, pady=7).pack(side="right",
                                                      padx=(0, 10))
+
+            if played:
+                time_lbl = tk.Label(row,
+                                     text=f"{history.rel_time(ts)} · "
+                                          f"{playtime.format_duration(played)} played",
+                                     bg=BG_ACTIVE, fg=FG_DIM,
+                                     font=("TkDefaultFont", 10), padx=10)
+                time_lbl.pack(side="right")
+            else:
+                time_lbl = tk.Label(row, text=history.rel_time(ts),
+                                     bg=BG_ACTIVE, fg=FG_DIM,
+                                     font=("TkDefaultFont", 10), padx=10)
+                time_lbl.pack(side="right")
 
     def refresh():
         entries = history.get_history()
@@ -1397,8 +1604,14 @@ def build_playhistory(app, parent, pad):
             ev = getattr(app, "mainloop_started", None)
             if ev is not None:
                 ev.wait(timeout=10)
+            try:
+                total = playtime.scan()
+                times = total[0]
+            except Exception as e:
+                log.warning(f"i can't scan your playtime: {e}")
+                times, total = None, None
             names = history.resolve_names(ids)
-            app.after(0, lambda: render(entries, names))
+            app.after(0, lambda: render(entries, names, times, total))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -1486,11 +1699,9 @@ def build_marketplace(app, parent, pad):
                  anchor="w").pack(anchor="w", padx=16, pady=(16, 6))
 
         if itype == "mod":
-            msg = "You can apply this mod in the Mods section."
+            msg = "you can now apply this mod in the mods section!"
         else:
-            msg = ("You can apply this FFlag by going to the FastFlags "
-                   "section, then Presets, and clicking the preset you "
-                   "installed.")
+            msg = ("you can apply this fflag by going in fflags presets and clicking the one you installed!")
         tk.Label(win, text=msg, bg=BG, fg=FG_DIM,
                  font=("TkDefaultFont", 10), anchor="w", justify="left",
                  wraplength=430).pack(anchor="w", padx=16, pady=(0, 12))
@@ -1521,7 +1732,7 @@ def build_marketplace(app, parent, pad):
 
         if not items:
             tk.Label(list_frame,
-                     text="Store unreachable and no cached copy available.",
+                     text="marketplace is unreachable and there is no cached copy",
                      bg=parent["bg"], fg=FG_DIM,
                      font=("TkDefaultFont", 10)).pack(anchor="w", pady=8)
             return
@@ -1687,7 +1898,7 @@ def build_marketplace(app, parent, pad):
 
     btn_row = tk.Frame(parent, bg=parent["bg"])
     btn_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 14))
-    app.make_button(btn_row, "Refresh Store", command=refresh_list,
+    app.make_button(btn_row, "Refresh", command=refresh_list,
                       padx=12, pady=6).pack(side="left")
 
     refresh_list()
@@ -1709,7 +1920,7 @@ def build_versionlabel(app, parent, pad):
             status.configure(text=f"Update available: v{latest}", fg=ACCENT)
             def open_url():
                 webbrowser.open(url)
-            app.make_button(parent, "Download Update", command=open_url,
+            app.make_button(parent, "see the new lution update", command=open_url,
                               padx=14, pady=6).pack(anchor="w", padx=pad, pady=(0, 6))
         else:
             status.configure(text="Up to date", fg=FG_DIM)
@@ -1746,14 +1957,14 @@ def build_soberversion(app, parent, pad):
                 version_lbl.configure(text="Sober version: ... (retrying)")
                 app.after(1500, lambda: fetch(attempt + 1))
             else:
-                version_lbl.configure(text="Sober version: Unknown")
+                version_lbl.configure(text="Sober version: idk bro")
         except Exception as e:
-            log.error(f"Sober version check failed: {e}")
+            log.error(f"i can't see sober's version :(: {e}")
             if attempt < 2:
                 version_lbl.configure(text="Sober version: ... (retrying)")
                 app.after(1500, lambda: fetch(attempt + 1))
             else:
-                version_lbl.configure(text="Sober version: Unknown")
+                version_lbl.configure(text="Sober version: idk bro")
 
     app.after(300, fetch)
 
@@ -1764,8 +1975,24 @@ def build_soberlauncher(app, parent, pad):
         log.info("Launch Sober clicked")
         bootstrapper.open_in(app)
 
+    def run_vanilla():
+        import launcher
+        log.info("Launch vanilla Sober clicked")
+        try:
+            if launcher.sober_is_running():
+                raise launcher.LaunchError(
+                    "Sober is already running, so it keeps the files it was "
+                    "started with.")
+            launcher.launch_plain()
+        except launcher.LaunchError as e:
+            log.error(f"lauching sober without customizations failed: {e}")
+            messagebox.showerror("Lution", str(e), parent=parent)
+
     app.make_button(parent, "Launch Sober", command=run
-                     ).pack(anchor="w", padx=pad, pady=(4, 4))
+                    ).pack(anchor="w", padx=pad, pady=(4, 4))
+    app.make_button(parent, "Launch Sober without customizations",
+                    command=run_vanilla
+                    ).pack(anchor="w", padx=pad, pady=(4, 4))
 
 def build_sobersettings(app, parent, pad):
     import log
@@ -1872,7 +2099,7 @@ def build_bootstrapper(app, parent, pad):
               textvariable=bg_image_var).pack(side="left", fill="x",
                                                expand=True, ipady=4,
                                                padx=(0, 6))
-    app.make_button(h, "Browse", command=lambda: browse_image(bg_image_var),
+    app.make_button(h, "browse", command=lambda: browse_image(bg_image_var),
                      padx=10, pady=5).pack(side="left", padx=(0, 6))
     app.make_button(h, "Clear", command=lambda: bg_image_var.set(""),
                      padx=10, pady=5, bg=BG_SIDEBAR, fg=FG_DIM
@@ -1887,7 +2114,7 @@ def build_bootstrapper(app, parent, pad):
               textvariable=logo_var).pack(side="left", fill="x",
                                            expand=True, ipady=4,
                                            padx=(0, 6))
-    app.make_button(h, "Browse", command=lambda: browse_image(logo_var),
+    app.make_button(h, "browse", command=lambda: browse_image(logo_var),
                      padx=10, pady=5).pack(side="left", padx=(0, 6))
     app.make_button(h, "Default", command=lambda: logo_var.set(""),
                      padx=10, pady=5, bg=BG_SIDEBAR, fg=FG_DIM
@@ -2000,7 +2227,7 @@ def build_bootstrapper(app, parent, pad):
         try:
             bootstrapper.save_config(c)
             status.configure(
-                text="Saved. The 'Sober with Lution' shortcut now uses this launcher.",
+                text="saved",
                 fg=FG_DIM)
         except Exception as e:
             status.configure(text=f"Save failed: {e}", fg=ERROR)
@@ -2009,12 +2236,16 @@ def build_bootstrapper(app, parent, pad):
     btn_row.pack(anchor="w", fill="x", padx=pad, pady=(6, 14))
     app.make_button(btn_row, "Preview", command=do_preview, padx=14,
                      pady=8).pack(side="left", padx=(0, 6))
-    app.make_button(btn_row, "Save & Install Shortcut", command=do_save
+    app.make_button(btn_row, "Save", command=do_save
                      ).pack(side="left")
 
 def build_soberguide(app, parent, pad):
     GUIDE = (
         "Sober is installed and managed via Flatpak.\n\n"
+        "Lution keeps its customizations in\n"
+        "~/.local/share/Lution/overlay and only applies them when it launches\n"
+        "Sober itself. Launching Sober any other way gives you vanilla Sober,\n"
+        "so nothing here is modified behind your back.\n\n"
         "how to install sober:\n"
         "$ flatpak update org.vinegarhq.Sober\n\n"
         "how to uninstall sober:\n"
@@ -2023,6 +2254,9 @@ def build_soberguide(app, parent, pad):
         "$ flatpak uninstall --delete-data org.vinegarhq.Sober\n\n"
         "how to delete sober's data:\n"
         "$ rm -rf ~/.var/app/org.vinegarhq.Sober/\n\n"
+        "how to delete lution's customizations:\n"
+        "use Reset All on the Backup page, or\n"
+        "$ rm -rf ~/.local/share/Lution\n\n"
         "how to update sober:\n"
         "$ flatpak update org.vinegarhq.Sober\n\n"
         "you also might aswell run flatpak update if sober is not using your dedicated graphics card or it feels laggy "
@@ -2060,7 +2294,7 @@ def build_resetall(app, parent, pad):
         win.configure(bg=BG)
         win.resizable(False, False)
 
-        tk.Label(win, text="This will remove all Lution customizations.\nAre you sure?",
+        tk.Label(win, text="this WILL remove all lution customizations.\nare you sure?",
                  bg=BG, fg=FG, font=BODY_FONT,
                  justify="center").pack(pady=(20, 14))
 
@@ -2069,16 +2303,16 @@ def build_resetall(app, parent, pad):
 
         def confirm():
             removed = backup.reset_all()
-            status.configure(text=f"Reset complete. Removed: {', '.join(removed)}", fg=FG_DIM)
+            status.configure(text=f"Removed: {', '.join(removed)}", fg=FG_DIM)
             win.destroy()
 
-        app.make_button(btn_row, "Yes, reset", command=confirm,
+        app.make_button(btn_row, "yes pls", command=confirm,
                           bg=ERROR, fg="#0a0a0a", padx=12, pady=6
                           ).pack(side="left", padx=(0, 8))
         app.make_button(btn_row, "Cancel", command=win.destroy,
                           padx=12, pady=6).pack(side="left")
 
-    app.make_button(parent, "Reset Everything", command=do_reset,
+    app.make_button(parent, "Reset everything", command=do_reset,
                       bg=ERROR, fg="#0a0a0a"
                       ).pack(anchor="w", padx=pad, pady=(0, 14))
 
@@ -2119,3 +2353,584 @@ def build_backupmanager(app, parent, pad):
 
     app.make_button(parent, "Import Backup", command=do_import
                      ).pack(anchor="w", padx=pad, pady=(0, 14))
+
+def build_serversel(app, parent, pad):
+    import threading
+
+    import bootstrapper
+    import history
+    import regions
+
+    status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                      font=("TkDefaultFont", 10), anchor="w",
+                      wraplength=560, justify="left")
+    status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+    place_row = tk.Frame(parent, bg=parent["bg"])
+    place_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+    tk.Label(place_row, text="Place ID", bg=parent["bg"], fg=FG,
+             font=BODY_FONT).pack(side="left", padx=(0, 8))
+
+    place_var = tk.StringVar()
+    place_entry = tk.Entry(place_row, textvariable=place_var, bg=BG, fg=FG,
+                           insertbackground=FG, font=BODY_FONT, relief="flat",
+                           highlightthickness=1,
+                           highlightbackground=BG_SIDEBAR,
+                           highlightcolor=ACCENT)
+    place_entry.pack(side="left", fill="x", expand=True, ipady=6)
+
+    history_map = {}
+    history_box = ttk.Combobox(place_row, values=[], state="readonly",
+                               font=BODY_FONT, width=28)
+    history_box.pack(side="left", padx=(8, 0))
+
+    def on_history_pick(_event):
+        pid = history_map.get(history_box.get())
+        if pid:
+            place_var.set(pid)
+            refresh_regions()
+
+    history_box.bind("<<ComboboxSelected>>", on_history_pick)
+
+    region_row = tk.Frame(parent, bg=parent["bg"])
+    region_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+    tk.Label(region_row, text="Region", bg=parent["bg"], fg=FG,
+             font=BODY_FONT).pack(side="left", padx=(0, 8))
+
+    region_box = ttk.Combobox(region_row, state="readonly", font=BODY_FONT,
+                              width=32,
+                              values=[regions.ANY_REGION, regions.AUTO_REGION])
+    region_box.set(regions.ANY_REGION)
+    region_box.pack(side="left")
+
+    list_frame = tk.Frame(parent, bg=parent["bg"])
+    list_frame.pack(anchor="w", fill="x", padx=pad, pady=(6, 6))
+
+    busy = {"find": False}
+
+    def render_history():
+        entries = history.get_history()
+        names = history.load_name_cache()
+        labels = []
+        history_map.clear()
+        for place_id, _ts in entries:
+            label = f"{names.get(place_id, f'Place {place_id}')} ({place_id})"
+            labels.append(label)
+            history_map[label] = place_id
+        history_box.configure(values=labels)
+
+    def clear_rows():
+        for w in list_frame.winfo_children():
+            w.destroy()
+
+    def render(place, rows):
+        clear_rows()
+
+        header = tk.Frame(list_frame, bg=parent["bg"])
+        header.pack(anchor="w", fill="x", pady=(0, 2))
+        for text, width in (("Region", 26), ("Players", 9), ("Ping", 8),
+                            ("Uptime", 10)):
+            tk.Label(header, text=text, bg=parent["bg"], fg=FG_DIM,
+                     font=("TkDefaultFont", 10, "bold"), width=width,
+                     anchor="w").pack(side="left", padx=(0, 6))
+
+        for row in rows:
+            frame = tk.Frame(list_frame, bg=BG_ACTIVE, highlightthickness=1,
+                             highlightbackground=BG_SIDEBAR)
+            frame.pack(anchor="w", fill="x", pady=2)
+
+            tk.Label(frame, text=row["region"], bg=BG_ACTIVE, fg=FG,
+                     font=("TkDefaultFont", 11), width=26, anchor="w",
+                     padx=10).pack(side="left", ipady=5)
+
+            players = ("-" if row["playing"] is None
+                       else f"{row['playing']}/{row['max']}")
+            ping = "-" if row["ping"] is None else f"{row['ping']} ms"
+            for text, width in ((players, 9), (ping, 8),
+                                (regions.age_text(row["first_seen"]), 10)):
+                tk.Label(frame, text=text, bg=BG_ACTIVE,
+                         fg=ERROR if text.endswith("ms") and row["ping"] and row["ping"] > 200 else FG_DIM,
+                         font=("TkDefaultFont", 10), width=width,
+                         anchor="w").pack(side="left", padx=(0, 6))
+
+            def join(p=place, job=row["id"], r=row["region"]):
+                log.info(f"Servers: joining place {p} in {r} ({job})")
+                bootstrapper.open_in(app, url=regions.join_url(p, job))
+
+            app.make_button(frame, "Join", command=join, padx=14, pady=5
+                            ).pack(side="right", padx=(0, 8))
+
+    def find():
+        if busy["find"]:
+            return
+        place = place_var.get().strip()
+        if not place.isdigit():
+            status.configure(text="enter a place id or pick from your play history to the right", fg=ERROR)
+            return
+
+        region = regions.strip_count(region_box.get() or regions.ANY_REGION)
+        busy["find"] = True
+        clear_rows()
+        status.configure(text="Looking for servers...", fg=FG_DIM)
+
+        def worker():
+            try:
+                rows = regions.find_servers(place, region)
+                err = None
+            except Exception as e:
+                log.warning(f"Servers: lookup failed: {e}")
+                rows, err = [], str(e)
+
+            def done():
+                busy["find"] = False
+                if err:
+                    status.configure(text=f"Could not fetch servers: {err}",
+                                     fg=ERROR)
+                    return
+                if not rows:
+                    status.configure(
+                        text="no servers found for that place and region, game is probably deleted or inactive in some way",
+                        fg=FG_DIM)
+                    return
+                render(place, rows)
+                where = region if region != regions.ANY_REGION else "everywhere"
+                status.configure(
+                    text=f"{len(rows)} servers from {where} best ping "
+                         f"first", fg=FG_DIM)
+
+            app.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def refresh_regions():
+        place = place_var.get().strip()
+        place = place if place.isdigit() else ""
+        current = region_box.get()
+
+        def worker():
+            try:
+                options = regions.region_options(place)
+                err = None
+            except Exception as e:
+                log.debug(f"Servers: region list failed: {e}")
+                options, err = None, str(e)
+
+            def done():
+                if options is None:
+                    status.configure(text=f"Could not load regions: {err}",
+                                     fg=ERROR)
+                    return
+                region_box.configure(values=options)
+                if current in options:
+                    region_box.set(current)
+                elif options:
+                    region_box.set(options[0])
+
+            app.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def on_page_shown(page_name):
+        if page_name == "Servers":
+            render_history()
+            refresh_regions()
+
+    try:
+        app.page_shown_listeners.append(on_page_shown)
+    except AttributeError:
+        pass
+
+    app.make_button(region_row, "Find servers", command=find
+                    ).pack(side="left", padx=(10, 0))
+
+    render_history()
+    status.configure(text="choose a game and region", fg=FG_DIM)
+
+
+def build_shortcuts(app, parent, pad):
+    import threading
+
+    import history
+    import shortcuts as game_shortcuts
+
+    status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                      font=("TkDefaultFont", 10), anchor="w",
+                      wraplength=500, justify="left")
+    status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+    create_row = tk.Frame(parent, bg=parent["bg"])
+    create_row.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+
+    tk.Label(create_row, text="Place ID", bg=parent["bg"], fg=FG,
+             font=BODY_FONT).pack(side="left", padx=(0, 8))
+
+    place_var = tk.StringVar()
+    entry = tk.Entry(create_row, textvariable=place_var, bg=BG, fg=FG,
+                     insertbackground=FG, font=BODY_FONT, relief="flat",
+                     highlightthickness=1,
+                     highlightbackground=BG_SIDEBAR,
+                     highlightcolor=ACCENT)
+    entry.pack(side="left", fill="x", expand=True, ipady=6)
+
+    busy = {"on": False}
+    list_frame = tk.Frame(parent, bg=parent["bg"])
+    list_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+    history_frame = tk.Frame(parent, bg=parent["bg"])
+    history_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+
+    def create(place_id, name=None):
+        if busy["on"]:
+            return
+        place_id = str(place_id).strip()
+        if not place_id.isdigit():
+            status.configure(text="letters found!!!! the id must be all numbers", fg=ERROR)
+            return
+        if game_shortcuts.exists(place_id):
+            status.configure(text="that game already has a shortcut", fg=FG_DIM)
+            render_all()
+            return
+
+        busy["on"] = True
+        status.configure(text="Creating shortcut...", fg=FG_DIM)
+
+        def worker():
+            try:
+                made = game_shortcuts.create(place_id, name=name)
+                err = None
+            except Exception as e:
+                log.warning(f"Shortcuts: create failed: {e}")
+                made, err = None, str(e)
+
+            def done():
+                busy["on"] = False
+                if err:
+                    status.configure(text=f"Could not create shortcut: {err}",
+                                     fg=ERROR)
+                else:
+                    status.configure(
+                        text=f'Created "{made["name"]} (Sober)" in your '
+                             f"applications menu.", fg=FG_DIM)
+                    render_all()
+
+            app.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def remove(place_id):
+        try:
+            game_shortcuts.remove(place_id)
+            status.configure(text="shortcut removed", fg=FG_DIM)
+        except OSError as e:
+            status.configure(text=str(e), fg=ERROR)
+        render_all()
+
+    def render_shortcuts():
+        for w in list_frame.winfo_children():
+            w.destroy()
+
+        rows = game_shortcuts.list_shortcuts()
+        tk.Label(list_frame, text="Your shortcuts", bg=parent["bg"], fg=FG,
+                 font=("TkDefaultFont", 13, "bold"), anchor="w"
+                 ).pack(anchor="w", pady=(0, 4))
+
+        if not rows:
+            tk.Label(list_frame,
+                     text="no shortcuts.",
+                     bg=parent["bg"], fg=FG_DIM,
+                     font=("TkDefaultFont", 10)
+                     ).pack(anchor="w", padx=4, pady=(0, 6))
+            return
+
+        for row in rows:
+            frame = tk.Frame(list_frame, bg=BG_ACTIVE, highlightthickness=1,
+                             highlightbackground=BG_SIDEBAR)
+            frame.pack(anchor="w", fill="x", pady=2)
+
+            tk.Label(frame, text=f'{row["name"]} (Sober)', bg=BG_ACTIVE, fg=FG,
+                     font=("TkDefaultFont", 11, "bold"), anchor="w",
+                     padx=12).pack(side="left", fill="x", expand=True,
+                                   ipady=6)
+
+            tk.Label(frame, text=row["place_id"], bg=BG_ACTIVE, fg=FG_DIM,
+                     font=("TkDefaultFont", 10), padx=10
+                     ).pack(side="right")
+
+            app.make_button(frame, "Remove",
+                            command=lambda p=row["place_id"]: remove(p),
+                            bg=BG_SIDEBAR, fg=ERROR, padx=12, pady=5
+                            ).pack(side="right", padx=(0, 8))
+
+    def render_history():
+        for w in history_frame.winfo_children():
+            w.destroy()
+
+        entries = history.get_history()
+        if not entries:
+            return
+
+        names = history.load_name_cache()
+        have = {row["place_id"] for row in game_shortcuts.list_shortcuts()}
+        missing = [pid for pid, _ts in entries if pid not in have]
+        if not missing:
+            return
+
+        tk.Label(history_frame, text="From play history", bg=parent["bg"],
+                 fg=FG, font=("TkDefaultFont", 13, "bold"), anchor="w"
+                 ).pack(anchor="w", pady=(6, 4))
+
+        for place_id in missing:
+            frame = tk.Frame(history_frame, bg=BG_ACTIVE,
+                             highlightthickness=1,
+                             highlightbackground=BG_SIDEBAR)
+            frame.pack(anchor="w", fill="x", pady=2)
+
+            tk.Label(frame, text=names.get(place_id, f"Place {place_id}"),
+                     bg=BG_ACTIVE, fg=FG, font=("TkDefaultFont", 11),
+                     anchor="w", padx=12).pack(side="left", fill="x",
+                                               expand=True, ipady=5)
+
+            def add(p=place_id, n=names.get(place_id)):
+                create(p, name=n)
+
+            app.make_button(frame, "Add", command=add, padx=12, pady=5
+                            ).pack(side="right", padx=(0, 8))
+
+    def render_all():
+        render_shortcuts()
+        render_history()
+
+    def on_page_shown(page_name):
+        if page_name == "Home":
+            render_all()
+
+    try:
+        app.page_shown_listeners.append(on_page_shown)
+    except AttributeError:
+        pass
+
+    def create_from_entry():
+        create(place_var.get())
+        place_var.set("")
+
+    entry.bind("<Return>", lambda e: create_from_entry())
+    app.make_button(create_row, "Create shortcut", command=create_from_entry
+                    ).pack(side="left", padx=(8, 0))
+
+    render_all()
+
+def _load_avatar(path, size=48):
+    if not path:
+        return None
+    try:
+        img = tk.PhotoImage(file=path)
+    except tk.TclError:
+        return None
+    factor = max(1, (img.width() + size - 1) // size)
+    img = img.subsample(factor, factor)
+    return img
+
+def build_account(app, parent, pad):
+    import threading
+
+    import accounts
+    import bootstrapper
+    import log
+
+    status = tk.Label(parent, text="reading account...", bg=parent["bg"],
+                      fg=FG_DIM, font=("TkDefaultFont", 10), anchor="w",
+                      wraplength=560, justify="left")
+    status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+    holder = {"images": []}
+
+    card = tk.Frame(parent, bg=BG_ACTIVE, highlightthickness=1,
+                    highlightbackground=BG_SIDEBAR)
+    card.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+
+    accounts_frame = tk.Frame(parent, bg=parent["bg"])
+    accounts_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+
+    friends_frame = tk.Frame(parent, bg=parent["bg"])
+    friends_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
+
+    def clear(widget):
+        for w in widget.winfo_children():
+            w.destroy()
+
+    def render(data):
+        holder["images"].clear()
+        user = data["user"]
+        avatars = data.get("avatars") or {}
+        presence = data.get("presence") or {}
+
+        clear(card)
+        inner = tk.Frame(card, bg=BG_ACTIVE)
+        inner.pack(anchor="w", fill="x", padx=14, pady=12)
+
+        avatar = _load_avatar(avatars.get(str(user["id"])), size=64)
+        if avatar:
+            holder["images"].append(avatar)
+            tk.Label(inner, image=avatar, bg=BG_ACTIVE).pack(side="left",
+                                                              padx=(0, 12))
+        info = tk.Frame(inner, bg=BG_ACTIVE)
+        info.pack(side="left", anchor="w")
+        tk.Label(info, text=user["display_name"] or user["name"],
+                 bg=BG_ACTIVE, fg=FG,
+                 font=("TkDefaultFont", 15, "bold"), anchor="w"
+                 ).pack(anchor="w")
+        tk.Label(info, text=f"@{user['name']} · signed in",
+                 bg=BG_ACTIVE, fg=ACCENT, font=("TkDefaultFont", 11),
+                 anchor="w").pack(anchor="w")
+        tk.Label(info, text=f"user id {user['id']}", bg=BG_ACTIVE, fg=FG_DIM,
+                 font=("TkDefaultFont", 10), anchor="w").pack(anchor="w")
+
+        clear(accounts_frame)
+        rows = data.get("accounts") or []
+        if rows:
+            tk.Label(accounts_frame, text="Accounts in the \"switch accounts\" menu",
+                     bg=parent["bg"], fg=FG,
+                     font=("TkDefaultFont", 13, "bold"), anchor="w"
+                     ).pack(anchor="w", pady=(0, 4))
+            box = tk.Frame(accounts_frame, bg=BG_ACTIVE, highlightthickness=1,
+                           highlightbackground=BG_SIDEBAR)
+            box.pack(anchor="w", fill="x", pady=(0, 4))
+
+            for account in rows:
+                row = tk.Frame(box, bg=BG_ACTIVE)
+                row.pack(anchor="w", fill="x", padx=10, pady=3)
+
+                avatar = _load_avatar(avatars.get(str(account["id"])), size=36)
+                if avatar:
+                    holder["images"].append(avatar)
+                    tk.Label(row, image=avatar, bg=BG_ACTIVE).pack(
+                        side="left", padx=(0, 10))
+
+                name = account["display_name"] or account["name"]
+                text = name if name == account["name"] \
+                    else f"{name} (@{account['name']})"
+                tk.Label(row, text=text, bg=BG_ACTIVE, fg=FG,
+                         font=("TkDefaultFont", 11, "bold"), anchor="w"
+                         ).pack(side="left", anchor="w", ipady=4)
+
+                if account.get("active"):
+                    tk.Label(row, text="in use", bg=BG_ACTIVE, fg=ACCENT,
+                             font=("TkDefaultFont", 10, "bold"),
+                             padx=8).pack(side="right")
+                elif account.get("signed_out"):
+                    tk.Label(row, text="signed out", bg=BG_ACTIVE, fg=FG_DIM,
+                             font=("TkDefaultFont", 10), padx=8
+                             ).pack(side="right")
+                else:
+                    tk.Label(row, text="saved", bg=BG_ACTIVE, fg=FG_DIM,
+                             font=("TkDefaultFont", 10), padx=8
+                             ).pack(side="right")
+
+        clear(friends_frame)
+        friends = list(data.get("friends") or [])
+
+        def rank(friend):
+            kind = (presence.get(friend["id"]) or {}).get("type",
+                                                          accounts.OFFLINE)
+            return {accounts.IN_GAME: 0, accounts.ONLINE: 1}.get(kind, 2)
+
+        friends.sort(key=lambda f: (rank(f), f["display_name"].lower()))
+
+        tk.Label(friends_frame, text="Friends", bg=parent["bg"], fg=FG,
+                 font=("TkDefaultFont", 13, "bold"), anchor="w"
+                 ).pack(anchor="w", pady=(0, 4))
+
+        if not friends:
+            tk.Label(friends_frame, text="haha you have no friends L bozo",
+                     bg=parent["bg"], fg=FG_DIM,
+                     font=("TkDefaultFont", 10)).pack(anchor="w", padx=4)
+            return
+
+        box = tk.Frame(friends_frame, bg=BG_ACTIVE, highlightthickness=1,
+                       highlightbackground=BG_SIDEBAR)
+        box.pack(anchor="w", fill="x")
+
+        for friend in friends:
+            here = presence.get(friend["id"]) or {}
+            label, kind = accounts.status_text(here)
+
+            row = tk.Frame(box, bg=BG_ACTIVE)
+            row.pack(anchor="w", fill="x", padx=10, pady=3)
+
+            avatar = _load_avatar(avatars.get(str(friend["id"])), size=36)
+            if avatar:
+                holder["images"].append(avatar)
+                tk.Label(row, image=avatar, bg=BG_ACTIVE).pack(
+                    side="left", padx=(0, 10))
+
+            text = friend["display_name"]
+            if friend["name"] and friend["name"] != friend["display_name"]:
+                text += f" (@{friend['name']})"
+
+            info = tk.Frame(row, bg=BG_ACTIVE)
+            info.pack(side="left", anchor="w", pady=2)
+            tk.Label(info, text=text, bg=BG_ACTIVE, fg=FG,
+                     font=("TkDefaultFont", 11, "bold"), anchor="w"
+                     ).pack(anchor="w")
+            tk.Label(info, text=label, bg=BG_ACTIVE,
+                     fg=ACCENT if kind == accounts.IN_GAME else FG_DIM,
+                     font=("TkDefaultFont", 10), anchor="w").pack(anchor="w")
+
+            if kind == accounts.IN_GAME:
+                url = accounts.join_url(here)
+
+                def join(target=url, who=friend["display_name"]):
+                    if not target:
+                        return
+                    log.info(f"Friends: joining {who}")
+                    bootstrapper.open_in(app, url=target)
+
+                app.make_button(row, "Join", command=join, padx=14, pady=5
+                                ).pack(side="right", padx=(0, 4))
+            elif kind == accounts.IN_STUDIO:
+                tk.Label(row, text="studio", bg=BG_ACTIVE, fg=FG_DIM,
+                         font=("TkDefaultFont", 10), padx=8
+                         ).pack(side="right")
+            else:
+                tk.Label(row, text="", bg=BG_ACTIVE, width=6
+                         ).pack(side="right")
+
+    def load(refresh=False):
+        status.configure(text="fetching account...", fg=FG_DIM)
+
+        def worker():
+            try:
+                data = accounts.fetch_all(refresh=refresh)
+                err = None
+            except Exception as e:
+                log.warning(f"Account page failed: {e}")
+                data, err = None, str(e)
+
+            def done():
+                if err:
+                    status.configure(text=err, fg=ERROR)
+                    clear(card)
+                    clear(accounts_frame)
+                    clear(friends_frame)
+                    return
+                status.configure(text="", fg=FG_DIM)
+                render(data)
+
+            app.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    app.make_button(parent, "Refresh", command=lambda: load(refresh=True),
+                     padx=14, pady=6).pack(anchor="w", padx=pad, pady=(0, 8))
+
+    def on_page_shown(page_name):
+        if page_name == "Account":
+            load()
+
+    try:
+        app.page_shown_listeners.append(on_page_shown)
+    except AttributeError:
+        pass
+
+    load()

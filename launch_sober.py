@@ -1,26 +1,19 @@
 # self explanatory
 
-import json
-import subprocess
 import sys
-from pathlib import Path
 
-SOBER_APP_ID = "org.vinegarhq.Sober"
-ENV_FILE = Path.home() / ".local/Lution/env_vars.json"
+import launcher
 
-args = ["flatpak", "run"]
 
-try:
-    env_vars = json.loads(ENV_FILE.read_text())
-    if isinstance(env_vars, dict):
-        for key, value in env_vars.items():
-            args.append(f"--env={key}={value}")
-except Exception:
-    pass
+def main():
+    url = sys.argv[1] if len(sys.argv) > 1 else None
+    try:
+        proc = launcher.launch(url=url)
+    except launcher.LaunchError as e:
+        print(f"Lution: {e}")
+        raise SystemExit(1)
+    proc.wait()
 
-args.append(SOBER_APP_ID)
 
-if len(sys.argv) > 1:
-    args.append(sys.argv[1])
-
-subprocess.Popen(args)
+if __name__ == "__main__":
+    main()
