@@ -6,9 +6,6 @@ SoberGuide
 Subtitle = Play History
 PlayHistory
 
-Subtitle = Game Shortcuts
-ShortcutManager
-
 # Launcher
 Subtitle = Environment Variables
 EnvVars
@@ -22,6 +19,21 @@ Account
 # Marketplace
 Marketplace
 
+# Config
+Subtitle = FPS Limit
+FPSInput
+
+Subtitle = Lution theme
+ThemePicker
+
+Subtitle = Game Shortcuts
+ShortcutManager
+
+Subtitle = Backup & Restore
+BackupManager
+
+ResetAll
+
 # Servers
 Subtitle = Region & Server Selector
 ServerSelector
@@ -29,19 +41,6 @@ ServerSelector
 # FastFlags
 Subtitle = Active FFlags
 FlagList
-
-# Config
-Subtitle = FPS Limit
-FPSInput
-
-Subtitle = Custom Font
-FontPicker
-
-Subtitle = Custom Emoji
-EmojiPicker
-
-Subtitle = Custom Cursors
-CursorPicker
 
 # Mods
 Subtitle = Mod Manager
@@ -53,17 +52,21 @@ ModConflictDetector
 Subtitle = Custom Sounds
 SoundMods
 
-# Backup
-Subtitle = Backup & Restore
-BackupManager
+Subtitle = Custom Font
+FontPicker
 
-ResetAll
+Subtitle = Custom Emoji
+EmojiPicker
+
+Subtitle = Custom Cursors
+CursorPicker
+
+Subtitle = Custom Emote Wheel
+EmoteWheelPicker
 
 # About
 VersionLabel
 SoberVersion
+RestartSetup
 Subtitle = Lution developed by WookHQ (https://github.com/wookhq)
 Image = cat.png | look at this cat bro
-
-Subtitle = Theme
-ThemePicker

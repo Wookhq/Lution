@@ -8,6 +8,7 @@ import tempfile
 import os
 
 import paths
+import log
 
 OVERLAY_DIR = paths.LUTION_OVERLAY
 MODS_DIR = Path.home() / ".local/Lution/Mods"
@@ -17,13 +18,26 @@ MANIFEST_FILE = Path.home() / ".local/Lution/mods_manifest.json"
 def _load_manifest():
     try:
         data = json.loads(MANIFEST_FILE.read_text())
-        return data if isinstance(data, list) else []
-    except Exception:
+    except FileNotFoundError:
         return []
+    except json.JSONDecodeError as e:
+        log.error(f"Mods manifest is corrupt ({e}), not touching any mod")
+        return []
+    return data if isinstance(data, list) else []
 
 def _save_manifest(names):
     MANIFEST_FILE.parent.mkdir(parents=True, exist_ok=True)
-    MANIFEST_FILE.write_text(json.dumps(names))
+    tmp = MANIFEST_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(names))
+    os.replace(tmp, MANIFEST_FILE)
+
+def _safe_under(base, parts):
+    dest = Path(base).joinpath(*parts)
+    resolved = dest.resolve()
+    root = Path(base).resolve()
+    if resolved != root and root not in resolved.parents:
+        return None
+    return dest
 
 def ensure_dirs():
     MODS_DIR.mkdir(parents=True, exist_ok=True)
@@ -104,7 +118,23 @@ def install_mod(mod_path):
     temp_dir = Path(tempfile.mkdtemp(prefix="lution_mod_"))
     try:
         with zipfile.ZipFile(mod_path, "r") as zf:
-            zf.extractall(temp_dir)
+            for info in zf.infolist():
+                if info.is_dir():
+                    continue
+                parts = [p for p in info.filename.split("/") if p]
+                if info.filename.startswith("/") or ".." in parts:
+                    return False, (
+                        f"Mod archive has an unsafe entry: {info.filename}"
+                    )
+                target = _safe_under(temp_dir, parts)
+                if target is None:
+                    return False, (
+                        f"Mod archive entry resolves outside its folder: "
+                        f"{info.filename}"
+                    )
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with zf.open(info) as src, open(target, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
 
         content_dir = _find_content_dir(temp_dir)
         if content_dir is None:
@@ -149,6 +179,7 @@ def remove_mod_content(include_custom=False):
 
     PROTECTED = {
         OVERLAY_DIR / "content" / "textures" / "Cursors" / "KeyboardMouse",
+        OVERLAY_DIR / "content" / "textures" / "ui" / "Emotes" / "TenFoot",
         OVERLAY_DIR / "content" / "fonts",
         OVERLAY_DIR / "content" / "sounds",
     }
@@ -190,10 +221,18 @@ def delete_mod(mod_path):
     return False
 
 def reapply_mods():
+    failed = []
     for name in _load_manifest():
         mod_path = MODS_DIR / name
-        if mod_path.exists():
-            install_mod(mod_path)
+        if not mod_path.exists():
+            log.warning(f"Mod archive is gone, cannot reapply: {name}")
+            failed.append(name)
+            continue
+        ok, msg = install_mod(mod_path)
+        if not ok:
+            log.error(f"Could not reapply mod {name}: {msg}")
+            failed.append(name)
+    return failed
 
 CONTENT_ROOTS = ("content", "ExtraContent", "PlatformContent")
 

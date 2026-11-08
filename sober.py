@@ -12,6 +12,8 @@ REMOTE = "flathub"
 FLATHUB_REPO = "https://flathub.org/repo/flathub.flatpakrepo"
 SOBER_DATA_DIR = Path.home() / ".var/app" / SOBER_APP_ID
 
+REMOTE_TIMEOUT = 45
+
 
 def clean_env():
     env = os.environ.copy()
@@ -30,6 +32,9 @@ def _run(cmd, timeout=15):
                               timeout=timeout, env=clean_env())
     except subprocess.TimeoutExpired:
         log.warning(f"Command timed out after {timeout}s: {cmd[0]} {cmd[1] if len(cmd)>1 else ''}")
+        return None
+    except OSError as e:
+        log.warning(f"Could not run {cmd[0]}: {e}")
         return None
 def _stream(args, output_cb=None):
     try:
@@ -108,14 +113,9 @@ def installed_commit():
     return _commit_from_output(result.stdout)
 
 def remote_commit():
-    result = _run(["flatpak", "remote-info", REMOTE, SOBER_APP_ID])
+    result = _run(["flatpak", "remote-info", REMOTE, SOBER_APP_ID],
+                  timeout=REMOTE_TIMEOUT)
     if result is None or result.returncode != 0:
-        return ""
-    return _commit_from_output(result.stdout)
-
-def remote_commit():
-    result = _run(["flatpak", "remote-info", REMOTE, SOBER_APP_ID])
-    if result.returncode != 0:
         return ""
     return _commit_from_output(result.stdout)
 

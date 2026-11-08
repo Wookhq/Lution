@@ -1,6 +1,8 @@
-# logging yeahh
-
+import os
 import sys
+import tempfile
+import threading
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -18,6 +20,39 @@ LEVEL_COLORS = {
 }
 
 LOG_FILE = Path.home() / ".local/Lution/lution.log"
+FALLBACK_FILE = Path(tempfile.gettempdir()) / f"lution-{os.getuid()}.log"
+
+_active_file = LOG_FILE
+_fallback_reported = False
+
+
+def _append(path, line):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a") as f:
+        f.write(line)
+
+
+def _write_file(line, now):
+    global _active_file, _fallback_reported
+    try:
+        _append(_active_file, line)
+        return
+    except OSError as e:
+        if _active_file != LOG_FILE:
+            print(f"{now.strftime('%H:%M:%S')} lution warning could not write "
+                  f"{_active_file}: {e}", file=sys.stderr, flush=True)
+            return
+        if not _fallback_reported:
+            _fallback_reported = True
+            print(f"{now.strftime('%H:%M:%S')} lution warning could not write "
+                  f"{LOG_FILE}: {e}; falling back to {FALLBACK_FILE}",
+                  file=sys.stderr, flush=True)
+        _active_file = FALLBACK_FILE
+        try:
+            _append(_active_file, line)
+        except OSError as e2:
+            print(f"{now.strftime('%H:%M:%S')} lution error could not write "
+                  f"{_active_file}: {e2}", file=sys.stderr, flush=True)
 
 
 def _log(level, msg):
@@ -25,15 +60,18 @@ def _log(level, msg):
     now = datetime.now()
     time_str = now.strftime("%H:%M:%S")
     stream = sys.stderr if level == "error" else sys.stdout
-    print(f"{time_str} {BLUE}lution{RESET} {color}{level}{RESET} {msg}",
-          file=stream, flush=True)
     try:
-        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-        stamp = now.strftime("%Y-%m-%d %H:%M:%S")
-        with open(LOG_FILE, "a") as f:
-            f.write(f"{stamp} lution {level} {msg}\n")
+        print(f"{time_str} {BLUE}lution{RESET} {color}{level}{RESET} {msg}",
+              file=stream, flush=True)
     except OSError:
         pass
+    stamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    _write_file(f"{stamp} lution {level} {msg}\n", now)
+
+
+def _format(exc_type, exc_value, exc_tb):
+    return "".join(
+        traceback.format_exception(exc_type, exc_value, exc_tb)).rstrip()
 
 
 def info(msg):
@@ -50,3 +88,30 @@ def warning(msg):
 
 def error(msg):
     _log("error", msg)
+
+
+def exception(msg):
+    _log("error", f"{msg}\n{traceback.format_exc().rstrip()}")
+
+
+def tk_exception(exc_type, exc_value, exc_tb):
+    _log("error", "unhandled Tk callback exception\n"
+         + _format(exc_type, exc_value, exc_tb))
+
+
+def install_hooks():
+    def handle_exception(exc_type, exc_value, exc_tb):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_tb)
+            return
+        _log("error", "uncaught exception\n"
+             + _format(exc_type, exc_value, exc_tb))
+
+    sys.excepthook = handle_exception
+
+    def handle_thread(args):
+        name = args.thread.name if args.thread is not None else "unknown"
+        _log("error", f"uncaught exception in thread {name}\n"
+             + _format(args.exc_type, args.exc_value, args.exc_traceback))
+
+    threading.excepthook = handle_thread

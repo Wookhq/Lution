@@ -12,7 +12,9 @@ import os
 import themes
 import net
 import paths
+import log
 
+log.install_hooks()
 net.ensure_ca_certs()
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
@@ -31,10 +33,11 @@ BODY_FONT = ("TkDefaultFont", 13)
 import fonts
 import emoji
 import cursors
+import emote_wheel
 import mods
 import sound_mods
-import log
 import fflags
+import setup
 
 APK_CHECKSUM_FILE = Path.home() / ".local" / "Lution" / "apk_checksum.txt"
 LEGACY_CHECKSUM_FILES = [
@@ -58,8 +61,8 @@ def reapply_customizations():
             if legacy.exists():
                 legacy.unlink()
                 log.debug(f"Removed old checksum file {legacy.name}")
-        except OSError:
-            pass
+        except OSError as e:
+            log.warning(f"Could not remove old checksum file {legacy}: {e}")
 
     paths.migrate_legacy_overlay()
 
@@ -78,15 +81,25 @@ def reapply_customizations():
         return
 
     log.info("Sober apk changed we reapplying all customizations")
+    failed = []
     for name, fn in (("fonts", fonts.reapply_fonts),
                      ("emoji", emoji.reapply_emoji),
                      ("cursors", cursors.reapply_cursors),
+                     ("emote wheel", emote_wheel.reapply_wheel),
                      ("mods", mods.reapply_mods),
                      ("sounds", sound_mods.reapply_sounds)):
         try:
-            fn()
+            result = fn()
+            if name == "mods" and result:
+                failed.extend(result)
         except Exception as e:
             log.error(f"Failed to reapply {name}: {e}")
+            failed.append(name)
+
+    if failed:
+        log.error(f"Not recording the new APK checksum, retry next launch: "
+                  f"{', '.join(str(f) for f in failed)}")
+        return
 
     try:
         APK_CHECKSUM_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -111,6 +124,7 @@ WIDGET_BUILDERS = {
     "bootstrapper": widgets.build_bootstrapper,
     "fontpicker": widgets.build_fontpicker,
     "cursorpicker": widgets.build_cursorpicker,
+    "emotewheelpicker": widgets.build_emotewheelpicker,
     "themepicker": widgets.build_themepicker,
     "emojipicker": widgets.build_emojipicker,
     "versionlabel": widgets.build_versionlabel,
@@ -128,6 +142,7 @@ WIDGET_BUILDERS = {
     "serverselector": widgets.build_serversel,
     "shortcutmanager": widgets.build_shortcuts,
     "account": widgets.build_account,
+    "restartsetup": widgets.build_restartsetup,
 }
 
 def darken(hex_color, amount=0.18):
@@ -213,6 +228,10 @@ def parse_config(path):
             if current is not None:
                 pages[current].append(("cursorpicker",))
 
+        elif line == "EmoteWheelPicker":
+            if current is not None:
+                pages[current].append(("emotewheelpicker",))
+
         elif line == "ThemePicker":
             if current is not None:
                 pages[current].append(("themepicker",))
@@ -281,6 +300,10 @@ def parse_config(path):
             if current is not None:
                 pages[current].append(("account",))
 
+        elif line == "RestartSetup":
+            if current is not None:
+                pages[current].append(("restartsetup",))
+
         elif line.startswith("Image = "):
             rest = line[len("Image = "):].strip()
             if "|" in rest:
@@ -296,12 +319,19 @@ def run_script(script, args=None):
     args = args or []
     path = BASE / script
 
-    if path.suffix == ".py":
-        subprocess.Popen(["python3", str(path), *args],
-                         env=sober.clean_env())
-    else:
-        subprocess.Popen([str(path), *args],
-                         env=sober.clean_env())
+    if not path.exists():
+        log.error(f"Script not found: {path}")
+        return
+
+    try:
+        if path.suffix == ".py":
+            subprocess.Popen(["python3", str(path), *args],
+                             env=sober.clean_env())
+        else:
+            subprocess.Popen([str(path), *args],
+                             env=sober.clean_env())
+    except OSError as e:
+        log.exception(f"Could not run {path}: {e}")
 
 class Lution(tk.Tk):
     def __init__(self):
@@ -346,6 +376,12 @@ class Lution(tk.Tk):
         else:
             self.build_sidebar()
             self.build_content()
+
+        if not setup.is_complete():
+            setup.show_wizard(self)
+
+    def report_callback_exception(self, exc, val, tb):
+        log.tk_exception(exc, val, tb)
 
     def setup_style(self):
         style = ttk.Style(self)
@@ -608,7 +644,7 @@ if __name__ == "__main__":
             import bootstrapper
             bootstrapper.refresh_shortcut()
         except Exception:
-            pass
+            log.exception("Could not refresh the Sober with Lution shortcut")
         fflags.refresh_allowlist_if_stale()
         app = Lution()
         app.mainloop()

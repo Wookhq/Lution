@@ -4,6 +4,7 @@ import shutil
 import zipfile
 
 import paths
+import log
 
 OVERLAY_DIR = paths.LUTION_OVERLAY
 LUTION_CONFIG = paths.LUTION_CONFIG
@@ -13,7 +14,8 @@ MODS_DIR = paths.STATE_DIR / "Mods"
 INSTALLED_DIRS = {
     name: paths.LUTION_ROOT / name
     for name in ("installed_font", "installed_emoji",
-                 "installed_cursors", "installed_sounds")
+                 "installed_cursors", "installed_sounds",
+                 "installed_emote_wheel")
 }
 
 
@@ -21,6 +23,20 @@ def _add_tree(zf, src, arc_root):
     for fp in src.rglob("*"):
         if fp.is_file():
             zf.write(fp, arc_root + "/" + str(fp.relative_to(src)))
+
+
+def _safe_dest(root, name):
+    root = Path(root)
+    if Path(name).is_absolute() or name.startswith("\\\\"):
+        raise ValueError(f"Backup entry has an absolute path: {name}")
+    parts = [p for p in name.replace("\\", "/").split("/") if p]
+    if any(p == ".." for p in parts):
+        raise ValueError(f"Backup entry escapes its folder: {name}")
+    dest = root.joinpath(*parts) if parts else root
+    resolved = dest.resolve()
+    if resolved != root.resolve() and root.resolve() not in resolved.parents:
+        raise ValueError(f"Backup entry resolves outside its folder: {name}")
+    return dest
 
 
 def _extract(zf, member, dest):
@@ -78,7 +94,12 @@ def import_backup(backup_path):
 
             for prefix, dest_root in roots:
                 if member.startswith(prefix):
-                    _extract(zf, member, dest_root / member[len(prefix):])
+                    try:
+                        dest = _safe_dest(dest_root, member[len(prefix):])
+                    except ValueError as e:
+                        log.error(f"Skipping unsafe backup entry: {e}")
+                        break
+                    _extract(zf, member, dest)
                     restored.append(member)
                     break
 

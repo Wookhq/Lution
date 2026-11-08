@@ -11,12 +11,19 @@ FPS_XML = (Path.home() / ".var/app" / SOBER_APP_ID /
 def load_framerate_cap():
     if not FPS_XML.exists():
         return None
-    tree = ET.parse(FPS_XML)
+    try:
+        tree = ET.parse(FPS_XML)
+    except ET.ParseError:
+        return None
     node = tree.getroot().find(".//int[@name='FramerateCap']")
     return node.text if node is not None else None
 
 
 def save_framerate_cap(value):
+    if not FPS_XML.exists():
+        raise ValueError(
+            "Sober hasn't written its settings file yet - open Roblox once, "
+            "set the in-game cap to 60, close it, then try again")
     tree = ET.parse(FPS_XML)
     node = tree.getroot().find(".//int[@name='FramerateCap']")
     if node is None:

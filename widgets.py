@@ -11,6 +11,7 @@ import fps
 import cursors
 import themes
 import emoji
+import emote_wheel
 import mods
 import sound_mods
 import updater
@@ -19,6 +20,7 @@ import bootstrapper
 import backup
 import log
 import sober
+import setup
 import sys
 
 BG = "#1e1e1e"
@@ -716,10 +718,23 @@ def build_fpsinput(app, parent, pad):
              anchor="w", wraplength=500, justify="left"
              ).pack(anchor="w", padx=pad, pady=(0, 6))
 
-    save_command = lambda: (fps.save_framerate_cap(entry.get().strip())
-                             if entry.get().strip() else None)
-    app.make_button(parent, "Save FPS Limit", command=save_command
-                     ).pack(anchor="w", padx=pad, pady=(0, 14))
+    def save():
+        value = entry.get().strip()
+        if not value:
+            return
+        try:
+            fps.save_framerate_cap(value)
+        except Exception as e:
+            fps_status.configure(text=str(e), fg=ERROR)
+        else:
+            fps_status.configure(text=f"saved, cap is now {value}", fg=FG_DIM)
+
+    app.make_button(parent, "Save FPS Limit", command=save
+                     ).pack(anchor="w", padx=pad, pady=(0, 4))
+    fps_status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                          font=("TkDefaultFont", 10), anchor="w",
+                          wraplength=500, justify="left")
+    fps_status.pack(anchor="w", padx=pad, pady=(0, 14))
 
 def build_fontpicker(app, parent, pad):
     tk.Label(parent, text="Font file (.ttf / .otf)", bg=parent["bg"],
@@ -997,6 +1012,112 @@ def build_cursorpicker(app, parent, pad):
 
     app.make_button(parent, "Restore default cursors", command=restore_default,
                       bg=ERROR, fg="#0a0a0a"
+                      ).pack(anchor="w", padx=pad, pady=(0, 14))
+
+def build_emotewheelpicker(app, parent, pad):
+    status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
+                       font=("TkDefaultFont", 10), anchor="w",
+                       wraplength=500, justify="left")
+    status.pack(anchor="w", padx=pad, pady=(0, 6))
+
+    tk.Label(parent,
+             bg=parent["bg"], fg=FG_DIM, font=("TkDefaultFont", 10),
+             anchor="w", wraplength=500, justify="left"
+             ).pack(anchor="w", padx=pad, pady=(0, 8))
+
+    preset_names = emote_wheel.list_presets()
+    wheel_entries = {}
+
+    if preset_names:
+        tk.Label(parent, text="Preset", bg=parent["bg"], fg=FG,
+                 font=BODY_FONT).pack(anchor="w", padx=pad, pady=(6, 2))
+        preset_combo = ttk.Combobox(parent, values=["Custom"] + preset_names,
+                                     font=BODY_FONT, state="readonly")
+        preset_combo.set("Custom")
+        preset_combo.pack(anchor="w", padx=pad, pady=(0, 10), ipady=4)
+
+        def on_preset_change(event=None):
+            selection = preset_combo.get()
+            if selection == "Custom":
+                return
+            preset_wheel = emote_wheel.get_preset_wheel(selection)
+            for name, entry in wheel_entries.items():
+                entry.delete(0, "end")
+                if name in preset_wheel:
+                    entry.insert(0, preset_wheel[name])
+
+        preset_combo.bind("<<ComboboxSelected>>", on_preset_change)
+    else:
+        preset_combo = None
+
+    installed = {}
+    for name in emote_wheel.WHEEL_PARTS:
+        saved = emote_wheel.INSTALLED_EMOTE_DIR / f"{name}.png"
+        if saved.exists():
+            installed[name] = str(saved)
+
+    for name in emote_wheel.WHEEL_PARTS:
+        label_text = emote_wheel.PART_LABELS[name] + f"  ({name}.png)"
+        tk.Label(parent, text=label_text, bg=parent["bg"], fg=FG,
+                 font=BODY_FONT).pack(anchor="w", padx=pad, pady=(6, 2))
+
+        row = tk.Frame(parent, bg=parent["bg"])
+        row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
+
+        entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+                          font=BODY_FONT, relief="flat",
+                          highlightthickness=1,
+                          highlightbackground=BG_SIDEBAR,
+                          highlightcolor=ACCENT)
+        entry.pack(side="left", fill="x", expand=True, ipady=8,
+                    padx=(0, 6))
+        if name in installed:
+            entry.insert(0, installed[name])
+        wheel_entries[name] = entry
+
+        def browse_wheel(e=entry, s=name):
+            chosen = filedialog.askopenfilename(
+                title=f"Choose {emote_wheel.PART_LABELS[s].lower()}",
+                filetypes=[("PNG images", "*.png"), ("All files", "*.*")]
+            )
+            if chosen:
+                e.delete(0, "end")
+                e.insert(0, chosen)
+                if preset_combo is not None and preset_combo.get() != "Custom":
+                    preset_combo.set("Custom")
+
+        app.make_button(row, "browse", command=browse_wheel,
+                          padx=14, pady=8).pack(side="left")
+
+    def apply_wheel_action():
+        parts_dict = {}
+        for name, entry in wheel_entries.items():
+            path = entry.get().strip()
+            if path:
+                parts_dict[name] = path
+        if not parts_dict:
+            status.configure(text="select at least one image first", fg=ERROR)
+            return
+        applied = emote_wheel.apply_wheel(parts_dict)
+        emote_wheel.save_installed_wheel(parts_dict)
+        status.configure(
+            text="Applied " + ", ".join(emote_wheel.PART_LABELS[n]
+                                        for n in applied) + ".", fg=FG_DIM)
+
+    app.make_button(parent, "Apply emote wheel", command=apply_wheel_action
+                      ).pack(anchor="w", padx=pad, pady=(0, 6))
+
+    def restore_default():
+        removed = emote_wheel.restore_wheel()
+        if removed:
+            for name in removed:
+                wheel_entries[name].delete(0, "end")
+            status.configure(text="default emote wheel is restored", fg=FG_DIM)
+        else:
+            status.configure(text="no custom emote wheel to restore", fg=ERROR)
+
+    app.make_button(parent, "Restore default emote wheel",
+                      command=restore_default, bg=ERROR, fg="#0a0a0a"
                       ).pack(anchor="w", padx=pad, pady=(0, 14))
 
 def build_themepicker(app, parent, pad):
@@ -1968,6 +2089,11 @@ def build_soberversion(app, parent, pad):
 
     app.after(300, fetch)
 
+def build_restartsetup(app, parent, pad):
+    app.make_button(parent, "Restart setup",
+                    command=lambda: setup.restart(app)
+                    ).pack(anchor="w", padx=pad, pady=(4, 4))
+
 def build_soberlauncher(app, parent, pad):
     import log
 
@@ -2896,10 +3022,16 @@ def build_account(app, parent, pad):
                 tk.Label(row, text="", bg=BG_ACTIVE, width=6
                          ).pack(side="right")
 
+    loading = {"busy": False}
+
     def load(refresh=False):
+        if loading["busy"]:
+            return
+        loading["busy"] = True
         status.configure(text="fetching account...", fg=FG_DIM)
 
         def worker():
+            loading["busy"] = False
             try:
                 data = accounts.fetch_all(refresh=refresh)
                 err = None
@@ -2934,3 +3066,4 @@ def build_account(app, parent, pad):
         pass
 
     load()
+

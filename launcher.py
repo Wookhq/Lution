@@ -57,16 +57,21 @@ def userns_available():
              "--proc", "/proc", "--", "true"],
             capture_output=True, timeout=10,
         )
-        return result.returncode == 0
-    except (OSError, subprocess.SubprocessError):
+    except subprocess.TimeoutExpired:
+        log.warning("bwrap user namespace probe timed out, assuming it works")
+        return True
+    except OSError as e:
+        log.warning(f"bwrap probe failed to start: {e}")
         return False
+    return result.returncode == 0
 
 
 def sober_is_running():
     try:
         result = subprocess.run(["flatpak", "ps"], capture_output=True,
                                 text=True, timeout=10)
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError) as e:
+        log.warning(f"Could not check for a running Sober ({e}), assuming none")
         return False
     return paths.SOBER_APP_ID in result.stdout
 
