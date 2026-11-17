@@ -27,4 +27,38 @@ just go into the releases lol
 2. install python and tk using your native package manager (or also called python-tkinter or tkinter)
 3. open a terminal and cd into the source code folder and run "python main.py" and lution will launch
 
-                    
+# screenshots
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/home.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/fastflags.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/servers.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/account.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/launcher.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/mods.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/config.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/marketplace.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/about.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/thelauncher.png" width="100%">
+</p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wookhq/lution/refs/heads/main/screenshots/sober.png" width="100%">
+</p>
