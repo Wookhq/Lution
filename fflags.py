@@ -1,5 +1,4 @@
 # this changes fflags config
-# lution now keeps its own config.json and bind mounts it over sober's at launch
 
 
 from pathlib import Path
@@ -16,7 +15,6 @@ import log
 import net
 
 CONFIG_JSON = paths.LUTION_CONFIG
-SOBER_CONFIG = paths.SOBER_CONFIG
 
 DEFAULT_CONFIG = {"fflags": {}}
 ALLOWLIST_TOPIC = ("https://devforum.roblox.com/t/allowlist-for-local-client-"
@@ -54,18 +52,14 @@ def _parse(text):
 
 def load_config():
     base, comments = ({}, [])
-    if SOBER_CONFIG.exists():
-        base, sober_comments = _parse(SOBER_CONFIG.read_text())
-        comments = sober_comments or comments
+    if CONFIG_JSON.exists():
+        try:
+            base, comments = _parse(CONFIG_JSON.read_text())
+        except OSError as e:
+            log.error(f"Could not read config: {e}")
 
     data = dict(base)
-    fflags = {}
-    if CONFIG_JSON.exists():
-        lution_data, lution_comments = _parse(CONFIG_JSON.read_text())
-        fflags = lution_data.get("fflags") or {}
-        if lution_comments:
-            comments = lution_comments
-
+    fflags = data.get("fflags") or {}
     data["fflags"] = fflags
     return data, comments
 
@@ -112,7 +106,7 @@ def _read_allowlist_file(path):
         allowed = data.get("allowed")
         if isinstance(allowed, list) and allowed:
             return data
-    except (OSError, ValueError):
+    except (OSError, UnicodeError, ValueError):
         pass
     return None
 
@@ -135,7 +129,7 @@ def allowlist_age():
     try:
         data = json.loads(ALLOWLIST_CACHE.read_text())
         return max(0, int(time.time() - float(data.get("_ts", 0))))
-    except (OSError, ValueError, TypeError):
+    except (OSError, UnicodeError, ValueError, TypeError):
         return None
 
 

@@ -15,7 +15,8 @@ MAX_SEGMENT = 12 * 3600
 MAX_SESSION = 24 * 3600
 
 _TS_RE = re.compile(r"Roblox: (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?)Z")
-_GAME_RE = re.compile(r'"place_id":"(\d+)","type":"game_loaded"')
+_GAME_RE = re.compile(
+    r'"place_id":\s*"(\d+)"[^\n]*?"type":\s*"game_loaded"')
 
 
 def format_duration(seconds):
@@ -85,7 +86,7 @@ def _load_cache():
     try:
         data = json.loads(CACHE_FILE.read_text())
         return data if isinstance(data, dict) else {}
-    except (OSError, ValueError):
+    except (OSError, UnicodeError, ValueError):
         return {}
 
 

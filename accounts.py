@@ -1,6 +1,7 @@
 # who you are signed in as and what your friends are doing
 
 import json
+import socket
 import time
 import urllib.error
 import urllib.request
@@ -35,7 +36,7 @@ class AccountError(Exception):
 def cookie_header():
     try:
         text = COOKIES_FILE.read_text().strip()
-    except OSError:
+    except (OSError, UnicodeError):
         return None
     if not text or ".ROBLOSECURITY" not in text:
         return None
@@ -65,7 +66,15 @@ def _request(url, data=None, cookie=False, timeout=15):
                 "Sober's login has expired - open Sober and sign in again.") from e
         raise AccountError(f"Roblox replied with HTTP {e.code}") from e
     except urllib.error.URLError as e:
+        if isinstance(e.reason, (TimeoutError, socket.timeout)):
+            raise AccountError("Roblox took too long to respond") from e
         raise AccountError(f"Network error: {e.reason}") from e
+    except (TimeoutError, socket.timeout) as e:
+        raise AccountError("Roblox took too long to respond") from e
+    except json.JSONDecodeError as e:
+        raise AccountError("Roblox returned an invalid response") from e
+    except Exception as e:
+        raise AccountError(f"Request failed: {e}") from e
 
 
 def current_user():
@@ -78,7 +87,7 @@ def current_user():
 def switcher_accounts():
     try:
         storage = json.loads(APP_STORAGE.read_text())
-    except (OSError, ValueError) as e:
+    except (OSError, UnicodeError, ValueError) as e:
         log.debug(f"Could not read appStorage: {e}")
         return []
 
@@ -257,6 +266,6 @@ def _disk_cache():
             if isinstance(data, dict) and time.time() - data.get("ts", 0) < DISK_TTL:
                 _memory.update(ts=data["ts"], data=data)
                 return data
-        except (OSError, ValueError):
+        except (OSError, UnicodeError, ValueError):
             pass
     return _memory["data"]

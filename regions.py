@@ -49,6 +49,8 @@ def _get(url, timeout=20):
         raise RegionError(f"Request failed with HTTP {e.code}") from e
     except urllib.error.URLError as e:
         raise RegionError(f"Network error: {e.reason}") from e
+    except ValueError as e:
+        raise RegionError("Server returned invalid data") from e
 
 
 def _cache_read(path, ttl):
@@ -56,7 +58,7 @@ def _cache_read(path, ttl):
         data = json.loads(path.read_text())
         if time.time() - float(data.get("_ts", 0)) < ttl:
             return data.get("items")
-    except (OSError, ValueError, TypeError):
+    except (OSError, UnicodeError, ValueError, TypeError, AttributeError):
         pass
     return None
 
@@ -144,8 +146,21 @@ def user_location(refresh=False):
             return cached
 
     raw = _get(IPINFO_URL, timeout=10)
-    parts = str(raw.get("loc") or "").split(",")
-    lat, lon = float(parts[0]), float(parts[1])
+    loc = raw.get("loc")
+    if not isinstance(loc, str) or "," not in loc:
+        raise RegionError(
+            "IP geolocation did not return a usable location")
+    parts = loc.split(",")
+    if len(parts) < 2:
+        raise RegionError(
+            "IP geolocation did not return a usable location")
+    try:
+        lat, lon = float(parts[0]), float(parts[1])
+    except (TypeError, ValueError):
+        raise RegionError(
+            "IP geolocation did not return a usable location") from None
+    if not (math.isfinite(lat) and math.isfinite(lon)):
+        raise RegionError("IP geolocation returned an invalid location")
     item = {"lat": lat, "lon": lon,
             "city": (raw.get("city") or "").strip(),
             "country": (raw.get("country") or "").strip()}

@@ -32,6 +32,12 @@ def save_installed_font(font_path: Path | str) -> None:
         INSTALLED_FONTS_DIR.mkdir(exist_ok=True, parents=True)
 
     dest_file = INSTALLED_FONTS_DIR / ("font"+font_path.suffix)
+    for old in INSTALLED_FONTS_DIR.glob("font.*"):
+        if old != dest_file:
+            try:
+                old.unlink()
+            except OSError:
+                pass
     try:
         _ = shutil.copy(font_path, dest_file, follow_symlinks=True)
     except shutil.SameFileError:
@@ -40,9 +46,9 @@ def save_installed_font(font_path: Path | str) -> None:
 def reapply_fonts():
     if not INSTALLED_FONTS_DIR.exists(): return
 
-    candidates = sorted(INSTALLED_FONTS_DIR.glob("*"), key=lambda p: p.stat().st_ctime)
+    candidates = [p for p in INSTALLED_FONTS_DIR.glob("*") if p.is_file()]
     if not candidates: return
-    target_font = candidates[0]
+    target_font = sorted(candidates, key=lambda p: p.name)[0]
 
     try:
         apply_font(str(target_font))
@@ -64,12 +70,15 @@ def _apk_font_names():
         return []
     emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
     names = []
-    with zipfile.ZipFile(apk) as zf:
-        for entry in zf.namelist():
-            if entry.startswith("assets/content/fonts/") and not entry.startswith("assets/content/fonts/families/"):
-                name = Path(entry).name
-                if name and Path(name).suffix.lower() in {".ttf", ".otf"} and name.lower() not in emoji_names:
-                    names.append(name)
+    try:
+        with zipfile.ZipFile(apk) as zf:
+            for entry in zf.namelist():
+                if entry.startswith("assets/content/fonts/") and not entry.startswith("assets/content/fonts/families/"):
+                    name = Path(entry).name
+                    if name and Path(name).suffix.lower() in {".ttf", ".otf"} and name.lower() not in emoji_names:
+                        names.append(name)
+    except (OSError, zipfile.BadZipFile):
+        return []
     return names
 
 

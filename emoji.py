@@ -61,6 +61,12 @@ def save_installed_emoji(font_path: Path | str) -> None:
         INSTALLED_EMOJI_DIR.mkdir(exist_ok=True, parents=True)
 
     dest_file = INSTALLED_EMOJI_DIR / ("emoji" + font_path.suffix)
+    for old in INSTALLED_EMOJI_DIR.glob("emoji.*"):
+        if old != dest_file:
+            try:
+                old.unlink()
+            except OSError:
+                pass
     try:
         shutil.copy(font_path, dest_file, follow_symlinks=True)
     except shutil.SameFileError:
@@ -71,7 +77,7 @@ def reapply_emoji():
     if not INSTALLED_EMOJI_DIR.exists():
         return
 
-    candidates = sorted(INSTALLED_EMOJI_DIR.glob("*"), key=lambda p: p.stat().st_ctime)
+    candidates = sorted([p for p in INSTALLED_EMOJI_DIR.glob("*") if p.is_file()], key=lambda p: p.name)
     if not candidates:
         return
 

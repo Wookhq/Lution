@@ -7,37 +7,47 @@ import subprocess
 import json
 import sys
 import threading
+import queue
 import os
+import shlex
+import shutil
 
 import themes
-import net
 import paths
 import log
+import sober
 
 log.install_hooks()
-net.ensure_ca_certs()
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 CONFIG_FILE = BASE / "ui.md"
 
-_theme = themes.load_theme()
-BG = _theme["bg"]
-BG_SIDEBAR = _theme["bg_sidebar"]
-BG_ACTIVE = "#2a2a2a"
-FG = _theme["fg"]
-FG_DIM = "#888888"
-ACCENT = _theme["accent"]
-ERROR = "#e06c75"
-BODY_FONT = ("TkDefaultFont", 13)
+def load_theme_globals():
+    global BG, BG_SIDEBAR, BG_ACTIVE, FG, FG_DIM, ACCENT, ERROR, BORDER
+    global INPUT_BG, INPUT_FG, INPUT_BORDER, BUTTON_BG, BUTTON_FG, BUTTON_HOVER
+    global SCROLLBAR, SCROLLBAR_HOVER, _widgets, _WIDGET_BUILDERS
+    t = themes.load_theme()
+    BG = t["bg"]
+    BG_SIDEBAR = t["bg_sidebar"]
+    BG_ACTIVE = t.get("bg_active", "#2a2a2a")
+    FG = t["fg"]
+    FG_DIM = t.get("fg_dim", "#888888")
+    ACCENT = t["accent"]
+    ERROR = t.get("error", "#e06c75")
+    BORDER = t.get("border", "#3a3a3a")
+    INPUT_BG = t.get("input_bg", "#2a2a2a")
+    INPUT_FG = t.get("input_fg", "#e0e0e0")
+    INPUT_BORDER = t.get("input_border", "#3a3a3a")
+    BUTTON_BG = t.get("button_bg", ACCENT)
+    BUTTON_FG = t.get("button_fg", "#0a0a0a")
+    BUTTON_HOVER = t.get("button_hover") or None
+    SCROLLBAR = t.get("scrollbar", "#3a3a3a")
+    SCROLLBAR_HOVER = t.get("scrollbar_hover", "#5a5a5a")
+    _widgets = None
+    _WIDGET_BUILDERS = None
 
-import fonts
-import emoji
-import cursors
-import emote_wheel
-import mods
-import sound_mods
-import fflags
-import setup
+load_theme_globals()
+BODY_FONT = ("TkDefaultFont", 13)
 
 APK_CHECKSUM_FILE = Path.home() / ".local" / "Lution" / "apk_checksum.txt"
 LEGACY_CHECKSUM_FILES = [
@@ -47,6 +57,58 @@ LEGACY_CHECKSUM_FILES = [
     Path.home() / ".local/Lution/sounds_checksum.txt",
 ]
 
+_widgets = None
+_WIDGET_BUILDERS = None
+
+
+def get_widgets():
+    global _widgets, _WIDGET_BUILDERS
+    if _widgets is None:
+        import widgets as w
+        w.BG = BG
+        w.BG_SIDEBAR = BG_SIDEBAR
+        w.BG_ACTIVE = BG_ACTIVE
+        w.FG = FG
+        w.FG_DIM = FG_DIM
+        w.ACCENT = ACCENT
+        w.ERROR = ERROR
+        w.BORDER = BORDER
+        w.INPUT_BG = INPUT_BG
+        w.INPUT_FG = INPUT_FG
+        w.INPUT_BORDER = INPUT_BORDER
+        w.SCROLLBAR = SCROLLBAR
+        w.SCROLLBAR_HOVER = SCROLLBAR_HOVER
+        w.BODY_FONT = BODY_FONT
+        _widgets = w
+        _WIDGET_BUILDERS = {
+            "flaglist": w.build_flaglist,
+            "fpsinput": w.build_fpsinput,
+            "envvars": w.build_envvars,
+            "bootstrapper": w.build_bootstrapper,
+            "fontpicker": w.build_fontpicker,
+            "cursorpicker": w.build_cursorpicker,
+            "emotewheelpicker": w.build_emotewheelpicker,
+            "themepicker": w.build_themepicker,
+            "emojipicker": w.build_emojipicker,
+            "versionlabel": w.build_versionlabel,
+            "soberversion": w.build_soberversion,
+            "soberguide": w.build_soberguide,
+            "soberlauncher": w.build_soberlauncher,
+            "sobersettings": w.build_sobersettings,
+            "playhistory": w.build_playhistory,
+            "marketplace": w.build_marketplace,
+            "resetall": w.build_resetall,
+            "backupmanager": w.build_backupmanager,
+            "modconflicts": w.build_modconflicts,
+            "modmanager": w.build_modmanager,
+            "soundmods": w.build_soundmods,
+            "serverselector": w.build_serversel,
+            "shortcutmanager": w.build_shortcuts,
+            "account": w.build_account,
+            "restartsetup": w.build_restartsetup,
+        }
+    return _widgets, _WIDGET_BUILDERS
+
 def _find_apk():
     return paths.find_base_apk()
 
@@ -55,7 +117,68 @@ def _calculate_sha256_checksum(apk_path):
     with open(apk_path, "rb") as f:
         return hashlib.file_digest(f, "sha256").hexdigest()
 
+def _has_files(path):
+    try:
+        return path.is_dir() and any(p.is_file() for p in path.rglob("*"))
+    except OSError:
+        return False
+
+def _customizations_present():
+    import fonts
+    import emoji
+    import cursors
+    import emote_wheel
+    import mods
+    import sound_mods
+
+    overlay = paths.LUTION_OVERLAY
+
+    if _has_files(fonts.INSTALLED_FONTS_DIR):
+        font_dir = overlay / "content/fonts"
+        emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
+        try:
+            if not any(p.is_file() and p.name.lower() not in emoji_names
+                       for p in font_dir.iterdir()):
+                return False
+        except OSError:
+            return False
+
+    if _has_files(emoji.INSTALLED_EMOJI_DIR):
+        font_dir = overlay / "content/fonts"
+        if not all((font_dir / name).exists()
+                   for name in emoji.EMOJI_FONT_NAMES):
+            return False
+
+    try:
+        for path in cursors.INSTALLED_CURSORS_DIR.glob("*.png"):
+            if not (cursors.OVERLAY_TEXTURE_DIR / path.name).exists():
+                return False
+        for path in emote_wheel.INSTALLED_EMOTE_DIR.glob("*.png"):
+            for scale in emote_wheel.SCALES:
+                target = emote_wheel.OVERLAY_EMOTE_DIR / f"{path.stem}{scale}.png"
+                if not target.exists():
+                    return False
+        if sound_mods.INSTALLED_SOUNDS_DIR.exists():
+            for path in sound_mods.INSTALLED_SOUNDS_DIR.iterdir():
+                if path.is_file() and not (
+                        sound_mods.OVERLAY_SOUNDS_DIR / path.name).exists():
+                    return False
+    except OSError:
+        return False
+
+    if mods._load_manifest() and not mods.content_present():
+        return False
+
+    return True
+
 def reapply_customizations():
+    import fonts
+    import emoji
+    import cursors
+    import emote_wheel
+    import mods
+    import sound_mods
+
     for legacy in LEGACY_CHECKSUM_FILES:
         try:
             if legacy.exists():
@@ -63,8 +186,6 @@ def reapply_customizations():
                 log.debug(f"Removed old checksum file {legacy.name}")
         except OSError as e:
             log.warning(f"Could not remove old checksum file {legacy}: {e}")
-
-    paths.migrate_legacy_overlay()
 
     apk_path = _find_apk()
     if apk_path is None:
@@ -76,11 +197,14 @@ def reapply_customizations():
     if APK_CHECKSUM_FILE.exists():
         last = APK_CHECKSUM_FILE.read_text().strip()
 
-    if current == last:
-        log.debug("Sober apk unchanged")
+    if current == last and _customizations_present():
+        log.debug("Sober apk unchanged and customizations are still applied")
         return
 
-    log.info("Sober apk changed we reapplying all customizations")
+    if current != last:
+        log.info("Sober apk changed we reapplying all customizations")
+    else:
+        log.info("Sober overlay lost customizations, reapplying them")
     failed = []
     for name, fn in (("fonts", fonts.reapply_fonts),
                      ("emoji", emoji.reapply_emoji),
@@ -106,44 +230,6 @@ def reapply_customizations():
         APK_CHECKSUM_FILE.write_text(current)
     except OSError as e:
         log.error(f"Could not save APK checksum: {e}")
-
-import widgets
-widgets.BG = BG
-widgets.BG_SIDEBAR = BG_SIDEBAR
-widgets.BG_ACTIVE = BG_ACTIVE
-widgets.FG = FG
-widgets.FG_DIM = FG_DIM
-widgets.ACCENT = ACCENT
-widgets.ERROR = ERROR
-widgets.BODY_FONT = BODY_FONT
-
-WIDGET_BUILDERS = {
-    "flaglist": widgets.build_flaglist,
-    "fpsinput": widgets.build_fpsinput,
-    "envvars": widgets.build_envvars,
-    "bootstrapper": widgets.build_bootstrapper,
-    "fontpicker": widgets.build_fontpicker,
-    "cursorpicker": widgets.build_cursorpicker,
-    "emotewheelpicker": widgets.build_emotewheelpicker,
-    "themepicker": widgets.build_themepicker,
-    "emojipicker": widgets.build_emojipicker,
-    "versionlabel": widgets.build_versionlabel,
-    "soberversion": widgets.build_soberversion,
-    "soberguide": widgets.build_soberguide,
-    "soberlauncher": widgets.build_soberlauncher,
-    "sobersettings": widgets.build_sobersettings,
-    "playhistory": widgets.build_playhistory,
-    "marketplace": widgets.build_marketplace,
-    "resetall": widgets.build_resetall,
-    "backupmanager": widgets.build_backupmanager,
-    "modconflicts": widgets.build_modconflicts,
-    "modmanager": widgets.build_modmanager,
-    "soundmods": widgets.build_soundmods,
-    "serverselector": widgets.build_serversel,
-    "shortcutmanager": widgets.build_shortcuts,
-    "account": widgets.build_account,
-    "restartsetup": widgets.build_restartsetup,
-}
 
 def darken(hex_color, amount=0.18):
     hex_color = hex_color.lstrip("#")
@@ -179,7 +265,16 @@ def parse_config(path):
             pending_label = line[len("CreateButton = "):].strip()
 
         elif line.startswith("CreateButton > "):
-            rest = line[len("CreateButton > "):].strip().split()
+            try:
+                rest = shlex.split(line[len("CreateButton > "):].strip())
+            except ValueError as e:
+                log.warning(f"Ignoring CreateButton with invalid arguments: {e}")
+                pending_label = None
+                continue
+            if not rest:
+                log.warning("Ignoring CreateButton with no script")
+                pending_label = None
+                continue
             script, static_args = rest[0], rest[1:]
             if current is not None and pending_label is not None:
                 pages[current].append(("button", pending_label, script, static_args))
@@ -325,7 +420,11 @@ def run_script(script, args=None):
 
     try:
         if path.suffix == ".py":
-            subprocess.Popen(["python3", str(path), *args],
+            if getattr(sys, "frozen", False) or globals().get("__compiled__"):
+                python = shutil.which("python3") or "python3"
+            else:
+                python = sys.executable or "python3"
+            subprocess.Popen([python, str(path), *args],
                              env=sober.clean_env())
         else:
             subprocess.Popen([str(path), *args],
@@ -341,6 +440,8 @@ class Lution(tk.Tk):
         self.minsize(1280, 720)
 
         self.mainloop_started = threading.Event()
+        self._ui_queue = queue.Queue()
+        self.after(50, self._drain_ui_queue)
 
         self.setup_style()
 
@@ -348,52 +449,86 @@ class Lution(tk.Tk):
         self.bind_all("<Button-4>", self._global_scroll)
         self.bind_all("<Button-5>", self._global_scroll)
 
-        log.info("Starting Lution")
-        reapply_customizations()
-
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
         self.pages_config = parse_config(CONFIG_FILE)
-        log.debug(f"Loaded {len(self.pages_config)} page(s) from ui.md")
         self.nav_buttons = {}
         self.pages = {}
         self.fflag_rows = []
         self.reload_fflags_ui = lambda: None
 
         self.page_shown_listeners = []
-        if os.environ.get("LUTION_QUIET_FONTCONFIG"):
-            saved = os.dup(2)
-            devnull = os.open(os.devnull, os.O_WRONLY)
-            os.dup2(devnull, 2)
-            os.close(devnull)
-            try:
-                self.build_sidebar()
-                self.build_content()
-            finally:
-                os.dup2(saved, 2)
-                os.close(saved)
-        else:
-            self.build_sidebar()
-            self.build_content()
+        self._visible_logged = False
+        self.bind("<Map>", self._on_map)
 
-        if not setup.is_complete():
-            setup.show_wizard(self)
+        self.build_sidebar()
+        self.build_content()
+
+        import setup as setup_mod
+        if not setup_mod.is_complete():
+            setup_mod.show_wizard(self)
+
+        self.after_idle(self._start_background_tasks)
+        self.update_idletasks()
+        self.after(0, self._post_show_init)
+
+    def _post_show_init(self):
+        log.debug(f"Loaded {len(self.pages_config)} page(s) from ui.md")
+
+    def _start_background_tasks(self):
+        threading.Thread(target=self._run_startup_tasks, daemon=True).start()
+
+    def _run_startup_tasks(self):
+        try:
+            reapply_customizations()
+        except Exception:
+            log.exception("Startup customization check failed")
 
     def report_callback_exception(self, exc, val, tb):
         log.tk_exception(exc, val, tb)
+
+    def run_on_ui(self, fn):
+        self._ui_queue.put(fn)
+
+    def after(self, ms, func=None, *args):
+        queue_ = getattr(self, "_ui_queue", None)
+        if (func is not None and queue_ is not None
+                and threading.current_thread() is not threading.main_thread()):
+            queue_.put(lambda: self.after(ms, func, *args))
+            return None
+        return super().after(ms, func, *args)
+
+    def _drain_ui_queue(self):
+        while True:
+            try:
+                fn = self._ui_queue.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                fn()
+            except Exception:
+                log.exception("UI callback failed")
+        try:
+            self.after(50, self._drain_ui_queue)
+        except tk.TclError:
+            pass
 
     def setup_style(self):
         style = ttk.Style(self)
         style.theme_use("clam")
         style.configure("TCombobox",
-                         fieldbackground=BG_ACTIVE, background=BG_ACTIVE,
-                         foreground=FG, arrowcolor=FG, bordercolor=BG_SIDEBAR)
-        style.map("TCombobox", fieldbackground=[("readonly", BG_ACTIVE)])
+                         fieldbackground=INPUT_BG, background=INPUT_BG,
+                         foreground=INPUT_FG, arrowcolor=INPUT_FG,
+                         bordercolor=INPUT_BORDER,
+                         lightcolor=INPUT_BORDER, darkcolor=INPUT_BORDER)
+        style.map("TCombobox", fieldbackground=[("readonly", INPUT_BG)])
 
-    def make_button(self, parent, text, command=None, bg=ACCENT, fg="#0a0a0a",
+    def make_button(self, parent, text, command=None, bg=None, fg=None,
                      font=BODY_FONT, padx=20, pady=10):
-        pressed_bg = darken(bg)
+        bg = BUTTON_BG if bg is None else bg
+        fg = BUTTON_FG if fg is None else fg
+        pressed_bg = (BUTTON_HOVER or darken(bg)) if bg == BUTTON_BG else darken(bg)
         btn = tk.Label(parent, text=text, bg=bg, fg=fg, font=font,
                         padx=padx, pady=pady, cursor="hand2")
 
@@ -412,6 +547,7 @@ class Lution(tk.Tk):
 
     def build_sidebar(self):
         sidebar = tk.Frame(self, width=240, bg=BG_SIDEBAR)
+        self.sidebar = sidebar
         sidebar.grid(row=0, column=0, sticky="ns")
         sidebar.grid_propagate(False)
 
@@ -483,21 +619,24 @@ class Lution(tk.Tk):
         self.container.columnconfigure(0, weight=1)
 
         for name, widgets_cfg in self.pages_config.items():
-            page = self.build_page(name, widgets_cfg)
-            page.grid(row=0, column=0, sticky="nsew")
-            self.pages[name] = page
+            wrapper = tk.Frame(self.container, bg=BG)
+            wrapper.grid(row=0, column=0, sticky="nsew")
+            self.pages[name] = {"frame": wrapper, "cfg": widgets_cfg, "built": False}
 
         if self.pages_config:
-            self.show_page(next(iter(self.pages_config)))
+            self.current_page = None
+            self._pending_page = next(iter(self.pages_config))
+            self.after(0, self._build_all_pages_bg)
 
-    def build_page(self, name, widgets_cfg):
-        wrapper = tk.Frame(self.container, bg=BG)
+    def build_page(self, name, widgets_cfg, wrapper=None):
+        if wrapper is None:
+            wrapper = tk.Frame(self.container, bg=BG)
 
         canvas = tk.Canvas(wrapper, bg=BG, highlightthickness=0)
         scrollbar = tk.Scrollbar(wrapper, orient="vertical",
                                   command=canvas.yview,
-                                  bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
-                                  activebackground=FG_DIM, width=10)
+                                  bg=SCROLLBAR, troughcolor=SCROLLBAR,
+                                  activebackground=SCROLLBAR_HOVER, width=10)
         page = tk.Frame(canvas, bg=BG)
         page_window = canvas.create_window((0, 0), window=page, anchor="nw")
 
@@ -525,7 +664,7 @@ class Lution(tk.Tk):
 
         def new_group():
             frame = tk.Frame(page, bg=BG_ACTIVE, highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR)
+                              highlightbackground=BORDER)
             frame.pack(anchor="w", fill="x", pady=(0, 14))
             return frame
 
@@ -559,16 +698,39 @@ class Lution(tk.Tk):
                 tk.Label(target, text=label, bg=BG_ACTIVE if group else BG,
                          fg=FG, font=BODY_FONT).pack(anchor="w", padx=pad,
                                                        pady=(6, 2))
-                entry = tk.Entry(target, bg=BG, fg=FG,
-                                  insertbackground=FG, font=BODY_FONT,
+                entry = tk.Entry(target, bg=INPUT_BG, fg=INPUT_FG,
+                                  insertbackground=INPUT_FG, font=BODY_FONT,
                                   relief="flat", highlightthickness=1,
-                                  highlightbackground=BG_SIDEBAR,
+                                  highlightbackground=INPUT_BORDER,
                                   highlightcolor=ACCENT)
+                state = {"placeholder": bool(placeholder)}
                 if placeholder:
                     entry.insert(0, placeholder)
+                    entry.configure(fg=FG_DIM)
+
+                    def clear_placeholder(e=None, ent=entry, st=state):
+                        if st["placeholder"]:
+                            ent.delete(0, "end")
+                            ent.configure(fg=FG)
+                            st["placeholder"] = False
+
+                    def restore_placeholder(e=None, ent=entry, st=state,
+                                            text=placeholder):
+                        if not ent.get().strip():
+                            ent.delete(0, "end")
+                            ent.insert(0, text)
+                            ent.configure(fg=FG_DIM)
+                            st["placeholder"] = True
+
+                    entry.bind("<FocusIn>", clear_placeholder)
+                    entry.bind("<FocusOut>", restore_placeholder)
                 entry.pack(anchor="w", fill="x", padx=pad,
                             pady=(0, 10), ipady=8)
-                group_inputs.append(entry.get)
+
+                def entry_value(e=entry, st=state):
+                    return "" if st["placeholder"] else e.get()
+
+                group_inputs.append(entry_value)
 
             elif kind == "selection":
                 _, label, options = widget
@@ -584,10 +746,16 @@ class Lution(tk.Tk):
                 combo.pack(anchor="w", padx=pad, pady=(0, 10), ipady=4)
                 group_inputs.append(combo.get)
 
-            elif kind in WIDGET_BUILDERS:
+            elif kind in ("flaglist", "fpsinput", "envvars", "bootstrapper", "fontpicker",
+                         "cursorpicker", "emotewheelpicker", "themepicker", "emojipicker",
+                         "versionlabel", "soberversion", "soberguide", "soberlauncher",
+                         "sobersettings", "playhistory", "marketplace", "resetall",
+                         "backupmanager", "modconflicts", "modmanager", "soundmods",
+                         "serverselector", "shortcutmanager", "account", "restartsetup"):
                 target = group if group is not None else page
                 pad = 14 if group is not None else 0
-                WIDGET_BUILDERS[kind](self, target, pad)
+                _, builders = get_widgets()
+                builders[kind](self, target, pad)
 
             elif kind == "image":
                 _, filename, caption = widget
@@ -613,10 +781,75 @@ class Lution(tk.Tk):
         self.mainloop_started.set()
         super().mainloop(n)
 
+    def _on_map(self, event):
+        if not self._visible_logged:
+            self._visible_logged = True
+            log.info("Starting Lution")
+        return None
+
+    def _build_all_pages_bg(self):
+        name = getattr(self, "_pending_page", None)
+        if not name:
+            return
+        self._pending_page = None
+        self._build_first_page(name)
+        self.after(700, self._warm_remaining_pages)
+
+    def _warm_remaining_pages(self):
+        for name, entry in self.pages.items():
+            if not entry["built"]:
+                self._build_page_on_main(name)
+                self.after(150, self._warm_remaining_pages)
+                return
+
+    def _build_page_on_main(self, name):
+        entry = self.pages[name]
+        if entry["built"]:
+            return
+        try:
+            self.build_page(name, entry["cfg"], entry["frame"])
+        except Exception:
+            log.exception(f"Failed to build page '{name}'")
+        entry["built"] = True
+
+    def _build_first_page(self, name):
+        self._build_page_on_main(name)
+        try:
+            self.show_page(name)
+        except Exception:
+            log.exception(f"Failed to show page '{name}'")
+
+    def reload_theme(self):
+        current = getattr(self, "current_page", None)
+        load_theme_globals()
+        self.configure(bg=BG)
+        self.setup_style()
+        for widget in (getattr(self, "sidebar", None),
+                       getattr(self, "container", None)):
+            try:
+                if widget is not None and widget.winfo_exists():
+                    widget.destroy()
+            except tk.TclError:
+                pass
+        self.nav_buttons = {}
+        self.pages = {}
+        self.fflag_rows = []
+        self.reload_fflags_ui = lambda: None
+        self.page_shown_listeners = []
+        self.build_sidebar()
+        self.build_content()
+        self._pending_page = None
+        self.update_idletasks()
+        if current in self.pages:
+            self.show_page(current)
+        self.after(0, self._warm_remaining_pages)
+
     def show_page(self, name):
         log.debug(f"Page opened: '{name}'")
         self.current_page = name
-        self.pages[name].tkraise()
+        entry = self.pages[name]
+        self._build_page_on_main(name)
+        entry["frame"].tkraise()
         for listener in getattr(self, "page_shown_listeners", []):
             try:
                 listener(name)
@@ -638,13 +871,22 @@ if __name__ == "__main__":
             url = f"roblox://experiences/start?placeId={place}"
         else:
             log.error(f"--play needs a place id, got: {place!r}")
-        bootstrapper.run_standalone(url=url, autostart=url is not None)
+            sys.exit(1)
+        bootstrapper.run_standalone(url=url, autostart=True)
     else:
-        try:
-            import bootstrapper
-            bootstrapper.refresh_shortcut()
-        except Exception:
-            log.exception("Could not refresh the Sober with Lution shortcut")
-        fflags.refresh_allowlist_if_stale()
         app = Lution()
+
+        def startup_bg():
+            try:
+                import fflags
+                fflags.refresh_allowlist_if_stale()
+            except Exception:
+                log.exception("Allowlist refresh check failed")
+            try:
+                import bootstrapper
+                bootstrapper.refresh_shortcut()
+            except Exception:
+                log.exception("Could not refresh the Sober with Lution shortcut")
+
+        threading.Thread(target=startup_bg, daemon=True).start()
         app.mainloop()

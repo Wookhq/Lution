@@ -1,8 +1,10 @@
 # yep it's literally all the widgets every textbox, menu, window, dropdown menu, everything bro
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, colorchooser
 import json
+import re
 import subprocess
+import threading
 import webbrowser
 from pathlib import Path
 import fflags
@@ -30,11 +32,19 @@ FG = "#e0e0e0"
 FG_DIM = "#888888"
 ACCENT = "#8D7EDC"
 ERROR = "#e06c75"
+BORDER = "#161616"
+INPUT_BG = "#1a1a1a"
+INPUT_FG = "#e0e0e0"
+INPUT_BORDER = "#161616"
+SCROLLBAR = "#3a3a3a"
+SCROLLBAR_HOVER = "#5a5a5a"
 BODY_FONT = ("TkDefaultFont", 13)
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 
 USER_PRESETS_FILE = Path.home() / ".local/Lution/fflag_user_presets.json"
+THEME_PRESETS_FILE = BASE / "theme_presets.json"
+THEME_USER_PRESETS_FILE = Path.home() / ".local/Lution/theme_user_presets.json"
 
 def _auto_resize(win):
     try:
@@ -53,6 +63,7 @@ def _fit(win, w, h, ratio=0.85):
     y = max(0, (sh - h) // 3)
     win.geometry(f"{w}x{h}+{x}+{y}")
     win.after(20, lambda: _auto_resize(win))
+
 
 def _clear_all_fflags(app, reload_fn, status):
     win = tk.Toplevel(app, bg=BG)
@@ -151,6 +162,34 @@ def _update_allowlist(app, reload_fn, status):
 
     threading.Thread(target=worker, daemon=True).start()
 
+def _load_theme_presets():
+    presets = {}
+    if THEME_PRESETS_FILE.exists():
+        try:
+            data = json.loads(THEME_PRESETS_FILE.read_text())
+            if isinstance(data, dict):
+                presets = data
+        except Exception:
+            pass
+    return presets
+
+
+def _load_theme_user_presets():
+    presets = {}
+    if THEME_USER_PRESETS_FILE.exists():
+        try:
+            data = json.loads(THEME_USER_PRESETS_FILE.read_text())
+            if isinstance(data, dict):
+                presets = data
+        except Exception:
+            pass
+    return presets
+
+
+def _save_theme_user_presets(presets):
+    THEME_USER_PRESETS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    THEME_USER_PRESETS_FILE.write_text(json.dumps(presets, indent=2) + "\n")
+
 def _load_fflag_presets():
     builtins = {}
     path = BASE / "fflag_presets.json"
@@ -167,6 +206,10 @@ def _load_fflag_presets():
         except Exception:
             pass
 
+    if not isinstance(builtins, dict):
+        builtins = {}
+    if not isinstance(user, dict):
+        user = {}
     return builtins, user
 
 def _save_user_presets(presets):
@@ -181,10 +224,10 @@ def build_flaglist(app, parent, pad):
              font=BODY_FONT).pack(side="left", padx=(0, 8))
 
     search_var = tk.StringVar()
-    search_entry = tk.Entry(search_row, bg=BG, fg=FG, insertbackground=FG,
+    search_entry = tk.Entry(search_row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                              font=BODY_FONT, relief="flat",
                              highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR,
+                             highlightbackground=INPUT_BORDER,
                              highlightcolor=ACCENT,
                              textvariable=search_var)
     search_entry.pack(side="left", fill="x", expand=True, ipady=6)
@@ -271,18 +314,18 @@ def build_flaglist(app, parent, pad):
         row = tk.Frame(list_frame, bg=parent["bg"])
         row.grid(row=row_index, column=0, sticky="ew", pady=3)
 
-        key_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        key_entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, relief="flat", width=32,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         key_entry.insert(0, key)
         key_entry.pack(side="left", padx=(0, 6), ipady=6)
 
-        value_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        value_entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                                 font=BODY_FONT, relief="flat", width=16,
                                 highlightthickness=1,
-                                highlightbackground=BG_SIDEBAR,
+                                highlightbackground=INPUT_BORDER,
                                 highlightcolor=ACCENT)
         value_entry.insert(0, value)
         value_entry.pack(side="left", padx=(0, 6), ipady=6)
@@ -300,6 +343,7 @@ def build_flaglist(app, parent, pad):
         remove_btn.pack(side="left")
 
         app.fflag_rows.append((key_entry, value_entry, row))
+        _update_warning(key_entry)
         apply_filter()
 
     def open_add_flag():
@@ -311,20 +355,20 @@ def build_flaglist(app, parent, pad):
 
         tk.Label(win, text="Flag name:", bg=BG, fg=FG,
                  font=BODY_FONT).pack(anchor="w", padx=16, pady=(16, 2))
-        key_entry = tk.Entry(win, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+        key_entry = tk.Entry(win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, relief="flat", width=40,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         key_entry.pack(anchor="w", padx=16, ipady=6)
         key_entry.focus()
 
         tk.Label(win, text="Value:", bg=BG, fg=FG,
                  font=BODY_FONT).pack(anchor="w", padx=16, pady=(8, 2))
-        val_entry = tk.Entry(win, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+        val_entry = tk.Entry(win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, relief="flat", width=40,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         val_entry.pack(anchor="w", padx=16, ipady=6)
 
@@ -333,6 +377,7 @@ def build_flaglist(app, parent, pad):
             val = val_entry.get().strip()
             if key:
                 add_row(key, val)
+                refresh_warnings()
                 win.destroy()
 
         key_entry.bind("<Return>", lambda e: do_add())
@@ -467,22 +512,21 @@ def _open_presets_window(app, reload_fn, status):
 
     builtins, user_presets = _load_fflag_presets()
 
-    def apply_preset(name, flags, replace=False):
-        current = {} if replace else fflags.get_fflags()
+    def apply_preset(name, flags):
+        current = fflags.get_fflags()
         current.update(flags)
         fflags.save_fflags(current)
         reload_fn()
         _ok, bad = fflags.validate(flags)
         note = (f" ({len(bad)} not on the allowlist)" if bad else "")
-        verb = "Loaded profile" if replace else "Applied preset"
-        status.configure(text=f"{verb}: {name}{note}",
+        status.configure(text=f"Applied preset: {name}{note}",
                          fg=ERROR if bad else FG_DIM)
 
     canvas = tk.Canvas(win, bg=BG, highlightthickness=0)
     scrollbar = tk.Scrollbar(win, orient="vertical",
                               command=canvas.yview,
-                              bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
-                              activebackground=FG_DIM, width=10)
+                              bg=SCROLLBAR, troughcolor=SCROLLBAR,
+                              activebackground=SCROLLBAR_HOVER, width=10)
     body = tk.Frame(canvas, bg=BG)
     body_window = canvas.create_window((0, 0), window=body, anchor="nw")
 
@@ -519,10 +563,13 @@ def _open_presets_window(app, reload_fn, status):
                  anchor="w").pack(anchor="w", padx=16, pady=(16, 6))
 
         bi_frame = tk.Frame(body, bg=BG_ACTIVE, highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR)
+                             highlightbackground=BORDER)
         bi_frame.pack(anchor="w", fill="x", padx=16, pady=(0, 12))
 
         for name, data in builtins.items():
+            if not isinstance(data, dict) or not isinstance(
+                    data.get("flags"), dict):
+                continue
             row = tk.Frame(bi_frame, bg=BG_ACTIVE)
             row.pack(anchor="w", fill="x", padx=8, pady=4)
 
@@ -538,10 +585,6 @@ def _open_presets_window(app, reload_fn, status):
                          font=("TkDefaultFont", 9),
                          anchor="w").pack(anchor="w")
 
-            app.make_button(row, "Replace",
-                             command=lambda n=name, f=data["flags"]: apply_preset(n, f, replace=True),
-                             padx=10, pady=4
-                             ).pack(side="right")
             app.make_button(row, "Apply", command=lambda n=name, f=data["flags"]: apply_preset(n, f),
                              padx=10, pady=4
                              ).pack(side="right")
@@ -551,7 +594,7 @@ def _open_presets_window(app, reload_fn, status):
              anchor="w").pack(anchor="w", padx=16, pady=(6, 6))
 
     user_frame = tk.Frame(body, bg=BG_ACTIVE, highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR)
+                           highlightbackground=BORDER)
     user_frame.pack(anchor="w", fill="x", padx=16, pady=(0, 12))
 
     def refresh_user():
@@ -563,6 +606,9 @@ def _open_presets_window(app, reload_fn, status):
                      font=("TkDefaultFont", 10)).pack(anchor="w", padx=8, pady=8)
             return
         for name, data in up.items():
+            if not isinstance(data, dict) or not isinstance(
+                    data.get("flags"), dict):
+                continue
             row = tk.Frame(user_frame, bg=BG_ACTIVE)
             row.pack(anchor="w", fill="x", padx=8, pady=4)
 
@@ -571,11 +617,6 @@ def _open_presets_window(app, reload_fn, status):
                              padx=10, pady=4
                              ).pack(side="left")
 
-            app.make_button(row, "Replace",
-                             command=lambda n=name, f=data["flags"]: apply_preset(n, f, replace=True),
-                             padx=10, pady=4
-                             ).pack(side="left", padx=(6, 0))
-
             def delete_preset(n=name):
                 d = {}
                 if USER_PRESETS_FILE.exists():
@@ -583,6 +624,8 @@ def _open_presets_window(app, reload_fn, status):
                         d = json.loads(USER_PRESETS_FILE.read_text())
                     except Exception:
                         pass
+                if not isinstance(d, dict):
+                    d = {}
                 d.pop(n, None)
                 _save_user_presets(d)
                 refresh_user()
@@ -604,10 +647,10 @@ def _open_presets_window(app, reload_fn, status):
         tk.Label(save_win, text="Preset name:", bg=BG, fg=FG,
                  font=BODY_FONT).pack(anchor="w", padx=16, pady=(16, 4))
 
-        name_entry = tk.Entry(save_win, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+        name_entry = tk.Entry(save_win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                                font=BODY_FONT, relief="flat",
                                highlightthickness=1,
-                               highlightbackground=BG_SIDEBAR,
+                               highlightbackground=INPUT_BORDER,
                                highlightcolor=ACCENT)
         name_entry.pack(fill="x", padx=16, pady=(0, 8), ipady=6)
         name_entry.focus()
@@ -625,6 +668,8 @@ def _open_presets_window(app, reload_fn, status):
                     d = json.loads(USER_PRESETS_FILE.read_text())
                 except Exception:
                     pass
+            if not isinstance(d, dict):
+                d = {}
             d[name] = {"description": "", "flags": current}
             _save_user_presets(d)
             save_win.destroy()
@@ -678,31 +723,35 @@ def _open_paste_json(app):
     text_frame = tk.Frame(win, bg=BG_ACTIVE)
     text_frame.pack(fill="both", expand=True, padx=16, pady=(0, 8))
 
-    text = tk.Text(text_frame, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+    text = tk.Text(text_frame, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                     font=BODY_FONT, relief="flat", wrap="word",
-                    highlightthickness=1, highlightbackground=BG_SIDEBAR,
+                    highlightthickness=1, highlightbackground=BORDER,
                     height=12)
     text_scroll = tk.Scrollbar(text_frame, orient="vertical",
                                 command=text.yview,
-                                bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
-                                activebackground=FG_DIM, width=10)
+                                bg=SCROLLBAR, troughcolor=SCROLLBAR,
+                                activebackground=SCROLLBAR_HOVER, width=10)
     text.configure(yscrollcommand=text_scroll.set)
     text_scroll.pack(side="right", fill="y")
     text.pack(side="left", fill="both", expand=True)
     text.focus_set()
 
-    text.bind("<Return>", lambda e: apply_json())
-    text.bind("<KP_Enter>", lambda e: apply_json())
+    def apply_on_key(event):
+        apply_json()
+        return "break"
+
+    text.bind("<Control-Return>", apply_on_key)
+    text.bind("<Control-KP_Enter>", apply_on_key)
 
 def build_fpsinput(app, parent, pad):
     tk.Label(parent, text="Framerate cap", bg=parent["bg"], fg=FG,
              font=BODY_FONT).pack(anchor="w", padx=pad, pady=(0, 2))
 
     vcmd = (app.register(fps.validate_digits), "%P")
-    entry = tk.Entry(parent, bg=BG, fg=FG, insertbackground=FG,
+    entry = tk.Entry(parent, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                       font=BODY_FONT, relief="flat",
                       highlightthickness=1,
-                      highlightbackground=BG_SIDEBAR,
+                      highlightbackground=INPUT_BORDER,
                       highlightcolor=ACCENT,
                       validate="key", validatecommand=vcmd)
     current = fps.load_framerate_cap()
@@ -725,16 +774,10 @@ def build_fpsinput(app, parent, pad):
         try:
             fps.save_framerate_cap(value)
         except Exception as e:
-            fps_status.configure(text=str(e), fg=ERROR)
-        else:
-            fps_status.configure(text=f"saved, cap is now {value}", fg=FG_DIM)
+            log.error(f"Could not save framerate cap: {e}")
 
     app.make_button(parent, "Save FPS Limit", command=save
-                     ).pack(anchor="w", padx=pad, pady=(0, 4))
-    fps_status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
-                          font=("TkDefaultFont", 10), anchor="w",
-                          wraplength=500, justify="left")
-    fps_status.pack(anchor="w", padx=pad, pady=(0, 14))
+                     ).pack(anchor="w", padx=pad, pady=(0, 14))
 
 def build_fontpicker(app, parent, pad):
     tk.Label(parent, text="Font file (.ttf / .otf)", bg=parent["bg"],
@@ -743,10 +786,10 @@ def build_fontpicker(app, parent, pad):
     row = tk.Frame(parent, bg=parent["bg"])
     row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-    path_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+    path_entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                            font=BODY_FONT, relief="flat",
                            highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR,
+                           highlightbackground=INPUT_BORDER,
                            highlightcolor=ACCENT)
     path_entry.pack(side="left", fill="x", expand=True, ipady=8,
                       padx=(0, 6))
@@ -822,10 +865,10 @@ def build_envvars(app, parent, pad):
         row = tk.Frame(list_frame, bg=parent["bg"])
         row.pack(anchor="w", fill="x", pady=3)
 
-        key_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        key_entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, relief="flat", width=22,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         key_entry.insert(0, key)
         key_entry.pack(side="left", padx=(0, 6), ipady=6)
@@ -834,10 +877,10 @@ def build_envvars(app, parent, pad):
                              font=BODY_FONT)
         eq_label.pack(side="left", padx=(0, 6))
 
-        value_entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        value_entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                                 font=BODY_FONT, relief="flat",
                                 highlightthickness=1,
-                                highlightbackground=BG_SIDEBAR,
+                                highlightbackground=INPUT_BORDER,
                                 highlightcolor=ACCENT)
         value_entry.insert(0, value)
         value_entry.pack(side="left", fill="x", expand=True, ipady=6,
@@ -865,20 +908,20 @@ def build_envvars(app, parent, pad):
 
         tk.Label(win, text="Variable name:", bg=BG, fg=FG,
                  font=BODY_FONT).pack(anchor="w", padx=16, pady=(16, 2))
-        key_entry = tk.Entry(win, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+        key_entry = tk.Entry(win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, width=40,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         key_entry.pack(anchor="w", padx=16, ipady=6)
         key_entry.focus()
 
         tk.Label(win, text="Value:", bg=BG, fg=FG,
                  font=BODY_FONT).pack(anchor="w", padx=16, pady=(8, 2))
-        val_entry = tk.Entry(win, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
+        val_entry = tk.Entry(win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                               font=BODY_FONT, width=40,
                               highlightthickness=1,
-                              highlightbackground=BG_SIDEBAR,
+                              highlightbackground=INPUT_BORDER,
                               highlightcolor=ACCENT)
         val_entry.pack(anchor="w", padx=16, ipady=6)
 
@@ -955,6 +998,8 @@ def build_cursorpicker(app, parent, pad):
                     entry.insert(0, preset_cursors[name])
 
         preset_combo.bind("<<ComboboxSelected>>", on_preset_change)
+    else:
+        preset_combo = None
 
     for state_name in cursors.CURSOR_STATES:
         label_text = state_name + ".png"
@@ -964,10 +1009,10 @@ def build_cursorpicker(app, parent, pad):
         row = tk.Frame(parent, bg=parent["bg"])
         row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-        entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                           font=BODY_FONT, relief="flat",
                           highlightthickness=1,
-                          highlightbackground=BG_SIDEBAR,
+                          highlightbackground=INPUT_BORDER,
                           highlightcolor=ACCENT)
         entry.pack(side="left", fill="x", expand=True, ipady=8,
                     padx=(0, 6))
@@ -981,7 +1026,7 @@ def build_cursorpicker(app, parent, pad):
             if chosen:
                 e.delete(0, "end")
                 e.insert(0, chosen)
-                if preset_combo.get() != "Custom":
+                if preset_combo is not None and preset_combo.get() != "Custom":
                     preset_combo.set("Custom")
 
         app.make_button(row, "browse", command=browse_cursor,
@@ -1064,10 +1109,10 @@ def build_emotewheelpicker(app, parent, pad):
         row = tk.Frame(parent, bg=parent["bg"])
         row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-        entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                           font=BODY_FONT, relief="flat",
                           highlightthickness=1,
-                          highlightbackground=BG_SIDEBAR,
+                          highlightbackground=INPUT_BORDER,
                           highlightcolor=ACCENT)
         entry.pack(side="left", fill="x", expand=True, ipady=8,
                     padx=(0, 6))
@@ -1127,10 +1172,44 @@ def build_themepicker(app, parent, pad):
         "accent": "Accent",
         "bg": "Background",
         "bg_sidebar": "Sidebar",
+        "bg_active": "Active BG",
         "fg": "Text",
+        "fg_dim": "Dim Text",
+        "error": "Error",
+        "border": "Border",
+        "input_bg": "Input BG",
+        "input_fg": "Input Text",
+        "input_border": "Input Border",
+        "button_bg": "Button BG",
+        "button_fg": "Button Text",
+        "button_hover": "Button Hover",
+        "scrollbar": "Scrollbar",
+        "scrollbar_hover": "Scrollbar Hover",
     }
 
+    def pick_color(key, entry, swatch):
+        initial = entry.get().strip()
+        if not (len(initial) == 7 and initial.startswith("#")):
+            initial = None
+        else:
+            try:
+                int(initial[1:], 16)
+            except ValueError:
+                initial = None
+        color = colorchooser.askcolor(
+            initialcolor=initial, parent=parent,
+            title=f"Pick {color_labels[key]}")
+        if color[1]:
+            entry.delete(0, "end")
+            entry.insert(0, color[1])
+            swatch.configure(bg=color[1])
+
     entries = {}
+    swatches = {}
+
+    builtin_presets = _load_theme_presets()
+    user_presets = _load_theme_user_presets()
+
     for key in themes.COLOR_KEYS:
         label = color_labels[key]
         tk.Label(parent, text=label, bg=parent["bg"], fg=FG,
@@ -1139,10 +1218,10 @@ def build_themepicker(app, parent, pad):
         row = tk.Frame(parent, bg=parent["bg"])
         row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-        entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                           font=BODY_FONT, relief="flat",
                           highlightthickness=1,
-                          highlightbackground=BG_SIDEBAR,
+                          highlightbackground=INPUT_BORDER,
                           highlightcolor=ACCENT)
         entry.insert(0, current[key])
         entry.pack(side="left", fill="x", expand=True, ipady=8,
@@ -1151,8 +1230,9 @@ def build_themepicker(app, parent, pad):
 
         swatch = tk.Label(row, bg=current[key], width=3, height=1,
                            relief="flat", highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR)
+                           highlightbackground=BORDER, cursor="hand2")
         swatch.pack(side="left", padx=(0, 6))
+        swatches[key] = swatch
 
         def update_swatch(event=None, ent=entry, s=swatch):
             val = ent.get().strip()
@@ -1165,41 +1245,204 @@ def build_themepicker(app, parent, pad):
 
         entry.bind("<KeyRelease>", update_swatch)
 
+        def open_picker(event=None, k=key, e=entry, s=swatch):
+            pick_color(k, e, s)
+
+        entry.bind("<Button-1>", open_picker)
+        swatch.bind("<Button-1>", open_picker)
+
     status = tk.Label(parent, text="", bg=parent["bg"], fg=FG_DIM,
                        font=("TkDefaultFont", 10), anchor="w",
                        wraplength=500, justify="left")
     status.pack(anchor="w", padx=pad, pady=(0, 6))
 
-    def apply_theme():
-        colors = {}
+    def apply_colors(colors):
+        merged = dict(themes.DEFAULTS)
+        for key, val in colors.items():
+            if key in themes.DEFAULTS and themes._valid_color(val):
+                merged[key] = val.strip()
+        themes.save_theme(merged)
         for key in themes.COLOR_KEYS:
-            val = entries[key].get().strip()
-            if len(val) == 7 and val.startswith("#"):
-                try:
-                    int(val[1:], 16)
-                    colors[key] = val
-                except ValueError:
-                    status.configure(text=f"Invalid hex color for {color_labels[key]}.", fg=ERROR)
-                    return
-            else:
-                status.configure(text=f"Invalid hex color for {color_labels[key]}.", fg=ERROR)
-                return
-        themes.save_theme(colors)
-        status.configure(text="theme saved. restart lution to apply", fg=FG_DIM)
+            entries[key].delete(0, "end")
+            entries[key].insert(0, merged[key])
+            swatches[key].configure(bg=merged[key])
+        try:
+            status.configure(text="theme applied", fg=FG_DIM)
+        except tk.TclError:
+            pass
+        app.reload_theme()
 
-    app.make_button(parent, "Save theme", command=apply_theme
-                     ).pack(anchor="w", padx=pad, pady=(0, 6))
+    def apply_preset(name, preset):
+        colors = preset.get("colors", preset)
+        if not isinstance(colors, dict):
+            return
+        apply_colors(colors)
+
+    def open_preset_window():
+        win = tk.Toplevel(parent)
+        win.title("Theme Presets")
+        win.configure(bg=BG)
+        win.transient(parent)
+        win.grab_set()
+
+        container = tk.Frame(win, bg=BG)
+        container.pack(fill="both", expand=True, padx=12, pady=12)
+
+        tk.Label(container, text="Theme Presets", bg=BG, fg=FG,
+                 font=("TkDefaultFont", 14, "bold")).pack(anchor="w", pady=(0, 8))
+
+        canvas = tk.Canvas(container, bg=BG, highlightthickness=0)
+        scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview,
+                                  bg=SCROLLBAR, troughcolor=SCROLLBAR,
+                                  activebackground=SCROLLBAR_HOVER, width=10)
+        list_frame = tk.Frame(canvas, bg=BG)
+
+        list_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=list_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        def on_canvas_width(e):
+            canvas.itemconfigure(canvas.find_all()[0], width=e.width)
+        canvas.bind("<Configure>", on_canvas_width)
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            return "break"
+        def _on_mousewheel_linux(event):
+            canvas.yview_scroll(-1 if event.num == 4 else 1, "units")
+            return "break"
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+        canvas.bind("<Button-4>", _on_mousewheel_linux)
+        canvas.bind("<Button-5>", _on_mousewheel_linux)
+        list_frame.bind("<MouseWheel>", _on_mousewheel)
+        list_frame.bind("<Button-4>", _on_mousewheel_linux)
+        list_frame.bind("<Button-5>", _on_mousewheel_linux)
+
+        win.bind("<MouseWheel>", _on_mousewheel)
+        win.bind("<Button-4>", _on_mousewheel_linux)
+        win.bind("<Button-5>", _on_mousewheel_linux)
+        container.bind("<MouseWheel>", _on_mousewheel)
+        container.bind("<Button-4>", _on_mousewheel_linux)
+        container.bind("<Button-5>", _on_mousewheel_linux)
+
+        if user_presets:
+            tk.Label(list_frame, text="Your Presets", bg=BG, fg=ACCENT,
+                     font=("TkDefaultFont", 12, "bold")).pack(anchor="w", pady=(0, 4))
+            for name in sorted(user_presets.keys()):
+                preset = user_presets[name]
+                row = tk.Frame(list_frame, bg=BG)
+                row.pack(fill="x", pady=2)
+                btn = tk.Button(row, text=name, bg=BG_ACTIVE, fg=FG,
+                                font=BODY_FONT, relief="flat", anchor="w",
+                                padx=12, pady=8, cursor="hand2",
+                                command=lambda n=name, p=preset: apply_and_close(n, p))
+                btn.pack(side="left", fill="x", expand=True)
+                btn.bind("<Enter>", lambda e, b=btn: b.configure(bg=BORDER))
+                btn.bind("<Leave>", lambda e, b=btn: b.configure(bg=BG_ACTIVE))
+                del_btn = tk.Button(row, text="✕", bg=BG_ACTIVE, fg=FG,
+                                    font=("TkDefaultFont", 10), relief="flat",
+                                    padx=8, pady=4, cursor="hand2",
+                                    command=lambda n=name: delete_preset(n, row))
+                del_btn.pack(side="right", padx=(8, 0))
+                del_btn.bind("<Enter>", lambda e, b=del_btn: b.configure(fg=ERROR))
+                del_btn.bind("<Leave>", lambda e, b=del_btn: b.configure(fg=FG))
+
+        def delete_preset(n, row):
+            user_presets.pop(n, None)
+            _save_theme_user_presets(user_presets)
+            row.destroy()
+            try:
+                status.configure(text=f"Deleted preset '{n}'", fg=FG_DIM)
+            except tk.TclError:
+                pass
+
+        def apply_and_close(n, p):
+            apply_preset(n, p)
+            win.destroy()
+
+        if builtin_presets:
+            separator = tk.Frame(list_frame, bg=BORDER, height=1)
+            separator.pack(fill="x", pady=8)
+            tk.Label(list_frame, text="Built-in Presets", bg=BG, fg=FG_DIM,
+                     font=("TkDefaultFont", 12, "bold")).pack(anchor="w", pady=(0, 4))
+            for name in sorted(builtin_presets.keys()):
+                btn = tk.Button(list_frame, text=name, bg=BG_ACTIVE, fg=FG,
+                                font=BODY_FONT, relief="flat", anchor="w",
+                                padx=12, pady=8, cursor="hand2", wraplength=500, justify="left",
+                                command=lambda n=name, p=builtin_presets[name]: apply_and_close(n, p))
+                btn.pack(fill="x", pady=2)
+                btn.bind("<Enter>", lambda e, b=btn: b.configure(bg=BORDER))
+                btn.bind("<Leave>", lambda e, b=btn: b.configure(bg=BG_ACTIVE))
+
+        _fit(win, 600, 500)
+
+    def save_as_preset():
+        name_win = tk.Toplevel(parent)
+        name_win.title("Save as Preset")
+        name_win.configure(bg=BG)
+        name_win.transient(parent)
+        name_win.grab_set()
+
+        tk.Label(name_win, text="Preset name:", bg=BG, fg=FG, font=BODY_FONT).pack(anchor="w", padx=12, pady=(12, 4))
+        name_var = tk.StringVar()
+        name_entry = tk.Entry(name_win, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
+                               font=BODY_FONT, relief="flat", highlightthickness=1,
+                               highlightbackground=INPUT_BORDER, highlightcolor=ACCENT,
+                               textvariable=name_var)
+        name_entry.pack(fill="x", padx=12, pady=(0, 12), ipady=6)
+        name_entry.focus_set()
+
+        def do_save():
+            name = name_var.get().strip()
+            if not name:
+                return
+            colors = {}
+            for key in themes.COLOR_KEYS:
+                val = entries[key].get().strip()
+                if len(val) == 7 and val.startswith("#"):
+                    try:
+                        int(val[1:], 16)
+                        colors[key] = val
+                    except ValueError:
+                        pass
+            if not colors:
+                return
+            user_presets[name] = {"description": "Custom preset", "colors": colors}
+            _save_theme_user_presets(user_presets)
+            try:
+                status.configure(text=f"Saved preset '{name}'", fg=FG_DIM)
+            except tk.TclError:
+                pass
+            name_win.destroy()
+
+        btn_row = tk.Frame(name_win, bg=BG)
+        btn_row.pack(fill="x", padx=12, pady=(0, 12))
+        app.make_button(btn_row, "Save", command=do_save).pack(side="right", padx=(8, 0))
+        app.make_button(btn_row, "Cancel", command=name_win.destroy, bg=ERROR, fg="#0a0a0a").pack(side="right")
+
+        _fit(name_win, 350, 150)
 
     def restore_default():
         themes.save_theme(dict(themes.DEFAULTS))
         for key in themes.COLOR_KEYS:
             entries[key].delete(0, "end")
             entries[key].insert(0, themes.DEFAULTS[key])
-        status.configure(text="default theme restored. restart lution to apply", fg=FG_DIM)
+            swatches[key].configure(bg=themes.DEFAULTS[key])
+        try:
+            status.configure(text="default theme restored", fg=FG_DIM)
+        except tk.TclError:
+            pass
+        app.reload_theme()
 
-    app.make_button(parent, "Restore default theme", command=restore_default,
-                     bg=ERROR, fg="#0a0a0a"
-                     ).pack(anchor="w", padx=pad, pady=(0, 14))
+    btn_row = tk.Frame(parent, bg=parent["bg"])
+    btn_row.pack(anchor="w", padx=pad, pady=(0, 6))
+
+    app.make_button(btn_row, "Browse presets", command=open_preset_window).pack(side="left", padx=(0, 8))
+    app.make_button(btn_row, "Save as preset", command=save_as_preset).pack(side="left", padx=(0, 8))
+    app.make_button(btn_row, "Restore default", command=restore_default, bg=ERROR, fg="#0a0a0a").pack(side="left")
 
 def build_emojipicker(app, parent, pad):
     tk.Label(parent, text="Emoji font", bg=parent["bg"],
@@ -1209,11 +1452,13 @@ def build_emojipicker(app, parent, pad):
     selected_font = tk.StringVar()
 
     list_frame = tk.Frame(parent, bg=BG, highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR)
+                           highlightbackground=BORDER)
     list_frame.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
     canvas = tk.Canvas(list_frame, bg=BG, highlightthickness=0, height=200)
-    scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
+    scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview,
+                              bg=SCROLLBAR, troughcolor=SCROLLBAR,
+                              activebackground=SCROLLBAR_HOVER)
     inner = tk.Frame(canvas, bg=BG)
 
     inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -1243,10 +1488,10 @@ def build_emojipicker(app, parent, pad):
     tk.Label(custom_row, text="Custom file:", bg=BG_ACTIVE, fg=FG_DIM,
              font=("TkDefaultFont", 11)).pack(side="left", padx=(0, 6))
 
-    custom_entry = tk.Entry(custom_row, bg=BG, fg=FG, insertbackground=FG,
+    custom_entry = tk.Entry(custom_row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                              font=("TkDefaultFont", 11), relief="flat",
                              highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR,
+                             highlightbackground=INPUT_BORDER,
                              highlightcolor=ACCENT)
     custom_entry.pack(side="left", fill="x", expand=True, ipady=4, padx=(0, 6))
 
@@ -1344,7 +1589,7 @@ def build_modmanager(app, parent, pad):
                                selectbackground=ACCENT, selectforeground="#0a0a0a",
                                font=BODY_FONT, relief="flat", height=8,
                                highlightthickness=1,
-                               highlightbackground=BG_SIDEBAR,
+                               highlightbackground=INPUT_BORDER,
                                highlightcolor=ACCENT)
     mod_listbox.pack(fill="x", ipady=4)
 
@@ -1376,11 +1621,13 @@ def build_modmanager(app, parent, pad):
         conflicts = mods.check_mod_conflicts(mod_path)
         if conflicts:
             first = conflicts[0]
-            status.configure(
-                text=f"Overlaps another mod on {len(conflicts)} file(s), e.g. {first}. Installing anyway.",
-                fg="#e0c252")
-        ok, msg = mods.install_mod(mod_path)
-        status.configure(text=msg, fg=FG_DIM if ok else ERROR)
+            msg = (f"Overlaps another mod on {len(conflicts)} file(s), "
+                   f"e.g. {first}. ")
+        else:
+            msg = ""
+        ok, result = mods.install_mod(mod_path)
+        status.configure(text=msg + result,
+                         fg=FG_DIM if ok else ERROR)
 
     def remove_selected():
         sel = mod_listbox.curselection()
@@ -1413,7 +1660,7 @@ def build_modmanager(app, parent, pad):
                              variable=also_var, bg=BG, fg=FG,
                              font=("TkDefaultFont", 10),
                              selectcolor=BG_ACTIVE, activebackground=BG,
-                             activeforeground=FG)
+                             activeforeground=FG, highlightthickness=0)
         cb.pack(anchor="w", padx=16, pady=(0, 10))
 
         btn_row = tk.Frame(win, bg=BG)
@@ -1465,20 +1712,14 @@ def build_modmanager(app, parent, pad):
         win.resizable(False, False)
 
         guide_frame = tk.Frame(win, bg=BG_SIDEBAR, highlightthickness=1,
-                                highlightbackground=BG_SIDEBAR)
-        guide_frame.pack(fill="both", expand=True, padx=16, pady=(16, 10))
+                                highlightbackground=BORDER)
+        guide_frame.pack(fill="both", expand=True, padx=0, pady=(0, 0))
 
-        guide_box = tk.Text(guide_frame, bg=BG_ACTIVE, fg=FG,
+        guide_box = tk.Text(guide_frame, bg=INPUT_BG, fg=INPUT_FG,
                          font=("TkDefaultFont", 11), relief="flat",
                          highlightthickness=0, wrap="word",
                          padx=10, pady=10,
                          width=64, height=20)
-        scroll = tk.Scrollbar(guide_frame, orient="vertical",
-                               command=guide_box.yview,
-                               bg=BG_SIDEBAR, troughcolor=BG_SIDEBAR,
-                               activebackground=FG_DIM, width=10)
-        guide_box.configure(yscrollcommand=scroll.set)
-        scroll.pack(side="right", fill="y")
         guide_box.pack(side="left", fill="both", expand=True)
 
         guide_text = (
@@ -1516,9 +1757,6 @@ def build_modmanager(app, parent, pad):
         guide_box.insert("1.0", guide_text)
         guide_box.configure(state="disabled")
 
-        app.make_button(win, "Close", command=win.destroy,
-                         padx=14, pady=6).pack(side="right", padx=16,
-                                                pady=(0, 14))
 
     app.make_button(parent, "What the fuck do I do?", command=open_guide,
                      bg=BG_SIDEBAR, fg=FG_DIM, padx=14, pady=8
@@ -1591,10 +1829,10 @@ def build_soundmods(app, parent, pad):
         row = tk.Frame(parent, bg=parent["bg"])
         row.pack(anchor="w", fill="x", padx=pad, pady=(0, 6))
 
-        entry = tk.Entry(row, bg=BG, fg=FG, insertbackground=FG,
+        entry = tk.Entry(row, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG,
                           font=BODY_FONT, relief="flat",
                           highlightthickness=1,
-                          highlightbackground=BG_SIDEBAR,
+                          highlightbackground=INPUT_BORDER,
                           highlightcolor=ACCENT)
         entry.pack(side="left", fill="x", expand=True, ipady=8, padx=(0, 6))
         sound_entries[file_name] = entry
@@ -1665,12 +1903,13 @@ def build_playhistory(app, parent, pad):
         for w in list_frame.winfo_children():
             w.destroy()
 
-        if total:
+        if not total or not total[2]:
+            summary.configure(
+                text="i can't see playtime from sober's logs :(", fg=ERROR)
+        else:
             summary.configure(
                 text=f"Total {playtime.format_duration(total[1])} in "
                      f"{total[2]} sessions", fg=FG_DIM)
-        elif total is None:
-            summary.configure(text="i can't see playtime from sober's logs :(", fg=ERROR)
 
         if not entries:
             tk.Label(list_frame,
@@ -1798,11 +2037,13 @@ def build_marketplace(app, parent, pad):
     progress_label.pack(side="left", padx=(8, 0))
 
     def show_progress():
-        progress_bar.configure(value=0.0)
+        progress_bar.stop()
+        progress_bar.configure(mode="determinate", value=0.0)
         progress_label.configure(text="Downloading...")
         progress_area.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
 
     def hide_progress():
+        progress_bar.stop()
         progress_area.pack_forget()
 
     list_frame = tk.Frame(parent, bg=parent["bg"])
@@ -1861,7 +2102,7 @@ def build_marketplace(app, parent, pad):
         for item in items:
             row = tk.Frame(list_frame, bg=BG_ACTIVE,
                             highlightthickness=1,
-                            highlightbackground=BG_SIDEBAR)
+                            highlightbackground=BORDER)
             row.pack(anchor="w", fill="x", pady=2)
 
             icon_path = icons.get(item.get("name"))
@@ -1876,8 +2117,10 @@ def build_marketplace(app, parent, pad):
                     icon_path = None
             if not icon_path:
                 if placeholder_img is not None:
-                    icon_refs.append(placeholder_img)
-                    tk.Label(row, image=placeholder_img, bg=BG_ACTIVE
+                    placeholder_copy = _fit_icon(
+                        tk.PhotoImage(file=str(placeholder_file)))
+                    icon_refs.append(placeholder_copy)
+                    tk.Label(row, image=placeholder_copy, bg=BG_ACTIVE
                              ).pack(side="left", padx=(8, 6), pady=4)
                 else:
                     badge = "FF" if item.get("type") == "fflags" else "MOD"
@@ -1924,14 +2167,15 @@ def build_marketplace(app, parent, pad):
 
                         mdir = mods_mod.MODS_DIR
                         mdir.mkdir(parents=True, exist_ok=True)
-                        safe_name = item.get("name", "mod").replace(
-                            " ", "_") + ".zip"
-                        zip_path = mdir / safe_name
+                        raw_name = str(item.get("name", "mod")).replace(" ", "_")
+                        safe_name = re.sub(r"[^A-Za-z0-9._-]", "_",
+                                           raw_name).strip("._") or "mod"
+                        zip_path = mdir / (safe_name[:80] + ".zip")
                         zip_path.write_bytes(data)
                         ok, msg = mods_mod.install_mod(zip_path)
                         if not ok:
                             app.after(0, hide_progress)
-                            set_status(msg, error=True)
+                            app.after(0, lambda: set_status(msg, error=True))
                             return
                     else:
                         data = mkt.download(item["url"])
@@ -1972,7 +2216,7 @@ def build_marketplace(app, parent, pad):
                 except Exception as e:
                     app.after(0, hide_progress)
                     log.error(f"Marketplace install failed: {e}")
-                    set_status(f"Install failed: {e}", error=True)
+                    app.after(0, lambda: set_status(f"Install failed: {e}", error=True))
 
             def on_click(_e=None, do=do_install):
                 threading.Thread(target=lambda: _safe_install(do),
@@ -1982,30 +2226,39 @@ def build_marketplace(app, parent, pad):
                 try:
                     fn()
                 except Exception as e:
-                    set_status(f"Install failed: {e}", error=True)
+                    app.after(0, lambda: set_status(f"Install failed: {e}", error=True))
 
             btn = app.make_button(row, "Install", command=on_click,
-                                   bg=ACCENT, fg="#0a0a0a",
                                    padx=14, pady=7)
             btn.pack(side="right", padx=10)
 
+    fetching = {"on": False}
+
     def refresh_list():
+        if fetching["on"]:
+            return
+        fetching["on"] = True
+
         def worker():
-            ev = getattr(app, "mainloop_started", None)
-            if ev is not None:
-                ev.wait(timeout=10)
-            items, from_cache = mkt.fetch_store()
-            icons = {}
-            for item in items:
-                if item.get("type") == "mod" and item.get("icon"):
-                    path = mkt.fetch_icon(item.get("name", ""),
-                                           item["icon"])
-                    if path:
-                        icons[item["name"]] = str(path)
-            if from_cache:
-                set_status("can't fetch marketplace, using cached copy",
-                           error=True)
-            app.after(0, lambda: render(items, icons))
+            try:
+                ev = getattr(app, "mainloop_started", None)
+                if ev is not None:
+                    ev.wait(timeout=10)
+                items, from_cache = mkt.fetch_store()
+                icons = {}
+                for item in items:
+                    if item.get("type") == "mod" and item.get("icon"):
+                        path = mkt.fetch_icon(item.get("name", ""),
+                                               item["icon"])
+                        if path:
+                            icons[item["name"]] = str(path)
+                if from_cache:
+                    app.after(0, lambda: set_status(
+                        "can't fetch marketplace, using cached copy",
+                        error=True))
+                app.after(0, lambda: render(items, icons))
+            finally:
+                app.after(0, lambda: fetching.update(on=False))
         threading.Thread(target=worker, daemon=True).start()
 
     def on_page_shown(page_name):
@@ -2036,15 +2289,24 @@ def build_versionlabel(app, parent, pad):
     status.pack(anchor="w", padx=pad, pady=(0, 6))
 
     def check():
-        outdated, latest, url = updater.check_for_update()
-        if outdated:
-            status.configure(text=f"Update available: v{latest}", fg=ACCENT)
-            def open_url():
-                webbrowser.open(url)
-            app.make_button(parent, "see the new lution update", command=open_url,
-                              padx=14, pady=6).pack(anchor="w", padx=pad, pady=(0, 6))
-        else:
-            status.configure(text="Up to date", fg=FG_DIM)
+        def worker():
+            outdated, latest, url = updater.check_for_update()
+
+            def done():
+                if outdated:
+                    status.configure(text=f"Update available: v{latest}", fg=ACCENT)
+
+                    def open_url():
+                        webbrowser.open(url)
+
+                    app.make_button(parent, "see the new lution update", command=open_url,
+                                      padx=14, pady=6).pack(anchor="w", padx=pad, pady=(0, 6))
+                else:
+                    status.configure(text="Up to date", fg=FG_DIM)
+
+            app.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
 
     app.after(100, check)
 
@@ -2055,37 +2317,41 @@ def build_soberversion(app, parent, pad):
     version_lbl.pack(anchor="w", padx=pad, pady=(0, 6))
 
     def fetch(attempt=0):
-        try:
-            result = subprocess.run(
-                ["flatpak", "info", "org.vinegarhq.Sober"],
-                capture_output=True, text=True, timeout=8,
-                env=sober.clean_env()
-            )
-            version = "Unknown"
-            for line in result.stdout.splitlines():
-                log.debug(f"flatpak info: {line}")
-                if line.strip().startswith("Version:"):
-                    version = line.split(":", 1)[1].strip()
-                    break
-            for line in result.stderr.splitlines():
-                log.debug(f"flatpak info stderr: {line}")
-            if version != "Unknown":
-                log.info(f"Sober version: {version}")
-                version_lbl.configure(text=f"Sober version: {version}")
-                return
-            log.warning(f"Sober version not in flatpak output (rc={result.returncode})")
-            if attempt < 2:
-                version_lbl.configure(text="Sober version: ... (retrying)")
-                app.after(1500, lambda: fetch(attempt + 1))
-            else:
-                version_lbl.configure(text="Sober version: idk bro")
-        except Exception as e:
-            log.error(f"i can't see sober's version :(: {e}")
-            if attempt < 2:
-                version_lbl.configure(text="Sober version: ... (retrying)")
-                app.after(1500, lambda: fetch(attempt + 1))
-            else:
-                version_lbl.configure(text="Sober version: idk bro")
+        def worker():
+            try:
+                flag = sober.installed_flag()
+                result = subprocess.run(
+                    ["flatpak", "info"] + ([flag] if flag else []) + ["org.vinegarhq.Sober"],
+                    capture_output=True, text=True, timeout=8,
+                    env=sober.clean_env()
+                )
+                version = "Unknown"
+                for line in result.stdout.splitlines():
+                    log.debug(f"flatpak info: {line}")
+                    if line.strip().startswith("Version:"):
+                        version = line.split(":", 1)[1].strip()
+                        break
+                for line in result.stderr.splitlines():
+                    log.debug(f"flatpak info stderr: {line}")
+                if version != "Unknown":
+                    log.info(f"Sober version: {version}")
+                    app.after(0, lambda v=version: version_lbl.configure(text=f"Sober version: {v}"))
+                    return
+                log.warning(f"Sober version not in flatpak output (rc={result.returncode})")
+                if attempt < 2:
+                    app.after(0, lambda: version_lbl.configure(text="Sober version: ... (retrying)"))
+                    app.after(1500, lambda: fetch(attempt + 1))
+                else:
+                    app.after(0, lambda: version_lbl.configure(text="Sober version: idk bro"))
+            except Exception as e:
+                log.error(f"i can't see sober's version :(: {e}")
+                if attempt < 2:
+                    app.after(0, lambda: version_lbl.configure(text="Sober version: ... (retrying)"))
+                    app.after(1500, lambda: fetch(attempt + 1))
+                else:
+                    app.after(0, lambda: version_lbl.configure(text="Sober version: idk bro"))
+
+        threading.Thread(target=worker, daemon=True).start()
 
     app.after(300, fetch)
 
@@ -2101,23 +2367,7 @@ def build_soberlauncher(app, parent, pad):
         log.info("Launch Sober clicked")
         bootstrapper.open_in(app)
 
-    def run_vanilla():
-        import launcher
-        log.info("Launch vanilla Sober clicked")
-        try:
-            if launcher.sober_is_running():
-                raise launcher.LaunchError(
-                    "Sober is already running, so it keeps the files it was "
-                    "started with.")
-            launcher.launch_plain()
-        except launcher.LaunchError as e:
-            log.error(f"lauching sober without customizations failed: {e}")
-            messagebox.showerror("Lution", str(e), parent=parent)
-
     app.make_button(parent, "Launch Sober", command=run
-                    ).pack(anchor="w", padx=pad, pady=(4, 4))
-    app.make_button(parent, "Launch Sober without customizations",
-                    command=run_vanilla
                     ).pack(anchor="w", padx=pad, pady=(4, 4))
 
 def build_sobersettings(app, parent, pad):
@@ -2125,8 +2375,9 @@ def build_sobersettings(app, parent, pad):
 
     def open_settings():
         log.info("Opening Sober settings")
-        subprocess.Popen(["flatpak", "run", "org.vinegarhq.Sober", "config"],
-                         env=sober.clean_env())
+        flag = sober.installed_flag()
+        cmd = ["flatpak", "run"] + ([flag] if flag else []) + ["org.vinegarhq.Sober", "config"]
+        subprocess.Popen(cmd, env=sober.clean_env())
 
     app.make_button(parent, "Open Sober Settings", command=open_settings
                      ).pack(anchor="w", padx=pad, pady=(4, 4))
@@ -2163,17 +2414,17 @@ def build_bootstrapper(app, parent, pad):
     def add_spin(holder, frm, to, initial):
         var = tk.IntVar(value=int(initial))
         tk.Spinbox(holder, from_=frm, to=to, textvariable=var, width=6,
-                    font=("TkDefaultFont", 11), bg=BG, fg=FG,
-                    buttonbackground=BG_SIDEBAR,
-                    insertbackground=FG, relief="flat").pack(side="left")
+                    font=("TkDefaultFont", 11), bg=INPUT_BG, fg=INPUT_FG,
+                    buttonbackground=BG_SIDEBAR, highlightthickness=0,
+                    insertbackground=INPUT_FG, relief="flat").pack(side="left")
         return var
 
     def add_color(holder, initial):
         var = tk.StringVar(value=initial)
-        e = tk.Entry(holder, bg=BG, fg=FG, insertbackground=FG, width=10,
+        e = tk.Entry(holder, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG, width=10,
                       font=("TkDefaultFont", 11), relief="flat",
                       highlightthickness=1,
-                      highlightbackground=BG_SIDEBAR,
+                      highlightbackground=INPUT_BORDER,
                       highlightcolor=ACCENT, textvariable=var)
         e.pack(side="left", ipady=4, padx=(0, 8))
 
@@ -2218,9 +2469,9 @@ def build_bootstrapper(app, parent, pad):
 
     h = add_field("BG Image")
     bg_image_var = tk.StringVar(value=cfg.get("bg_image", ""))
-    tk.Entry(h, bg=BG, fg=FG, insertbackground=FG, width=32,
+    tk.Entry(h, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG, width=32,
               font=("TkDefaultFont", 11), relief="flat",
-              highlightthickness=1, highlightbackground=BG_SIDEBAR,
+              highlightthickness=1, highlightbackground=INPUT_BORDER,
               highlightcolor=ACCENT,
               textvariable=bg_image_var).pack(side="left", fill="x",
                                                expand=True, ipady=4,
@@ -2233,9 +2484,9 @@ def build_bootstrapper(app, parent, pad):
 
     h = add_field("Logo Image")
     logo_var = tk.StringVar(value=cfg.get("logo_path", ""))
-    tk.Entry(h, bg=BG, fg=FG, insertbackground=FG, width=32,
+    tk.Entry(h, bg=INPUT_BG, fg=INPUT_FG, insertbackground=INPUT_FG, width=32,
               font=("TkDefaultFont", 11), relief="flat",
-              highlightthickness=1, highlightbackground=BG_SIDEBAR,
+              highlightthickness=1, highlightbackground=INPUT_BORDER,
               highlightcolor=ACCENT,
               textvariable=logo_var).pack(side="left", fill="x",
                                            expand=True, ipady=4,
@@ -2276,6 +2527,7 @@ def build_bootstrapper(app, parent, pad):
     tk.Checkbutton(h, text="Rounded", variable=rounded_var, bg=parent["bg"],
                     fg=FG, activebackground=parent["bg"],
                     activeforeground=FG, selectcolor=BG_ACTIVE,
+                    highlightthickness=0,
                     font=("TkDefaultFont", 11)).pack(side="left")
     h = add_field("Bar Align")
     bar_align_var = add_combo(h, ["left", "center", "right"],
@@ -2289,7 +2541,7 @@ def build_bootstrapper(app, parent, pad):
     tk.Checkbutton(h, text="Check for Sober updates before launching",
                     variable=updates_var, bg=parent["bg"], fg=FG,
                     activebackground=parent["bg"], activeforeground=FG,
-                    selectcolor=BG_ACTIVE,
+                    selectcolor=BG_ACTIVE, highlightthickness=0,
                     font=("TkDefaultFont", 11)).pack(side="left")
 
     def collect():
@@ -2317,6 +2569,7 @@ def build_bootstrapper(app, parent, pad):
 
     def do_preview():
         c = collect()
+        bootstrapper._ensure_default_logo(c)
         win = tk.Toplevel(app, bg=c.get("bg_color", "#232527"))
         win.title("Launcher Preview")
         _fit(win, 680, 520)
@@ -2339,7 +2592,7 @@ def build_bootstrapper(app, parent, pad):
                 ui.progress(frac)
                 ui.status(text)
             time.sleep(1.4)
-            ui.close()
+            ui.run_on_ui(ui.close)
 
         def on_play():
             ui.start_progress()
@@ -2368,12 +2621,10 @@ def build_bootstrapper(app, parent, pad):
 def build_soberguide(app, parent, pad):
     GUIDE = (
         "Sober is installed and managed via Flatpak.\n\n"
-        "Lution keeps its customizations in\n"
-        "~/.local/share/Lution/overlay and only applies them when it launches\n"
-        "Sober itself. Launching Sober any other way gives you vanilla Sober,\n"
-        "so nothing here is modified behind your back.\n\n"
+        "Lution writes its customizations directly into Sober's\n"
+        "asset_overlay and config, so they apply whenever Sober runs.\n\n"
         "how to install sober:\n"
-        "$ flatpak update org.vinegarhq.Sober\n\n"
+        "$ flatpak install flathub org.vinegarhq.Sober\n\n"
         "how to uninstall sober:\n"
         "$ flatpak uninstall org.vinegarhq.Sober\n\n"
         "how to fully uninstall sober:\n"
@@ -2395,7 +2646,7 @@ def build_soberguide(app, parent, pad):
         win.configure(bg=BG)
         win.resizable(False, False)
 
-        txt = tk.Text(win, bg=BG_ACTIVE, fg=FG,
+        txt = tk.Text(win, bg=INPUT_BG, fg=INPUT_FG,
                        font=("TkDefaultFont", 12), relief="flat",
                        highlightthickness=0, wrap="word",
                        padx=16, pady=16, cursor="xterm")
@@ -2429,7 +2680,9 @@ def build_resetall(app, parent, pad):
 
         def confirm():
             removed = backup.reset_all()
-            status.configure(text=f"Removed: {', '.join(removed)}", fg=FG_DIM)
+            text = (f"Removed: {', '.join(removed)}" if removed
+                    else "Nothing to reset")
+            status.configure(text=text, fg=FG_DIM)
             win.destroy()
 
         app.make_button(btn_row, "yes pls", command=confirm,
@@ -2499,10 +2752,10 @@ def build_serversel(app, parent, pad):
              font=BODY_FONT).pack(side="left", padx=(0, 8))
 
     place_var = tk.StringVar()
-    place_entry = tk.Entry(place_row, textvariable=place_var, bg=BG, fg=FG,
-                           insertbackground=FG, font=BODY_FONT, relief="flat",
+    place_entry = tk.Entry(place_row, textvariable=place_var, bg=INPUT_BG, fg=INPUT_FG,
+                           insertbackground=INPUT_FG, font=BODY_FONT, relief="flat",
                            highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR,
+                           highlightbackground=INPUT_BORDER,
                            highlightcolor=ACCENT)
     place_entry.pack(side="left", fill="x", expand=True, ipady=6)
 
@@ -2564,7 +2817,7 @@ def build_serversel(app, parent, pad):
 
         for row in rows:
             frame = tk.Frame(list_frame, bg=BG_ACTIVE, highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR)
+                             highlightbackground=BORDER)
             frame.pack(anchor="w", fill="x", pady=2)
 
             tk.Label(frame, text=row["region"], bg=BG_ACTIVE, fg=FG,
@@ -2693,10 +2946,10 @@ def build_shortcuts(app, parent, pad):
              font=BODY_FONT).pack(side="left", padx=(0, 8))
 
     place_var = tk.StringVar()
-    entry = tk.Entry(create_row, textvariable=place_var, bg=BG, fg=FG,
-                     insertbackground=FG, font=BODY_FONT, relief="flat",
+    entry = tk.Entry(create_row, textvariable=place_var, bg=INPUT_BG, fg=INPUT_FG,
+                     insertbackground=INPUT_FG, font=BODY_FONT, relief="flat",
                      highlightthickness=1,
-                     highlightbackground=BG_SIDEBAR,
+                     highlightbackground=INPUT_BORDER,
                      highlightcolor=ACCENT)
     entry.pack(side="left", fill="x", expand=True, ipady=6)
 
@@ -2771,7 +3024,7 @@ def build_shortcuts(app, parent, pad):
 
         for row in rows:
             frame = tk.Frame(list_frame, bg=BG_ACTIVE, highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR)
+                             highlightbackground=BORDER)
             frame.pack(anchor="w", fill="x", pady=2)
 
             tk.Label(frame, text=f'{row["name"]} (Sober)', bg=BG_ACTIVE, fg=FG,
@@ -2809,7 +3062,7 @@ def build_shortcuts(app, parent, pad):
         for place_id in missing:
             frame = tk.Frame(history_frame, bg=BG_ACTIVE,
                              highlightthickness=1,
-                             highlightbackground=BG_SIDEBAR)
+                             highlightbackground=BORDER)
             frame.pack(anchor="w", fill="x", pady=2)
 
             tk.Label(frame, text=names.get(place_id, f"Place {place_id}"),
@@ -2872,7 +3125,7 @@ def build_account(app, parent, pad):
     holder = {"images": []}
 
     card = tk.Frame(parent, bg=BG_ACTIVE, highlightthickness=1,
-                    highlightbackground=BG_SIDEBAR)
+                    highlightbackground=BORDER)
     card.pack(anchor="w", fill="x", padx=pad, pady=(0, 8))
 
     accounts_frame = tk.Frame(parent, bg=parent["bg"])
@@ -2920,7 +3173,7 @@ def build_account(app, parent, pad):
                      font=("TkDefaultFont", 13, "bold"), anchor="w"
                      ).pack(anchor="w", pady=(0, 4))
             box = tk.Frame(accounts_frame, bg=BG_ACTIVE, highlightthickness=1,
-                           highlightbackground=BG_SIDEBAR)
+                           highlightbackground=BORDER)
             box.pack(anchor="w", fill="x", pady=(0, 4))
 
             for account in rows:
@@ -2974,7 +3227,7 @@ def build_account(app, parent, pad):
             return
 
         box = tk.Frame(friends_frame, bg=BG_ACTIVE, highlightthickness=1,
-                       highlightbackground=BG_SIDEBAR)
+                       highlightbackground=BORDER)
         box.pack(anchor="w", fill="x")
 
         for friend in friends:
@@ -3031,7 +3284,6 @@ def build_account(app, parent, pad):
         status.configure(text="fetching account...", fg=FG_DIM)
 
         def worker():
-            loading["busy"] = False
             try:
                 data = accounts.fetch_all(refresh=refresh)
                 err = None
@@ -3040,6 +3292,7 @@ def build_account(app, parent, pad):
                 data, err = None, str(e)
 
             def done():
+                loading["busy"] = False
                 if err:
                     status.configure(text=err, fg=ERROR)
                     clear(card)

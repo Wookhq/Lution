@@ -2,6 +2,7 @@
 
 import json
 import math
+import queue
 import shutil
 import struct
 import subprocess
@@ -32,7 +33,7 @@ WIN_H = 350
 DARK = {
     "theme": "dark",
     "bg_type": "color", "bg_color": "#232527", "bg_image": "",
-    "menu_logo_size": 300,
+    "menu_logo_size": 300, "logo_path": "",
     "logo_size": 130, "logo_align": "center", "logo_pos_y": "middle",
     "text_color": "#ffffff", "text_size": 11, "text_align": "center",
     "bar_color": "#ffffff", "bar_track_color": "#3c3f41",
@@ -43,7 +44,7 @@ DARK = {
 LIGHT = {
     "theme": "light",
     "bg_type": "color", "bg_color": "#f2f4f5", "bg_image": "",
-    "menu_logo_size": 300,
+    "menu_logo_size": 300, "logo_path": "",
     "logo_size": 130, "logo_align": "center", "logo_pos_y": "middle",
     "text_color": "#393b3d", "text_size": 11, "text_align": "center",
     "bar_color": "#393b3d", "bar_track_color": "#d3d6d9",
@@ -98,14 +99,20 @@ def get_config():
         data = json.loads(CONFIG_FILE.read_text())
         if isinstance(data, dict):
             cfg.update({k: v for k, v in data.items() if k in DARK})
-    except Exception:
+    except FileNotFoundError:
         pass
+    except Exception as e:
+        log.warning(f"Could not read {CONFIG_FILE}: {e}")
     return cfg
 
 def save_config(cfg):
     clean = {k: cfg.get(k, DARK[k]) for k in DARK}
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    CONFIG_FILE.write_text(json.dumps(clean, indent=2) + "\n")
+    try:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        CONFIG_FILE.write_text(json.dumps(clean, indent=2) + "\n")
+    except OSError as e:
+        log.exception(f"Could not save {CONFIG_FILE}: {e}")
+        raise
     _ensure_default_logo(clean)
     _install_shortcut(clean)
     return clean
@@ -116,6 +123,7 @@ def apply_theme_defaults(theme):
 def _ensure_default_logo(cfg):
     import sys
 
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     src = Path(getattr(sys, "_MEIPASS", Path(__file__).parent)) / "sober.svg"
     if src.exists():
         up_to_date = False
@@ -132,8 +140,8 @@ def _ensure_default_logo(cfg):
                      str(src), "-o", str(DEFAULT_LOGO)],
                     check=True, capture_output=True, timeout=10)
                 return
-            except Exception:
-                pass
+            except Exception as e:
+                log.debug(f"Could not render {src} with rsvg-convert: {e}")
         elif up_to_date:
             return
 
@@ -183,6 +191,14 @@ def _short_status(line):
         line = line[:61] + "..."
     return line
 
+def _tail(path, max_lines=6):
+    try:
+        lines = path.read_text(errors="replace").splitlines()
+    except OSError:
+        return ""
+    lines = [line.strip() for line in lines if line.strip()]
+    return " | ".join(lines[-max_lines:])
+
 def _milestone_progress(line):
     for needle, frac in MILESTONES:
         if needle in line:
@@ -207,6 +223,7 @@ class BootstrapperWindow:
         self._accent = _shade_safe(themes.load_theme().get("accent", "#7aa2f7"))
         self.win_holder = {"closed": False}
         self.detach = False
+        self._ui_queue = queue.Queue()
 
         self.frame = tk.Frame(parent, width=WIN_W, height=WIN_H,
                               highlightthickness=1,
@@ -216,10 +233,12 @@ class BootstrapperWindow:
         self.canvas = tk.Canvas(self.frame, width=WIN_W, height=WIN_H,
                                  highlightthickness=0, bd=0)
         self.canvas.pack(fill="both", expand=True)
+        self.root.after(16, self._drain_ui_queue)
 
         def _on_win_destroy(e):
             if e.widget is parent:
                 self.win_holder["closed"] = True
+                self.closed = True
                 try:
                     r = self.root
                     if getattr(r, "_lution_standalone", False) \
@@ -244,7 +263,6 @@ class BootstrapperWindow:
             return
 
         self._build_progress_ui()
-        self._start_bounce()
 
     def start_progress(self):
         if not self.menu:
@@ -257,7 +275,6 @@ class BootstrapperWindow:
         self._menu_items.clear()
         self.menu = False
         self._build_progress_ui()
-        self._start_bounce()
 
     def _draw_menu(self):
         import tkinter as tk
@@ -418,7 +435,12 @@ class BootstrapperWindow:
         try:
             img = tk.PhotoImage(file=path)
         except Exception:
-            img = tk.PhotoImage(file=str(DEFAULT_LOGO))
+            try:
+                _ensure_default_logo(cfg)
+                img = tk.PhotoImage(file=str(DEFAULT_LOGO))
+            except Exception:
+                log.warning("Could not load a launcher logo")
+                return
 
         target = max(24, int(cfg.get("logo_size", 130)))
         w0, h0 = img.width(), img.height()
@@ -510,14 +532,29 @@ class BootstrapperWindow:
 
         self._anim_id = self.root.after(33, step)
 
-    def _schedule(self, fn):
-        def run():
+    def run_on_ui(self, fn):
+        self._ui_queue.put(fn)
+
+    def _drain_ui_queue(self):
+        if self.closed:
+            return
+        while True:
             try:
-                if not self.closed and self.canvas.winfo_exists():
+                fn = self._ui_queue.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                if self.canvas.winfo_exists():
                     fn()
             except Exception:
                 pass
-        self.root.after(0, run)
+        try:
+            self.root.after(16, self._drain_ui_queue)
+        except Exception:
+            pass
+
+    def _schedule(self, fn):
+        self._ui_queue.put(fn)
 
     def status(self, text):
         def do():
@@ -569,11 +606,12 @@ class BootstrapperWindow:
 
 def run_launch(cfg, ui, root, url=None):
     def T(fn):
-        root.after(0, fn)
+        ui.run_on_ui(fn)
     try:
         if cfg.get("check_updates", True):
             ui.status("Checking for updates...")
             log.info("Bootstrapper: checking for Sober updates")
+            last_line = {"text": ""}
 
             def on_line(line):
                 import re
@@ -585,12 +623,14 @@ def run_launch(cfg, ui, root, url=None):
                 else:
                     s = _short_status(line)
                     if s:
+                        last_line["text"] = s
                         ui.status(s)
 
             ok, msg = sober.ensure_sober(on_line)
             if not ok:
-                log.error("Bootstrapper: Sober update failed")
-                ui.fail("Update failed")
+                detail = msg or last_line["text"]
+                log.error(f"Bootstrapper: Sober update failed: {detail}")
+                ui.fail(f"Update failed: {detail}" if detail else "Update failed")
                 return
 
         ui.status("Launching Roblox...")
@@ -616,14 +656,15 @@ def run_launch(cfg, ui, root, url=None):
         ready = False
         while True:
             try:
-                with open(LAUNCH_LOG) as f:
+                with open(LAUNCH_LOG, "rb") as f:
                     f.seek(offset)
                     chunk = f.read()
-                    offset += len(chunk)
+                    offset = f.tell()
             except OSError:
-                chunk = ""
+                chunk = b""
             if chunk:
-                parts = (pending + chunk).replace("\r", "\n").split("\n")
+                text = pending + chunk.decode("utf-8", errors="replace")
+                parts = text.replace("\r", "\n").split("\n")
                 pending = parts.pop()
                 for line in parts:
                     line = line.strip()
@@ -643,7 +684,7 @@ def run_launch(cfg, ui, root, url=None):
                         ui.detach = True
                         T(ui.done)
                         T(lambda: ui.status("Sober is running"))
-                        root.after(1500, ui.close)
+                        T(lambda: root.after(1500, ui.close))
 
             rc = proc.poll()
 
@@ -664,13 +705,17 @@ def run_launch(cfg, ui, root, url=None):
                     log.info("Sober closed")
                     T(ui.close)
                     return
-                log.error(f"Bootstrapper: Sober exited early (code {rc})")
-                ui.fail(f"Sober exited early (code {rc})")
+                detail = _tail(LAUNCH_LOG)
+                log.error(f"Bootstrapper: Sober exited early (code {rc}): "
+                          f"{detail}")
+                ui.fail(f"Sober exited early (code {rc})"
+                        + (f": {detail}" if detail else ""))
                 return
             time.sleep(0.15)
     except Exception as e:
         log.error(f"Bootstrapper error: {e}")
-        T(lambda: ui.fail(f"Error: {e}"))
+        error_text = str(e)
+        T(lambda: ui.fail(f"Error: {error_text}"))
 
 def open_in(app, url=None):
     import tkinter as tk
@@ -696,13 +741,15 @@ def open_in(app, url=None):
 
 def refresh_shortcut():
     if not DESKTOP_FILE.exists():
+        log.debug(f"Shortcut not installed yet: {DESKTOP_FILE}")
         return
-    _install_shortcut(get_config())
+    try:
+        _install_shortcut(get_config())
+    except Exception:
+        log.exception("Could not refresh the Sober with Lution shortcut")
 
 def _clean_child_env():
-    import os
-    return {k: v for k, v in os.environ.items()
-            if not k.startswith("_MEI") and not k.startswith("_PYI")}
+    return sober.clean_env()
 
 def _launch_full_lution(root):
     import sys
@@ -716,7 +763,7 @@ def _launch_full_lution(root):
     try:
         subprocess.Popen(cmd, cwd=cwd, env=_clean_child_env())
     except Exception as e:
-        log.error(f"Could not open Lution: {e}")
+        log.exception(f"Could not open Lution: {e}")
         return
     root.after(300, root.destroy)
 
@@ -745,6 +792,7 @@ def _make_root():
     root = tk.Tk()
     root.withdraw()
     root._lution_standalone = True
+    root.report_callback_exception = log.tk_exception
     return root
 
 def _standalone_window(root, cfg):
@@ -781,6 +829,7 @@ def _sync_stable_binary():
 
     exe = _bundle_exe()
     try:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         stale = (not STABLE_BIN.exists()
                  or exe.stat().st_size != STABLE_BIN.stat().st_size
                  or exe.stat().st_mtime > STABLE_BIN.stat().st_mtime)
@@ -788,13 +837,15 @@ def _sync_stable_binary():
             shutil.copy2(exe, STABLE_BIN)
             log.debug("Refreshed stable launcher binary copy")
     except Exception as e:
-        log.warning(f"Could not refresh stable launcher copy: {e}")
+        log.exception(f"Could not refresh stable launcher copy: {e}")
 
 def _exec_command():
+    import sys
     main_py = Path(__file__).parent / "main.py"
     if _is_frozen():
         return f'"{STABLE_BIN}" --launcher'
-    return f'python3 "{main_py}" --launcher'
+    python = sys.executable or "python3"
+    return f'"{python}" "{main_py}" --launcher'
 
 def _install_shortcut(cfg):
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)

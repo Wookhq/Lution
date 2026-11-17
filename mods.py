@@ -173,41 +173,85 @@ def install_mod(mod_path):
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
+def _installed_mod_files():
+    files = set()
+    for name in _load_manifest():
+        mod_path = MODS_DIR / name
+        if mod_path.exists():
+            files.update(_mod_file_list(mod_path))
+    return files
+
+
+def content_present():
+    manifest = _load_manifest()
+    if not manifest:
+        return True
+    if any(not (MODS_DIR / name).exists() for name in manifest):
+        return False
+    files = _installed_mod_files()
+    if not files:
+        return False
+    return all((OVERLAY_DIR / rel).exists() for rel in files)
+
+
+def _prune_empty_dirs(base):
+    for root, dirs, files in os.walk(base, topdown=False):
+        if not dirs and not files:
+            try:
+                Path(root).rmdir()
+            except OSError:
+                pass
+
+
 def remove_mod_content(include_custom=False):
     ensure_dirs()
     removed = []
-
-    PROTECTED = {
-        OVERLAY_DIR / "content" / "textures" / "Cursors" / "KeyboardMouse",
-        OVERLAY_DIR / "content" / "textures" / "ui" / "Emotes" / "TenFoot",
-        OVERLAY_DIR / "content" / "fonts",
-        OVERLAY_DIR / "content" / "sounds",
-    }
+    mod_files = _installed_mod_files()
 
     for name in CONTENT_ROOTS:
         top = OVERLAY_DIR / name
         if not top.exists():
             continue
-        if include_custom:
-            shutil.rmtree(top)
-            removed.append(name)
-            continue
-        for root, dirs, files in os.walk(top):
-            root_path = Path(root)
-            if any(root_path == p or p in root_path.parents for p in PROTECTED):
+        touched = False
+        for rel in list(mod_files):
+            parts = rel.split("/", 1)
+            if not parts or parts[0] != name:
                 continue
-            for f in files:
-                (root_path / f).unlink()
-            for d in dirs:
-                dir_path = root_path / d
-                if not any(dir_path == p or p in dir_path.parents for p in PROTECTED):
-                    shutil.rmtree(dir_path)
-
-        if not any(top.rglob("*")):
-            shutil.rmtree(top)
-        removed.append(name)
+            target = OVERLAY_DIR / rel
+            try:
+                if target.is_file() or target.is_symlink():
+                    target.unlink()
+                    touched = True
+                elif target.exists():
+                    shutil.rmtree(target)
+                    touched = True
+            except OSError as e:
+                log.warning(f"Could not remove mod file {target}: {e}")
+        if top.exists():
+            _prune_empty_dirs(top)
+            try:
+                if not any(top.iterdir()):
+                    top.rmdir()
+            except OSError:
+                pass
+        if touched or not top.exists():
+            removed.append(name)
 
     _save_manifest([])
+
+    if include_custom:
+        import cursors
+        import emoji
+        import fonts
+
+        for label, restore in (("cursors", cursors.restore_cursors),
+                               ("emoji", emoji.restore_emoji),
+                               ("fonts", fonts.restore_fonts)):
+            try:
+                if restore():
+                    removed.append(label)
+            except Exception as e:
+                log.warning(f"Could not remove custom {label}: {e}")
 
     return removed
 

@@ -4,6 +4,7 @@
 import json
 import re
 import subprocess
+import sys
 import urllib.request
 from pathlib import Path
 
@@ -25,10 +26,13 @@ def _command(place_id):
 
     bootstrapper._sync_stable_binary()
     if bootstrapper._is_frozen():
+        if not bootstrapper.STABLE_BIN.exists():
+            raise RuntimeError("Could not prepare the Lution launcher binary")
         return f'"{bootstrapper.STABLE_BIN}" --play {place_id}'
 
     main_py = Path(__file__).parent / "main.py"
-    return f'python3 "{main_py}" --play {place_id}'
+    python = sys.executable or "python3"
+    return f'"{python}" "{main_py}" --play {place_id}'
 
 
 def _path(place_id):
@@ -128,8 +132,10 @@ def create(place_id, name=None):
 
 def _update_database():
     try:
-        subprocess.run(["update-desktop-database", str(APPS_DIR)],
-                       capture_output=True, timeout=15)
+        subprocess.Popen(["update-desktop-database", str(APPS_DIR)],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         stdin=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError):
         pass
 

@@ -6,16 +6,19 @@ import re
 
 import net
 
-VERSION = "0.6.1"
+VERSION = "0.6.5"
 REPO = "wookhq/Lution"
 API_URL = f"https://api.github.com/repos/{REPO}/releases/latest"
 
 
 def parse_version(tag):
-    match = re.match(r"^[vV]?(\d+)(?:\.(\d+))?(?:\.(\d+))?", str(tag).strip())
+    match = re.match(r"^[vV]?(\d+(?:\.\d+)*)", str(tag).strip())
     if not match:
         return None
-    return tuple(int(part) if part else 0 for part in match.groups())
+    parts = [int(part) for part in match.group(1).split(".")]
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts)
 
 
 def is_newer(remote_tag, current=VERSION):
@@ -32,7 +35,9 @@ def check_for_update():
         req = urllib.request.Request(API_URL, headers={"User-Agent": "Lution"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read())
-        latest = data.get("tag_name", "").lstrip("v")
+        latest = data.get("tag_name", "")
+        if latest[:1] in ("v", "V"):
+            latest = latest[1:]
         url = data.get("html_url", "")
         if not latest:
             return False, None, None

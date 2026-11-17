@@ -32,8 +32,9 @@ def fetch_store():
     try:
         data = _fetch(STORE_URL)
         items = _parse_items(data)
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        STORE_CACHE.write_text(json.dumps(items, indent=2) + "\n")
+        if items:
+            CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            STORE_CACHE.write_text(json.dumps(items, indent=2) + "\n")
         return items, False
     except Exception as e:
         log.warning(f"Store fetch failed ({e.__class__.__name__}: {e}), "
@@ -69,7 +70,7 @@ def download(url, timeout=120):
     return _fetch(url, timeout=timeout)
 
 def download_progress(url, report, timeout=180):
-    
+    net.ensure_ca_certs()
     req = urllib.request.Request(url, headers={"User-Agent": "Lution"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         length = resp.headers.get("Content-Length")
@@ -97,7 +98,7 @@ def fetch_icon(name, url):
     try:
         ICONS_CACHE.mkdir(parents=True, exist_ok=True)
         dest = ICONS_CACHE / f"{safe}.{ext}"
-        if dest.exists():
+        if dest.exists() and dest.stat().st_size:
             return dest
         data = _fetch(url, timeout=10)
         if data[:8] == b"\x89PNG\r\n\x1a\n" or data[:4] == b"GIF8":

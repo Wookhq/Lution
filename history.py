@@ -10,7 +10,8 @@ SOBER_LOGS = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober/sober_logs"
 CACHE_DIR = Path.home() / ".local/Lution"
 NAMES_CACHE = CACHE_DIR / "game_names.json"
 
-PLACE_RE = re.compile(r'"place_id":"(\d+)","type":"game_loaded"')
+PLACE_RE = re.compile(
+    r'"place_id":\s*"(\d+)"[^\n]*?"type":\s*"game_loaded"')
 HISTORY_LIMIT = 25
 def load_name_cache():
     try:
@@ -36,7 +37,10 @@ def get_history():
         matches = PLACE_RE.findall(text)
         if not matches:
             continue
-        ts = logfile.stat().st_mtime
+        try:
+            ts = logfile.stat().st_mtime
+        except OSError:
+            continue
         for place_id in matches:
             if place_id == "0":
                 continue
@@ -107,7 +111,9 @@ def launch_place(place_id):
     import subprocess
     import sober
     url = f"roblox://experiences/start?placeId={place_id}"
-    subprocess.Popen(["flatpak", "run", SOBER_APP_ID, url],
+    flag = sober.installed_flag()
+    cmd = ["flatpak", "run"] + ([flag] if flag else []) + [SOBER_APP_ID, url]
+    subprocess.Popen(cmd,
                      stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL,
                      stdin=subprocess.DEVNULL,

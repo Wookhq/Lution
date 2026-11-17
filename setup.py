@@ -19,11 +19,11 @@ BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 
 _theme = themes.load_theme()
 BG = _theme["bg"]
-BG_ACTIVE = "#2a2a2a"
+BG_ACTIVE = _theme.get("bg_active", "#2a2a2a")
 FG = _theme["fg"]
-FG_DIM = "#888888"
+FG_DIM = _theme.get("fg_dim", "#888888")
 ACCENT = _theme["accent"]
-ERROR = "#e06c75"
+ERROR = _theme.get("error", "#e06c75")
 DARK_TEXT = "#0a0a0a"
 BODY_FONT = ("TkDefaultFont", 13)
 SMALL_FONT = ("TkDefaultFont", 10)
@@ -146,8 +146,9 @@ def _sober_step(app, frame):
             text = ""
             color = FG_DIM
             try:
+                flag = sober.installed_flag()
                 result = subprocess.run(
-                    ["flatpak", "info", paths.SOBER_APP_ID],
+                    ["flatpak", "info"] + ([flag] if flag else []) + [paths.SOBER_APP_ID],
                     capture_output=True, text=True, timeout=10,
                     env=sober.clean_env())
                 version = None
@@ -204,31 +205,63 @@ def _theme_step(app, frame):
         "accent": "Accent",
         "bg": "Background",
         "bg_sidebar": "Sidebar",
+        "bg_active": "Active BG",
         "fg": "Text",
+        "fg_dim": "Dim Text",
+        "error": "Error",
+        "border": "Border",
+        "input_bg": "Input BG",
+        "input_fg": "Input Text",
+        "input_border": "Input Border",
+        "button_bg": "Button BG",
+        "button_fg": "Button Text",
+        "button_hover": "Button Hover",
+        "scrollbar": "Scrollbar",
+        "scrollbar_hover": "Scrollbar Hover",
     }
     entries = {}
+    swatches = {}
 
     form = tk.Frame(frame, bg=BG)
     form.pack(anchor="w", fill="x", padx=48, pady=(0, 10))
 
-    for key in themes.COLOR_KEYS:
+    def pick_color(key, entry, swatch):
+        from tkinter import colorchooser
+        initial = entry.get().strip()
+        if not (len(initial) == 7 and initial.startswith("#")):
+            initial = None
+        else:
+            try:
+                int(initial[1:], 16)
+            except ValueError:
+                initial = None
+        color = colorchooser.askcolor(
+            initialcolor=initial, parent=frame,
+            title=f"Pick {labels[key]}")
+        if color[1]:
+            entry.delete(0, "end")
+            entry.insert(0, color[1])
+            swatch.configure(bg=color[1])
+
+    for key in labels:
         row = tk.Frame(form, bg=BG)
         row.pack(anchor="w", fill="x", pady=(0, 6))
         tk.Label(row, text=labels[key], bg=BG, fg=FG,
-                 font=BODY_FONT, width=12, anchor="w").pack(side="left")
+                 font=BODY_FONT, width=14, anchor="w").pack(side="left")
         entry = tk.Entry(row, bg=BG_ACTIVE, fg=FG, insertbackground=FG,
                          font=BODY_FONT, relief="flat",
                          highlightthickness=1,
                          highlightbackground=BG_ACTIVE,
                          highlightcolor=ACCENT)
-        entry.insert(0, current[key])
+        entry.insert(0, current.get(key, ""))
         entry.pack(side="left", fill="x", expand=True, ipady=7,
                    padx=(0, 8))
         entries[key] = entry
-        swatch = tk.Label(row, bg=current[key], width=3, height=1,
+        swatch = tk.Label(row, bg=current.get(key, "#000000"), width=3, height=1,
                           relief="flat", highlightthickness=1,
-                          highlightbackground=BG_ACTIVE)
-        swatch.pack(side="left")
+                          highlightbackground=BG_ACTIVE, cursor="hand2")
+        swatch.pack(side="left", padx=(8, 0))
+        swatches[key] = swatch
 
         def update_swatch(event=None, ent=entry, sw=swatch):
             val = ent.get().strip()
@@ -241,6 +274,12 @@ def _theme_step(app, frame):
 
         entry.bind("<KeyRelease>", update_swatch)
 
+        def open_picker(event=None, k=key, e=entry, s=swatch):
+            pick_color(k, e, s)
+
+        entry.bind("<Button-1>", open_picker)
+        swatch.bind("<Button-1>", open_picker)
+
     status = tk.Label(frame, text="", bg=BG, fg=FG_DIM,
                       font=SMALL_FONT, anchor="w", justify="left",
                       wraplength=820)
@@ -248,8 +287,8 @@ def _theme_step(app, frame):
 
     def save():
         colors = {}
-        for key in themes.COLOR_KEYS:
-            val = entries[key].get().strip()
+        for key, entry in entries.items():
+            val = entry.get().strip()
             if len(val) == 7 and val.startswith("#"):
                 try:
                     int(val[1:], 16)
@@ -263,23 +302,24 @@ def _theme_step(app, frame):
                 return
             colors[key] = val
         themes.save_theme(colors)
-        status.configure(text="theme saved. restart Lution to apply it.",
+        status.configure(text="theme saved",
                          fg=FG_DIM)
 
     def restore():
-        themes.save_theme(dict(themes.DEFAULTS))
-        for key in themes.COLOR_KEYS:
-            entries[key].delete(0, "end")
-            entries[key].insert(0, themes.DEFAULTS[key])
-        status.configure(text="default theme restored. restart Lution to "
-                              "apply it.", fg=FG_DIM)
+        themes.save_theme(themes.DEFAULTS)
+        for key, entry in entries.items():
+            entry.delete(0, "end")
+            entry.insert(0, themes.DEFAULTS[key])
+            swatches[key].configure(bg=themes.DEFAULTS[key])
+        status.configure(text="default theme restored",
+            fg=FG_DIM)
 
     row = tk.Frame(frame, bg=BG)
     row.pack(anchor="w", padx=48, pady=(0, 20))
     app.make_button(row, "Save theme", command=save, padx=16, pady=8
                     ).pack(side="left", padx=(0, 8))
     app.make_button(row, "Restore defaults", command=restore,
-                    bg=ERROR, fg=DARK_TEXT, padx=16, pady=8
+                    bg=ERROR, fg="#0a0a0a", padx=16, pady=8
                     ).pack(side="left")
 
 

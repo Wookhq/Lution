@@ -13,7 +13,7 @@ def load_framerate_cap():
         return None
     try:
         tree = ET.parse(FPS_XML)
-    except ET.ParseError:
+    except (ET.ParseError, OSError):
         return None
     node = tree.getroot().find(".//int[@name='FramerateCap']")
     return node.text if node is not None else None
