@@ -5,7 +5,8 @@
 <div align="center">
 
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge\&logo=discord\&logoColor=white)](https://discord.gg/BXT7FYjTBa)
-
+[![Downloads](https://img.shields.io/github/downloads/wookhq/lution/total?style=for-the-badge&logo=github&label=Downloads&color=2ea44f)](https://github.com/wookhq/lution/releases)
+[![Stars](https://img.shields.io/github/stars/wookhq/lution?style=for-the-badge&logo=github)](https://github.com/wookhq/lution/stargazers)
 </div>
 
 <img src="https://raw.githubusercontent.com/Wookhq/Lution-old/refs/heads/latest/md/bar.png" style="width: 100%;">
