@@ -10,6 +10,7 @@ from urllib.parse import unquote, urlparse
 import emoji
 import log
 import paths
+import sync
 
 APK_DIR = paths.SOBER_APK_DIR
 OVERLAY_FONT_DIR = paths.LUTION_OVERLAY / "content/fonts"
@@ -25,6 +26,7 @@ def _as_path(font_path):
         return Path(unquote(parsed.path))
     return Path(text)
 
+@sync.locked
 def save_installed_font(font_path: Path | str) -> None:
     font_path = _as_path(font_path)
 
@@ -43,6 +45,7 @@ def save_installed_font(font_path: Path | str) -> None:
     except shutil.SameFileError:
         return
 
+@sync.locked
 def reapply_fonts():
     if not INSTALLED_FONTS_DIR.exists(): return
 
@@ -82,6 +85,7 @@ def _apk_font_names():
     return names
 
 
+@sync.locked
 def apply_font(source_path):
     source_path = Path(source_path)
     if not source_path.exists():
@@ -103,17 +107,20 @@ def apply_font(source_path):
     return replaced
 
 
+@sync.locked
 def restore_fonts():
-    if not OVERLAY_FONT_DIR.exists():
-        return False
-    emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
     removed = False
-    for path in OVERLAY_FONT_DIR.iterdir():
-        if path.name.lower() in emoji_names:
-            continue
-        if path.is_dir():
-            shutil.rmtree(path)
-        else:
-            path.unlink()
+    if OVERLAY_FONT_DIR.exists():
+        emoji_names = {name.lower() for name in emoji.EMOJI_FONT_NAMES}
+        for path in OVERLAY_FONT_DIR.iterdir():
+            if path.name.lower() in emoji_names:
+                continue
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+            removed = True
+    if INSTALLED_FONTS_DIR.exists():
+        shutil.rmtree(INSTALLED_FONTS_DIR, ignore_errors=True)
         removed = True
     return removed

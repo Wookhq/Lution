@@ -1,5 +1,7 @@
 # where everything lives
 
+import shutil
+import sys
 import zipfile
 from pathlib import Path
 
@@ -15,7 +17,8 @@ LUTION_ROOT = Path.home() / ".local/share/Lution"
 LUTION_OVERLAY = SOBER_OVERLAY
 LUTION_CONFIG = SOBER_CONFIG
 
-STATE_DIR = Path.home() / ".local/Lution"
+STATE_DIR = LUTION_ROOT
+LEGACY_STATE_DIR = Path.home() / ".local/Lution"
 
 OVERLAY_ROOTS = ("content", "ExtraContent", "PlatformContent")
 
@@ -67,3 +70,59 @@ def find_base_apk():
     with_assets = [a for a in apks if apk_has_font_assets(a)]
     pool = with_assets or apks
     return max(pool, key=lambda p: p.stat().st_size)
+
+
+def _unique_old(path):
+    candidate = path.with_name(path.name + ".old")
+    index = 1
+    while candidate.exists() or candidate.is_symlink():
+        candidate = path.with_name(f"{path.name}.old.{index}")
+        index += 1
+    return candidate
+
+
+def _merge_path(src, dst):
+    if (src.is_dir() and not src.is_symlink()
+            and dst.is_dir() and not dst.is_symlink()):
+        for child in list(src.iterdir()):
+            _merge_path(child, dst / child.name)
+        try:
+            src.rmdir()
+        except OSError:
+            pass
+        return
+
+    if dst.exists() or dst.is_symlink():
+        try:
+            src_mtime = src.lstat().st_mtime_ns
+            dst_mtime = dst.lstat().st_mtime_ns
+        except OSError:
+            src_mtime = dst_mtime = 0
+        if src_mtime > dst_mtime:
+            shutil.move(str(dst), str(_unique_old(dst)))
+            shutil.move(str(src), str(dst))
+        else:
+            shutil.move(str(src), str(_unique_old(dst)))
+        return
+
+    shutil.move(str(src), str(dst))
+
+
+def _migrate_legacy_state():
+    if (LEGACY_STATE_DIR == STATE_DIR or LEGACY_STATE_DIR.is_symlink()
+            or not LEGACY_STATE_DIR.is_dir()):
+        return
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        for child in list(LEGACY_STATE_DIR.iterdir()):
+            _merge_path(child, STATE_DIR / child.name)
+        try:
+            LEGACY_STATE_DIR.rmdir()
+        except OSError:
+            pass
+    except OSError as e:
+        print(f"lution warning: could not migrate {LEGACY_STATE_DIR} "
+              f"to {STATE_DIR}: {e}", file=sys.stderr)
+
+
+_migrate_legacy_state()

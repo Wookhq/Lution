@@ -10,6 +10,7 @@ import threading
 import time
 import urllib.request
 
+import atomic
 import paths
 import log
 import net
@@ -68,7 +69,7 @@ def save_config(data, comment_lines):
     CONFIG_JSON.parent.mkdir(parents=True, exist_ok=True)
     body = json.dumps(data, indent=4)
     header = ("\n".join(comment_lines) + "\n") if comment_lines else ""
-    CONFIG_JSON.write_text(header + body + "\n")
+    atomic.write_text(CONFIG_JSON, header + body + "\n")
 
 
 def parse_value(raw):
@@ -179,7 +180,7 @@ def refresh_allowlist(timeout=20):
         return False, msg
 
     ALLOWLIST_CACHE.parent.mkdir(parents=True, exist_ok=True)
-    ALLOWLIST_CACHE.write_text(json.dumps({
+    atomic.write_text(ALLOWLIST_CACHE, json.dumps({
         "source": ALLOWLIST_TOPIC,
         "updated": time.strftime("%Y-%m-%d"),
         "allowed": flags,

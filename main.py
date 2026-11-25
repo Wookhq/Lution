@@ -12,10 +12,12 @@ import os
 import shlex
 import shutil
 
+import atomic
 import themes
 import paths
 import log
 import sober
+import sync
 
 log.install_hooks()
 
@@ -49,12 +51,12 @@ def load_theme_globals():
 load_theme_globals()
 BODY_FONT = ("TkDefaultFont", 13)
 
-APK_CHECKSUM_FILE = Path.home() / ".local" / "Lution" / "apk_checksum.txt"
+APK_CHECKSUM_FILE = paths.STATE_DIR / "apk_checksum.txt"
 LEGACY_CHECKSUM_FILES = [
-    Path.home() / ".local/Lution/emoji_checksum.txt",
-    Path.home() / ".local/Lution/cursor_checksum.txt",
-    Path.home() / ".local/Lution/mods_checksum.txt",
-    Path.home() / ".local/Lution/sounds_checksum.txt",
+    paths.STATE_DIR / "emoji_checksum.txt",
+    paths.STATE_DIR / "cursor_checksum.txt",
+    paths.STATE_DIR / "mods_checksum.txt",
+    paths.STATE_DIR / "sounds_checksum.txt",
 ]
 
 _widgets = None
@@ -171,6 +173,7 @@ def _customizations_present():
 
     return True
 
+@sync.locked
 def reapply_customizations():
     import fonts
     import emoji
@@ -196,12 +199,15 @@ def reapply_customizations():
     last = ""
     if APK_CHECKSUM_FILE.exists():
         last = APK_CHECKSUM_FILE.read_text().strip()
+    has_saved_checksum = bool(last)
 
     if current == last and _customizations_present():
         log.debug("Sober apk unchanged and customizations are still applied")
         return
 
-    if current != last:
+    if not has_saved_checksum:
+        log.info("No saved APK checksum, checking customizations")
+    elif current != last:
         log.info("Sober apk changed we reapplying all customizations")
     else:
         log.info("Sober overlay lost customizations, reapplying them")
@@ -226,8 +232,7 @@ def reapply_customizations():
         return
 
     try:
-        APK_CHECKSUM_FILE.parent.mkdir(parents=True, exist_ok=True)
-        APK_CHECKSUM_FILE.write_text(current)
+        atomic.write_text(APK_CHECKSUM_FILE, current)
     except OSError as e:
         log.error(f"Could not save APK checksum: {e}")
 
@@ -407,6 +412,11 @@ def parse_config(path):
                 filename, caption = rest, ""
             if current is not None:
                 pages[current].append(("image", filename.strip(), caption.strip()))
+
+        else:
+            log.warning(f"Ignoring unknown ui.md directive: {line}")
+            if current is not None:
+                pages[current].append(("unknown", line))
 
     return pages
 
@@ -746,17 +756,6 @@ class Lution(tk.Tk):
                 combo.pack(anchor="w", padx=pad, pady=(0, 10), ipady=4)
                 group_inputs.append(combo.get)
 
-            elif kind in ("flaglist", "fpsinput", "envvars", "bootstrapper", "fontpicker",
-                         "cursorpicker", "emotewheelpicker", "themepicker", "emojipicker",
-                         "versionlabel", "soberversion", "soberguide", "soberlauncher",
-                         "sobersettings", "playhistory", "marketplace", "resetall",
-                         "backupmanager", "modconflicts", "modmanager", "soundmods",
-                         "serverselector", "shortcutmanager", "account", "restartsetup"):
-                target = group if group is not None else page
-                pad = 14 if group is not None else 0
-                _, builders = get_widgets()
-                builders[kind](self, target, pad)
-
             elif kind == "image":
                 _, filename, caption = widget
                 target = group if group is not None else page
@@ -774,6 +773,25 @@ class Lution(tk.Tk):
                     tk.Label(target, text=caption, bg=target["bg"], fg=FG_DIM,
                              font=("TkDefaultFont", 12),
                              anchor="w").pack(anchor="w", padx=pad, pady=(0, 10))
+
+            else:
+                target = group if group is not None else page
+                pad = 14 if group is not None else 0
+                _, builders = get_widgets()
+                builder = builders.get(kind)
+                if builder is not None:
+                    builder(self, target, pad)
+                elif kind == "unknown":
+                    tk.Label(target, text=f"Unknown ui.md token: {widget[1]}",
+                             bg=target["bg"], fg=ERROR,
+                             font=BODY_FONT, anchor="w").pack(
+                                 anchor="w", padx=pad, pady=(4, 8))
+                else:
+                    log.warning(f"No builder for ui.md widget: {kind}")
+                    tk.Label(target, text=f"Unknown widget: {kind}",
+                             bg=target["bg"], fg=ERROR,
+                             font=BODY_FONT, anchor="w").pack(
+                                 anchor="w", padx=pad, pady=(4, 8))
 
         return wrapper
 
@@ -887,6 +905,11 @@ if __name__ == "__main__":
                 bootstrapper.refresh_shortcut()
             except Exception:
                 log.exception("Could not refresh the Sober with Lution shortcut")
+            try:
+                import marketplace
+                marketplace.backfill_checksums()
+            except Exception:
+                log.exception("Marketplace checksum backfill failed")
 
         threading.Thread(target=startup_bg, daemon=True).start()
         app.mainloop()

@@ -11,6 +11,7 @@ import time
 import zlib
 from pathlib import Path
 
+import atomic
 import envvars
 import launcher
 import log
@@ -20,7 +21,7 @@ import themes
 
 SOBER_APP_ID = paths.SOBER_APP_ID
 
-CONFIG_DIR = Path.home() / ".local/Lution"
+CONFIG_DIR = paths.STATE_DIR
 CONFIG_FILE = CONFIG_DIR / "launcher_config.json"
 STABLE_BIN = CONFIG_DIR / "Lution-bootstrap"
 DESKTOP_FILE = Path.home() / ".local/share/applications/sober-with-lution.desktop"
@@ -109,7 +110,7 @@ def save_config(cfg):
     clean = {k: cfg.get(k, DARK[k]) for k in DARK}
     try:
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        CONFIG_FILE.write_text(json.dumps(clean, indent=2) + "\n")
+        atomic.write_text(CONFIG_FILE, json.dumps(clean, indent=2) + "\n")
     except OSError as e:
         log.exception(f"Could not save {CONFIG_FILE}: {e}")
         raise
@@ -172,7 +173,7 @@ def _png_from_fn(path, w, h, fn):
     def chunk(tag, data):
         return (struct.pack(">I", len(data)) + tag + data
                 + struct.pack(">I", zlib.crc32(tag + data) & 0xffffffff))
-    path.write_bytes(
+    atomic.write_bytes(path,
         b"\x89PNG\r\n\x1a\n"
         + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))
         + chunk(b"IDAT", zlib.compress(raw, 9))
@@ -841,11 +842,14 @@ def _sync_stable_binary():
 
 def _exec_command():
     import sys
+
+    from shortcuts import quote_exec
+
     main_py = Path(__file__).parent / "main.py"
     if _is_frozen():
-        return f'"{STABLE_BIN}" --launcher'
+        return f"{quote_exec(STABLE_BIN)} --launcher"
     python = sys.executable or "python3"
-    return f'"{python}" "{main_py}" --launcher'
+    return f"{quote_exec(python)} {quote_exec(main_py)} --launcher"
 
 def _install_shortcut(cfg):
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -874,7 +878,7 @@ def _install_shortcut(cfg):
         "StartupWMClass=Lution",
     ]) + "\n"
     DESKTOP_FILE.parent.mkdir(parents=True, exist_ok=True)
-    DESKTOP_FILE.write_text(desktop)
+    atomic.write_text(DESKTOP_FILE, desktop)
 
     for legacy in (CONFIG_DIR / "sober_with_lution.sh",
                    CONFIG_DIR / "sober_with_lution.py",

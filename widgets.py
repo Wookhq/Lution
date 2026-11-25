@@ -1,11 +1,16 @@
 # yep it's literally all the widgets every textbox, menu, window, dropdown menu, everything bro
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, colorchooser
+import atomic
+import hashlib
+import io
 import json
+import paths
 import re
 import subprocess
 import threading
 import webbrowser
+import zipfile
 from pathlib import Path
 import fflags
 import fonts
@@ -42,9 +47,9 @@ BODY_FONT = ("TkDefaultFont", 13)
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
 
-USER_PRESETS_FILE = Path.home() / ".local/Lution/fflag_user_presets.json"
+USER_PRESETS_FILE = paths.STATE_DIR / "fflag_user_presets.json"
 THEME_PRESETS_FILE = BASE / "theme_presets.json"
-THEME_USER_PRESETS_FILE = Path.home() / ".local/Lution/theme_user_presets.json"
+THEME_USER_PRESETS_FILE = paths.STATE_DIR / "theme_user_presets.json"
 
 def _auto_resize(win):
     try:
@@ -100,7 +105,7 @@ def _export_fflags_json(app, status):
     if path:
         try:
             current = fflags.get_fflags()
-            Path(path).write_text(json.dumps(current, indent=4) + "\n")
+            atomic.write_text(path, json.dumps(current, indent=4) + "\n")
             status.configure(text=f"Exported to {Path(path).name}", fg=FG_DIM)
         except Exception as e:
             status.configure(text=str(e), fg=ERROR)
@@ -188,7 +193,7 @@ def _load_theme_user_presets():
 
 def _save_theme_user_presets(presets):
     THEME_USER_PRESETS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    THEME_USER_PRESETS_FILE.write_text(json.dumps(presets, indent=2) + "\n")
+    atomic.write_text(THEME_USER_PRESETS_FILE, json.dumps(presets, indent=2) + "\n")
 
 def _load_fflag_presets():
     builtins = {}
@@ -214,7 +219,7 @@ def _load_fflag_presets():
 
 def _save_user_presets(presets):
     USER_PRESETS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    USER_PRESETS_FILE.write_text(json.dumps(presets, indent=2) + "\n")
+    atomic.write_text(USER_PRESETS_FILE, json.dumps(presets, indent=2) + "\n")
 
 def build_flaglist(app, parent, pad):
     search_row = tk.Frame(parent, bg=parent["bg"])
@@ -2147,6 +2152,7 @@ def build_marketplace(app, parent, pad):
 
             def do_install(item=item):
                 itype = item.get("type")
+                digest = None
                 try:
                     if itype == "mod":
                         app.after(0, show_progress)
@@ -2164,6 +2170,12 @@ def build_marketplace(app, parent, pad):
                             app.after(0, update)
 
                         data = mkt.download_progress(item["url"], report)
+                        digest = hashlib.sha256(data).hexdigest()
+                        expected = item.get("sha256") or item.get("checksum")
+                        if expected and digest.lower() != str(expected).lower():
+                            raise ValueError("Download checksum did not match")
+                        if not zipfile.is_zipfile(io.BytesIO(data)):
+                            raise ValueError("Downloaded mod is not a ZIP archive")
 
                         mdir = mods_mod.MODS_DIR
                         mdir.mkdir(parents=True, exist_ok=True)
@@ -2171,7 +2183,11 @@ def build_marketplace(app, parent, pad):
                         safe_name = re.sub(r"[^A-Za-z0-9._-]", "_",
                                            raw_name).strip("._") or "mod"
                         zip_path = mdir / (safe_name[:80] + ".zip")
-                        zip_path.write_bytes(data)
+                        if zip_path.exists():
+                            raise FileExistsError(
+                                f"A mod named {safe_name} already exists. "
+                                "Remove it before installing this item.")
+                        atomic.write_bytes(zip_path, data)
                         ok, msg = mods_mod.install_mod(zip_path)
                         if not ok:
                             app.after(0, hide_progress)
@@ -2179,6 +2195,10 @@ def build_marketplace(app, parent, pad):
                             return
                     else:
                         data = mkt.download(item["url"])
+                        digest = hashlib.sha256(data).hexdigest()
+                        expected = item.get("sha256") or item.get("checksum")
+                        if expected and digest.lower() != str(expected).lower():
+                            raise ValueError("Download checksum did not match")
                         parsed = json.loads(data)
                         if isinstance(parsed, dict) \
                                 and isinstance(parsed.get("flags"), dict):
@@ -2206,7 +2226,7 @@ def build_marketplace(app, parent, pad):
                         app.after(0, hide_progress)
 
                     item_name = item.get("name", "?")
-                    mkt.mark_installed(item_name)
+                    mkt.mark_installed(item_name, digest)
                     log.info(f"Marketplace: installed '{item_name}' ({itype})")
                     app.after(0, lambda: set_status(
                         f"Installed: {item_name}"))
@@ -2214,9 +2234,11 @@ def build_marketplace(app, parent, pad):
                                                               item_name))
                     app.after(0, lambda: refresh_list())
                 except Exception as e:
+                    error_text = str(e)
                     app.after(0, hide_progress)
-                    log.error(f"Marketplace install failed: {e}")
-                    app.after(0, lambda: set_status(f"Install failed: {e}", error=True))
+                    log.error(f"Marketplace install failed: {error_text}")
+                    app.after(0, lambda: set_status(
+                        f"Install failed: {error_text}", error=True))
 
             def on_click(_e=None, do=do_install):
                 threading.Thread(target=lambda: _safe_install(do),
@@ -2226,7 +2248,9 @@ def build_marketplace(app, parent, pad):
                 try:
                     fn()
                 except Exception as e:
-                    app.after(0, lambda: set_status(f"Install failed: {e}", error=True))
+                    error_text = str(e)
+                    app.after(0, lambda: set_status(
+                        f"Install failed: {error_text}", error=True))
 
             btn = app.make_button(row, "Install", command=on_click,
                                    padx=14, pady=7)

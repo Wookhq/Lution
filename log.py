@@ -6,6 +6,8 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+import paths
+
 RESET = "\x1b[0m"
 BLUE = "\x1b[34m"
 WHITE = "\x1b[37m"
@@ -19,17 +21,25 @@ LEVEL_COLORS = {
     "error": RED,
 }
 
-LOG_FILE = Path.home() / ".local/Lution/lution.log"
-FALLBACK_FILE = Path(tempfile.gettempdir()) / f"lution-{os.getuid()}.log"
+_SESSION_STAMP = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+LOG_DIR = paths.STATE_DIR / "logs"
+LOG_FILE = LOG_DIR / f"{_SESSION_STAMP}_{os.getpid()}.log"
+FALLBACK_FILE = (Path(tempfile.gettempdir())
+                 / f"lution-{os.getuid()}_{_SESSION_STAMP}_{os.getpid()}.log")
 
 _active_file = LOG_FILE
 _fallback_reported = False
 
 
 def _append(path, line):
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(line)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    fd = os.open(path, flags, 0o600)
+    with os.fdopen(fd, "a") as stream:
+        stream.write(line)
 
 
 def _write_file(line, now):
@@ -59,12 +69,13 @@ def _log(level, msg):
     color = LEVEL_COLORS.get(level, WHITE)
     now = datetime.now()
     time_str = now.strftime("%H:%M:%S")
-    stream = sys.stderr if level == "error" else sys.stdout
-    try:
-        print(f"{time_str} {BLUE}lution{RESET} {color}{level}{RESET} {msg}",
-              file=stream, flush=True)
-    except OSError:
-        pass
+    if level != "debug":
+        stream = sys.stderr if level == "error" else sys.stdout
+        try:
+            print(f"{time_str} {BLUE}lution{RESET} {color}{level}{RESET} {msg}",
+                  file=stream, flush=True)
+        except OSError:
+            pass
     stamp = now.strftime("%Y-%m-%d %H:%M:%S")
     _write_file(f"{stamp} lution {level} {msg}\n", now)
 

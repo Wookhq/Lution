@@ -5,11 +5,13 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+import atomic
 import history
 import log
+import paths
 
 SOBER_LOGS = history.SOBER_LOGS
-CACHE_FILE = Path.home() / ".local/Lution/playtime_cache.json"
+CACHE_FILE = paths.STATE_DIR / "playtime_cache.json"
 
 MAX_SEGMENT = 12 * 3600
 MAX_SESSION = 24 * 3600
@@ -92,8 +94,7 @@ def _load_cache():
 
 def _save_cache(cache):
     try:
-        CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
-        CACHE_FILE.write_text(json.dumps(cache))
+        atomic.write_text(CACHE_FILE, json.dumps(cache))
     except OSError as e:
         log.warning(f"Could not save playtime cache: {e}")
 

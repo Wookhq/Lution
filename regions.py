@@ -8,6 +8,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime
 
+import atomic
 import log
 import net
 import paths
@@ -65,8 +66,7 @@ def _cache_read(path, ttl):
 
 def _cache_write(path, items):
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"_ts": time.time(), "items": items}))
+        atomic.write_text(path, json.dumps({"_ts": time.time(), "items": items}))
     except OSError:
         pass
 

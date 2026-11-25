@@ -5,6 +5,7 @@ import shutil
 import sys
 
 import paths
+import sync
 
 APK_DIR = paths.SOBER_APK_DIR
 OVERLAY_FONT_DIR = paths.LUTION_OVERLAY / "content/fonts"
@@ -27,6 +28,7 @@ def get_preset_path(name):
     return str(path) if path.exists() else None
 
 
+@sync.locked
 def apply_emoji(source_path):
     source_path = Path(source_path)
     if not source_path.exists():
@@ -41,6 +43,7 @@ def apply_emoji(source_path):
     return replaced
 
 
+@sync.locked
 def restore_emoji():
     removed = []
     for name in EMOJI_FONT_NAMES:
@@ -53,6 +56,7 @@ def restore_emoji():
     return removed
 
 
+@sync.locked
 def save_installed_emoji(font_path: Path | str) -> None:
     if isinstance(font_path, str):
         font_path = Path(font_path)
@@ -73,6 +77,7 @@ def save_installed_emoji(font_path: Path | str) -> None:
         pass
 
 
+@sync.locked
 def reapply_emoji():
     if not INSTALLED_EMOJI_DIR.exists():
         return

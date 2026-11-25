@@ -1,7 +1,10 @@
 # this for changing fps cap simple enough
 
 from pathlib import Path
+import io
 import xml.etree.ElementTree as ET
+
+import atomic
 
 SOBER_APP_ID = "org.vinegarhq.Sober"
 FPS_XML = (Path.home() / ".var/app" / SOBER_APP_ID /
@@ -29,7 +32,9 @@ def save_framerate_cap(value):
     if node is None:
         raise ValueError("FramerateCap node not found in XML")
     node.text = str(value)
-    tree.write(FPS_XML, xml_declaration=True, encoding="UTF-8")
+    buffer = io.BytesIO()
+    tree.write(buffer, xml_declaration=True, encoding="UTF-8")
+    atomic.write_bytes(FPS_XML, buffer.getvalue())
 
 
 def validate_digits(new_value):

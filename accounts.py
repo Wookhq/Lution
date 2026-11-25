@@ -8,6 +8,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+import atomic
 import log
 import net
 import paths
@@ -35,12 +36,37 @@ class AccountError(Exception):
 
 def cookie_header():
     try:
-        text = COOKIES_FILE.read_text().strip()
+        text = COOKIES_FILE.read_text()
     except (OSError, UnicodeError):
         return None
-    if not text or ".ROBLOSECURITY" not in text:
-        return None
-    return text
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or ".ROBLOSECURITY" not in stripped:
+            continue
+        if ";" in stripped:
+            for part in stripped.split(";"):
+                name, sep, value = part.strip().partition("=")
+                if sep and name.strip() == ".ROBLOSECURITY" and value.strip():
+                    return f".ROBLOSECURITY={value.strip()}"
+        fields = stripped.split("\t")
+        if len(fields) >= 7 and fields[5].strip() == ".ROBLOSECURITY":
+            value = fields[6].strip()
+            if value:
+                return f".ROBLOSECURITY={value}"
+        fields = stripped.split()
+        if len(fields) >= 7 and fields[5] == ".ROBLOSECURITY" and fields[6]:
+            return f".ROBLOSECURITY={fields[6]}"
+    return None
+
+
+def _sanitize(text):
+    value = str(text)
+    header = cookie_header()
+    if header and "=" in header:
+        value = value.replace(header.split("=", 1)[1], "[redacted]")
+    if ".ROBLOSECURITY" in value:
+        value = "[redacted]"
+    return value
 
 
 def _request(url, data=None, cookie=False, timeout=15):
@@ -68,13 +94,13 @@ def _request(url, data=None, cookie=False, timeout=15):
     except urllib.error.URLError as e:
         if isinstance(e.reason, (TimeoutError, socket.timeout)):
             raise AccountError("Roblox took too long to respond") from e
-        raise AccountError(f"Network error: {e.reason}") from e
+        raise AccountError(f"Network error: {_sanitize(e.reason)}") from e
     except (TimeoutError, socket.timeout) as e:
         raise AccountError("Roblox took too long to respond") from e
     except json.JSONDecodeError as e:
         raise AccountError("Roblox returned an invalid response") from e
     except Exception as e:
-        raise AccountError(f"Request failed: {e}") from e
+        raise AccountError(f"Request failed: {_sanitize(e)}") from e
 
 
 def current_user():
@@ -190,7 +216,7 @@ def _download(url, dest, timeout=20):
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = resp.read()
     if data:
-        dest.write_bytes(data)
+        atomic.write_bytes(dest, data)
 
 
 def download_avatars(user_ids):
@@ -251,7 +277,7 @@ def fetch_all(refresh=False, timeout=20):
     _memory.update(ts=now, data=data)
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        PROFILE_CACHE.write_text(json.dumps(data))
+        atomic.write_text(PROFILE_CACHE, json.dumps(data))
     except OSError:
         pass
     log.debug(f"Account: {user['name']}, {len(friends)} friends, "

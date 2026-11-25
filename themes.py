@@ -3,8 +3,11 @@ from pathlib import Path
 import sys
 import json
 
+import atomic
+import paths
+
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
-THEME_FILE = Path.home() / ".local/Lution/theme.json"
+THEME_FILE = paths.STATE_DIR / "theme.json"
 
 DEFAULTS = {
     "accent": "#8D7EDC",
@@ -62,5 +65,4 @@ def save_theme(colors):
     for key in DEFAULTS:
         if _valid_color(colors.get(key)):
             clean[key] = colors[key].strip()
-    THEME_FILE.parent.mkdir(parents=True, exist_ok=True)
-    THEME_FILE.write_text(json.dumps(clean, indent=2) + "\n")
+    atomic.write_text(THEME_FILE, json.dumps(clean, indent=2) + "\n")

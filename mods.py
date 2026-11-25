@@ -9,11 +9,13 @@ import os
 
 import paths
 import log
+import sync
 
 OVERLAY_DIR = paths.LUTION_OVERLAY
-MODS_DIR = Path.home() / ".local/Lution/Mods"
+MODS_DIR = paths.STATE_DIR / "Mods"
+MAX_UNCOMPRESSED_SIZE = 512 * 1024 * 1024
 
-MANIFEST_FILE = Path.home() / ".local/Lution/mods_manifest.json"
+MANIFEST_FILE = paths.STATE_DIR / "mods_manifest.json"
 
 def _load_manifest():
     try:
@@ -47,10 +49,13 @@ def list_mods():
     ensure_dirs()
     return sorted(MODS_DIR.glob("*.zip"), key=lambda p: p.stem.lower())
 
+@sync.locked
 def import_mod(source_path):
     ensure_dirs()
     source_path = Path(source_path)
     dest = MODS_DIR / source_path.name
+    if dest.exists():
+        raise FileExistsError(f"A mod named {dest.name} already exists")
     shutil.copy2(source_path, dest)
     return dest
 
@@ -61,7 +66,10 @@ def _mod_file_list(mod_path):
             for info in zf.infolist():
                 if info.is_dir():
                     continue
-                name = info.filename
+                name = info.filename.replace("\\", "/")
+                parts = [p for p in name.split("/") if p]
+                if name.startswith("/") or ".." in parts:
+                    continue
                 for prefix in ("content/", "ExtraContent/", "PlatformContent/"):
                     if prefix in name:
                         idx = name.index(prefix)
@@ -109,6 +117,7 @@ def scan_all_conflicts():
                 conflicts[(names[i], names[j])] = sorted(overlap)
     return conflicts
 
+@sync.locked
 def install_mod(mod_path):
     ensure_dirs()
     mod_path = Path(mod_path)
@@ -117,10 +126,14 @@ def install_mod(mod_path):
 
     temp_dir = Path(tempfile.mkdtemp(prefix="lution_mod_"))
     try:
+        total_size = 0
         with zipfile.ZipFile(mod_path, "r") as zf:
             for info in zf.infolist():
                 if info.is_dir():
                     continue
+                total_size += info.file_size
+                if total_size > MAX_UNCOMPRESSED_SIZE:
+                    return False, "Mod archive is too large"
                 parts = [p for p in info.filename.split("/") if p]
                 if info.filename.startswith("/") or ".." in parts:
                     return False, (
@@ -191,7 +204,8 @@ def content_present():
     files = _installed_mod_files()
     if not files:
         return False
-    return all((OVERLAY_DIR / rel).exists() for rel in files)
+    return all(_safe_under(OVERLAY_DIR, rel.split("/")) is not None
+               and (OVERLAY_DIR / rel).exists() for rel in files)
 
 
 def _prune_empty_dirs(base):
@@ -203,6 +217,7 @@ def _prune_empty_dirs(base):
                 pass
 
 
+@sync.locked
 def remove_mod_content(include_custom=False):
     ensure_dirs()
     removed = []
@@ -214,10 +229,12 @@ def remove_mod_content(include_custom=False):
             continue
         touched = False
         for rel in list(mod_files):
-            parts = rel.split("/", 1)
+            parts = rel.split("/")
             if not parts or parts[0] != name:
                 continue
-            target = OVERLAY_DIR / rel
+            target = _safe_under(OVERLAY_DIR, parts)
+            if target is None:
+                continue
             try:
                 if target.is_file() or target.is_symlink():
                     target.unlink()
@@ -255,6 +272,7 @@ def remove_mod_content(include_custom=False):
 
     return removed
 
+@sync.locked
 def delete_mod(mod_path):
     mod_path = Path(mod_path)
     if mod_path.exists():
@@ -264,6 +282,7 @@ def delete_mod(mod_path):
         return True
     return False
 
+@sync.locked
 def reapply_mods():
     failed = []
     for name in _load_manifest():

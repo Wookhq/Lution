@@ -8,6 +8,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
+import atomic
 import history
 import log
 import net
@@ -21,6 +22,13 @@ DESKTOP_SUFFIX = ".desktop"
 _BAD_CHARS = re.compile(r"[\r\n\t]+")
 
 
+def quote_exec(value):
+    text = str(value)
+    for char in ("\\", '"', "$", "`"):
+        text = text.replace(char, "\\" + char)
+    return f'"{text}"'
+
+
 def _command(place_id):
     import bootstrapper
 
@@ -28,11 +36,12 @@ def _command(place_id):
     if bootstrapper._is_frozen():
         if not bootstrapper.STABLE_BIN.exists():
             raise RuntimeError("Could not prepare the Lution launcher binary")
-        return f'"{bootstrapper.STABLE_BIN}" --play {place_id}'
+        return f"{quote_exec(bootstrapper.STABLE_BIN)} --play {quote_exec(place_id)}"
 
     main_py = Path(__file__).parent / "main.py"
     python = sys.executable or "python3"
-    return f'"{python}" "{main_py}" --play {place_id}'
+    return (f"{quote_exec(python)} {quote_exec(main_py)} "
+            f"--play {quote_exec(place_id)}")
 
 
 def _path(place_id):
@@ -87,7 +96,7 @@ def fetch_icon(place_id):
         if not data:
             return None
 
-        dest.write_bytes(data)
+        atomic.write_bytes(dest, data)
         return dest
     except Exception as e:
         log.debug(f"Could not fetch icon for place {place_id}: {e}")
@@ -104,7 +113,7 @@ def create(place_id, name=None):
 
     icon = fetch_icon(place_id)
     if icon is None:
-        fallback = Path.home() / ".local/Lution/sober.svg"
+        fallback = paths.STATE_DIR / "sober.svg"
         icon_line = f"Icon={fallback}" if fallback.exists() else ""
     else:
         icon_line = f"Icon={icon}"
@@ -123,7 +132,7 @@ def create(place_id, name=None):
 
     APPS_DIR.mkdir(parents=True, exist_ok=True)
     path = _path(place_id)
-    path.write_text("\n".join(line for line in lines if line) + "\n")
+    atomic.write_text(path, "\n".join(line for line in lines if line) + "\n")
     path.chmod(0o644)
     _update_database()
     log.info(f"Shortcut created: {game_name} (Sober)")

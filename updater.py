@@ -6,7 +6,7 @@ import re
 
 import net
 
-VERSION = "0.6.5"
+VERSION = "0.7.0"
 REPO = "wookhq/Lution"
 API_URL = f"https://api.github.com/repos/{REPO}/releases/latest"
 

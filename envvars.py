@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
-CONFIG_DIR = Path.home() / ".local/Lution"
+import atomic
+import paths
+
+CONFIG_DIR = paths.STATE_DIR
 ENV_FILE = CONFIG_DIR / "env_vars.json"
 
 
@@ -29,8 +32,7 @@ def save_vars(vars_dict):
         value = str(value).strip()
         if valid_key(key):
             clean[key] = value
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    ENV_FILE.write_text(json.dumps(clean, indent=2) + "\n")
+    atomic.write_text(ENV_FILE, json.dumps(clean, indent=2) + "\n")
     return clean
 
 

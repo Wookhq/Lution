@@ -5,9 +5,12 @@ import re
 import urllib.request
 from pathlib import Path
 
+import atomic
+import paths
+
 SOBER_APP_ID = "org.vinegarhq.Sober"
 SOBER_LOGS = Path.home() / ".var/app" / SOBER_APP_ID / "data/sober/sober_logs"
-CACHE_DIR = Path.home() / ".local/Lution"
+CACHE_DIR = paths.STATE_DIR
 NAMES_CACHE = CACHE_DIR / "game_names.json"
 
 PLACE_RE = re.compile(
@@ -21,8 +24,7 @@ def load_name_cache():
         return {}
 
 def save_name_cache(cache):
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    NAMES_CACHE.write_text(json.dumps(cache, indent=2) + "\n")
+    atomic.write_text(NAMES_CACHE, json.dumps(cache, indent=2) + "\n")
 
 def get_history():
     
@@ -109,12 +111,14 @@ def rel_time(ts):
 
 def launch_place(place_id):
     import subprocess
-    import sober
+
+    import launcher
+    import log
+
     url = f"roblox://experiences/start?placeId={place_id}"
-    flag = sober.installed_flag()
-    cmd = ["flatpak", "run"] + ([flag] if flag else []) + [SOBER_APP_ID, url]
-    subprocess.Popen(cmd,
-                     stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL,
-                     stdin=subprocess.DEVNULL,
-                     env=sober.clean_env())
+    try:
+        return launcher.launch(url=url, stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL)
+    except launcher.LaunchError as e:
+        log.error(f"Could not launch place: {e}")
+        return None

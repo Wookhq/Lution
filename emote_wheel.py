@@ -5,6 +5,7 @@ import shutil
 import sys
 
 import paths
+import sync
 
 OVERLAY_EMOTE_DIR = paths.LUTION_OVERLAY / "content/textures/ui/Emotes/TenFoot"
 
@@ -44,6 +45,7 @@ def get_preset_wheel(preset_name):
     return wheel
 
 
+@sync.locked
 def apply_wheel(parts_dict):
     OVERLAY_EMOTE_DIR.mkdir(parents=True, exist_ok=True)
     applied = []
@@ -60,6 +62,7 @@ def apply_wheel(parts_dict):
     return applied
 
 
+@sync.locked
 def restore_wheel():
     removed = []
     for name in WHEEL_PARTS:
@@ -73,6 +76,7 @@ def restore_wheel():
     return sorted(set(removed))
 
 
+@sync.locked
 def save_installed_wheel(parts_dict):
     INSTALLED_EMOTE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -89,6 +93,7 @@ def save_installed_wheel(parts_dict):
         shutil.copyfile(source, dest)
 
 
+@sync.locked
 def reapply_wheel():
     if not INSTALLED_EMOTE_DIR.exists():
         return

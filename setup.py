@@ -8,6 +8,7 @@ import tkinter as tk
 import webbrowser
 from pathlib import Path
 
+import atomic
 import log
 import paths
 import sober
@@ -66,8 +67,8 @@ def is_complete():
 
 def mark_complete():
     try:
-        SETUP_FLAG.parent.mkdir(parents=True, exist_ok=True)
-        SETUP_FLAG.write_text(json.dumps({"completed": True}, indent=2) + "\n")
+        atomic.write_text(SETUP_FLAG,
+                          json.dumps({"completed": True}, indent=2) + "\n")
     except OSError as e:
         log.error(f"could not save setup state: {e}")
 

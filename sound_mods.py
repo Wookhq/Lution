@@ -5,6 +5,7 @@ import shutil
 import sys
 
 import paths
+import sync
 
 OVERLAY_SOUNDS_DIR = paths.LUTION_OVERLAY / "content/sounds"
 
@@ -26,6 +27,7 @@ SOUND_STATES = [
 INSTALLED_SOUNDS_DIR = paths.LUTION_ROOT / "installed_sounds"
 
 
+@sync.locked
 def apply_sounds(sounds_dict):
 
     OVERLAY_SOUNDS_DIR.mkdir(parents=True, exist_ok=True)
@@ -43,6 +45,7 @@ def apply_sounds(sounds_dict):
     return applied
 
 
+@sync.locked
 def restore_sounds():
     removed = []
     for name in SOUND_STATES:
@@ -55,6 +58,7 @@ def restore_sounds():
     return removed
 
 
+@sync.locked
 def save_installed_sounds(sounds_dict):
     if not INSTALLED_SOUNDS_DIR.exists():
         INSTALLED_SOUNDS_DIR.mkdir(exist_ok=True, parents=True)
@@ -72,6 +76,7 @@ def save_installed_sounds(sounds_dict):
         shutil.copyfile(source, dest)
 
 
+@sync.locked
 def reapply_sounds():
     if not INSTALLED_SOUNDS_DIR.exists():
         return

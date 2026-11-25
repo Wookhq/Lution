@@ -5,6 +5,7 @@ import shutil
 import sys
 
 import paths
+import sync
 
 OVERLAY_TEXTURE_DIR = paths.LUTION_OVERLAY / "content/textures/Cursors/KeyboardMouse"
 
@@ -34,6 +35,7 @@ def get_preset_cursors(preset_name):
     return cursors
 
 
+@sync.locked
 def apply_cursors(cursors_dict):
     OVERLAY_TEXTURE_DIR.mkdir(parents=True, exist_ok=True)
     applied = []
@@ -50,6 +52,7 @@ def apply_cursors(cursors_dict):
     return applied
 
 
+@sync.locked
 def restore_cursors():
     removed = []
     for name in CURSOR_STATES:
@@ -62,6 +65,7 @@ def restore_cursors():
     return removed
 
 
+@sync.locked
 def save_installed_cursors(cursors_dict):
     if not INSTALLED_CURSORS_DIR.exists():
         INSTALLED_CURSORS_DIR.mkdir(exist_ok=True, parents=True)
@@ -79,6 +83,7 @@ def save_installed_cursors(cursors_dict):
         shutil.copyfile(source, dest)
 
 
+@sync.locked
 def reapply_cursors():
     if not INSTALLED_CURSORS_DIR.exists():
         return
